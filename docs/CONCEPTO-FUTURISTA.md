@@ -151,6 +151,27 @@ Seguimos con el pixel art dibujado en código, con otras reglas:
 > Decidido por el usuario el 2026-10-18: **"En Vivo"** y el juego se llama **MATCH**. La estructura es la misma de
 > Custom Hero; los competidores se diseñan para que pelear entre ellos sea divertido y desafiante (sigue en
 > `docs/MATCH.md`). El 2026-10-19 eligió los atributos (Blindaje, Reflejos y Procesador) y las 8 semillas de competidores.
+>
+> **Roster ampliado a 19 (decidido por el usuario el 2026-10-19):** 16 competidores nuevos en total (los 8 ya
+> elegidos + 8 más, ver tabla abajo) más los 3 que se convierten (Danzante Cinético, Arcanista, Sabio del Vacío —
+> no son copia de Dota, siguen). Se retiran los 8 copiados de Dota (Axe, Sniper, Asesino, Vampiro, Bruja del
+> Hielo, Nigromante, Alquimista, Zeus) a medida que entran los 16 nuevos, siempre con el juego jugable.
+> **Proceso (pedido del usuario):** una ficha por competidor (sello, 4 módulos con números, aviso de cada golpe
+> fuerte, su lectura, su respuesta, su mal cruce), de a uno, para aprobar antes de programar. "No es importante
+> programar esto ahora" — queda listo para retomar cuando se pida.
+
+### Las 8 semillas que faltaban (aprobadas por el usuario el 2026-10-19, sin números todavía)
+
+| Competidor/a | Quién es | Rol | Idea de sello / cómo gana | Su lectura | Cómo se le gana |
+|---|---|---|---|---|---|
+| **Rebote** | Doble de riesgo del show | Movilidad / daño por impulso | Rebota contra las paredes ganando velocidad; pega más cuanto más corrió sin frenar | ¿Le corto el camino ya, o lo dejo pegar y me cubro? | Plantarse en su línea de rebote le corta el impulso |
+| **Forja** | Soldadora de utilería | Golpe cargado, cuerpo a cuerpo | Carga su herramienta (brillo creciente); más carga, más daño, se corta con cualquier control | ¿Suelta ya (seguro, flojo) o espera el brillo máximo (arriesgado)? | Cortarle la carga con cualquier aturdimiento o empujón |
+| **Chispa** | Electricista del rigger | Control por marcas / cadena | Marca al rival; dos marcados cerca se electrocutan entre sí | ¿Me alejo de mi propia marca antes de que caduque? | No juntarse con nada marcado; romperle línea de visión |
+| **Ancla** | Levantador de pesas, utilero pesado | Tanque que se planta | Al plantarse (se avisa) queda inamovible y pega fuerte, pero no esquiva nada mientras tanto | ¿Entro antes de que termine de plantarse, o peleo de lejos? | No pegarle de cerca mientras está plantado |
+| **Rizo** | Gimnasta rítmica | Control de área, alcance medio | Su listón barre un arco ancho; si pega a 2+ a la vez, se cura un poco | ¿Peleo en su punto dulce (media distancia) o me meto bien cerca / me alejo bien lejos? | Pelear pegado o lejos, nunca a media distancia |
+| **Pila** | Doble que "aguanta" golpes para el show | Blindaje, crece con el castigo | Cada golpe recibido carga una pila visible; al tope, su próximo golpe básico la libera entera | ¿Dejo que cargue, o me alejo y la dejo decaer sola? | Alejarse cuando está por llegar al tope |
+| **Satélite** | Camarógrafo con dron volador | Procesador, marcador a distancia | Un rayo de cámara "encuadra" al rival: mientras dura, el resto de sus golpes no fallan y pegan más | ¿Evito que me encuadre, o ya me marcó y juego a la defensiva? | Cortarle la línea de visión o cerrarle la distancia (poco alcance cuerpo a cuerpo) |
+| **Replay** | Editor del show, rebobina su posición | Reflejos, movilidad con lectura | Puede volver a donde estaba hace 1,5s (con la vida de ese momento); el rival ve la marca de a dónde rebobinaría | ¿Entra arriesgado ya, o guarda el rebobinado para un golpe grande que viene? | Forzarlo a gastarlo con una amenaza chica antes del golpe fuerte de verdad |
 
 1. **El concepto:** (a) **"En Vivo", el show futurista, con la paleta limpia de "La Simulación" (recomendada)**;
    (b) "La Simulación", la liga virtual; (c) "Los Juegos del Sol", solarpunk.
