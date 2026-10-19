@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MATCH</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tiny5&display=swap">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Portada provisoria: placeholder simple hasta que se diseñe la estética "En Vivo" de MATCH (docs/CONCEPTO-FUTURISTA.md) -->
+    <div id="title-screen">
+        <div class="ts-content">
+            <div class="ts-logo">
+                <div class="ts-logo-main">MATCH</div>
+                <div class="ts-logo-sub">En Vivo · arena de competidores</div>
+            </div>
+            <div class="ts-bottom">
+                <label class="name-field ts-name">Tu nombre <input id="player-name" maxlength="14" placeholder="Vos" autocomplete="off"></label>
+                <div class="ts-buttons">
+                    <button class="primary-btn" id="ts-play-btn">▶ Jugar</button>
+                    <button class="secondary-btn" data-glossary="heroes">🦸 Héroes</button>
+                    <button class="secondary-btn" data-glossary="creeps">👹 Creeps y jefes</button>
+                    <button class="secondary-btn" data-glossary="items">🎒 Ítems</button>
+                </div>
+                <p class="ts-foot"><span id="game-version"></span></p>
+            </div>
+        </div>
+    </div>
+    <div id="app">
+    <div id="view-game" style="display:flex;">
+    <div id="game-container">
+        <div id="hud-main">
+            <!-- Izquierda: ranking (clic para mirar la arena de otro héroe) -->
+            <div id="left-col">
+                <div class="col-title">Ranking</div>
+                <div id="scoreboard"></div>
+                <div class="col-hint">Clic en un héroe para mirar su arena</div>
+                <div id="hero-stats-panel" style="display: none;">
+                    <div class="col-title">Tus estadísticas</div>
+                    <div id="hero-stats"></div>
+                </div>
+            </div>
+
+            <!-- Centro: mapa y barra de tu héroe -->
+            <div id="center-col">
+                <!-- Franja sobre el mapa: ronda, fase y tiempo; vidas, oro, puntos; mapa grande y pausa -->
+                <div id="map-hud">
+                    <span class="mh-item">Ronda <b id="round-num">1</b></span>
+                    <span class="mh-item"><span id="game-state-text">MENÚ</span> <span id="phase-timer"></span></span>
+                    <span class="mh-spacer"></span>
+                    <span class="mh-item" id="lives-text" title="Vidas"></span>
+                    <span class="mh-item mh-gold" title="Oro">💰 <span id="player-gold">0</span>g <span id="player-income" class="mh-income" title="Lo que cobrás al terminar la ronda: interés (+1 cada 10g ahorrados, tope 5) y la racha (🔥 ganadas / 🧊 perdidas seguidas)"></span></span>
+                    <span class="mh-item mh-essence" id="essence-text" title="Esencia: moneda permanente (no se pierde al morir)"></span>
+                    <span class="mh-item" id="points-text" title="Puntos y puesto en el ranking"></span>
+                    <button id="map-toggle" title="Agrandar o achicar el mapa (tecla M)">⤢</button>
+                    <button id="pause-btn" title="Pausa, tutorial, glosario y opciones (Esc)">⏸</button>
+                </div>
+                <!-- Contador grande de la fase (arriba al centro, visible también sobre las ventanas) -->
+                <div id="center-timer" style="display: none;"><div class="ct-label"></div><div class="ct-time"></div></div>
+                <!-- Cartel de apuestas ganadas: pasa de derecha a izquierda -->
+                <div id="bet-banner"></div>
+                <div id="map-wrap">
+                    <canvas id="ascii-canvas"></canvas>
+                    <div id="float-log"></div>
+                    <div id="tower-badges"></div>
+                </div>
+                <div id="relic-bar" style="display: none;"></div>
+                <div id="hero-bar" style="display: none;">
+                    <div id="hb-portrait">
+                        <div id="hb-symbol"></div>
+                        <div id="hb-level"></div>
+                        <div id="hb-xp"><div id="hb-xp-fill"></div></div>
+                    </div>
+                    <div id="hb-main">
+                        <div id="hb-name-line"><span id="hb-name"></span><span id="hb-stats"></span></div>
+                        <div class="hb-bar hp"><div id="hb-hp-fill"></div><span id="hb-hp-text"></span></div>
+                        <div class="hb-bar mana"><div id="hb-mana-fill"></div><span id="hb-mana-text"></span></div>
+                        <div id="hb-skills"></div>
+                        <div id="hb-passives"></div>
+                    </div>
+                    <div id="hb-side">
+                        <div class="hb-title">Inventario</div>
+                        <div id="hb-slots"></div>
+                        <div id="hb-effects"></div>
+                    </div>
+                </div>
+                <div id="controls-hint">Caminar: clic derecho · Atacar: clic derecho sobre un rival · Habilidades: E R T F Q y clic para apuntar · Objetivo: clic izquierdo · W A S D y lanzamiento rápido: en Opciones · Automáticas: H · Tienda: B · Mapa grande: M · Piloto: P</div>
+            </div>
+
+            <!-- Derecha: lo que toca en esta fase y el registro -->
+            <div id="right-col">
+                <div id="phase-area">
+                    <!-- Menú de inicio (la elección real está en la portada) -->
+                    <div id="menu-panel">
+                        <h3>MATCH</h3>
+                        <p class="subtitle">Tocá "Jugar" en la portada para elegir tu competidor.</p>
+                    </div>
+
+                    <!-- Elección de Héroe -->
+                    <div id="hero-select-panel" style="display: none;">
+                        <h3 id="hero-select-title">Elegí tu héroe</h3>
+                        <p class="subtitle" id="hero-select-subtitle">Estas opciones son solo tuyas. Ningún héroe se repite en la partida.</p>
+                        <div id="hero-options" class="options-grid"></div>
+                        <label id="ban-row" class="ban-row">🚫 Baneá una habilidad <small>(no le sale a nadie en el draft)</small> <select id="ban-select"></select></label>
+                        <button id="hero-any-btn" class="secondary-btn">🔓 Elegir cualquier héroe (arrancás sin oro)</button>
+                        <button id="hero-back-btn" class="secondary-btn">← Volver al menú</button>
+                    </div>
+
+                    <!-- En combate: qué está pasando -->
+                    <div id="combat-info" style="display: none;"></div>
+
+                    <button id="restart-btn" class="primary-btn" style="display: none;">Nueva Partida</button>
+                </div>
+
+                <!-- Registro de Combate -->
+                <div id="log-panel">
+                    <div class="col-title">Registro <button id="log-toggle" title="Achicar o agrandar el registro">▾</button></div>
+                    <div id="combat-log"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- Ventana del draft de habilidades (también Fragmento y Libro del Destino): hay que elegir una para seguir -->
+    <div id="draft-container" class="modal" style="display: none;">
+        <div class="modal-box wide draft-box">
+            <div class="modal-head">
+                <h3 id="draft-title">Draft de Habilidades</h3>
+                <span class="modal-timer phase-countdown big"></span>
+            </div>
+            <p class="subtitle" id="draft-subtitle">Elegí una habilidad nueva:</p>
+            <div id="draft-options" class="draft-grid"></div>
+        </div>
+    </div>
+
+    <!-- Teclas configurables (keymap.js) -->
+    <div id="keys-container" class="modal" style="display: none;">
+        <div class="modal-box">
+            <div class="modal-head">
+                <h3>⌨️ Teclas</h3>
+                <button class="modal-close" onclick="toggleKeys(false)" title="Cerrar (Esc)">✕</button>
+            </div>
+            <p class="subtitle">Clic en una acción y apretá la tecla nueva. Si otra acción la usaba, se intercambian. Las flechas siempre mueven y Esc siempre pausa.</p>
+            <div id="keys-list"></div>
+            <button class="secondary-btn" onclick="resetKeymap(); renderKeys()">Volver a las de fábrica</button>
+        </div>
+    </div>
+
+    <!-- Ventana de la tienda (se abre sola en la preparación; B para abrir o cerrar) -->
+    <div id="shop-container" class="modal" style="display: none;">
+        <div class="modal-box wide">
+            <div class="modal-head">
+                <h3>🛒 Tienda · Preparación</h3>
+                <span class="modal-timer phase-countdown"></span>
+                <span class="modal-gold">💰 <span id="shop-gold"></span>g</span>
+                <button class="modal-close" id="shop-close" title="Cerrar (Esc). Se vuelve a abrir con B">✕</button>
+            </div>
+            <div class="shop-layout">
+                <div class="shop-main">
+                    <div id="shop-tabs"></div>
+                    <div id="shop-options" class="options-grid"></div>
+                </div>
+                <div class="shop-side">
+                    <button id="start-wave-btn" class="primary-btn">⚔ Comenzar oleada</button>
+                    <div id="wave-preview"></div>
+                    <div id="inventory-panel"></div>
+                    <div id="destiny-panel"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ventana de apuestas (previa de duelos) -->
+    <div id="bet-container" class="modal" style="display: none;">
+        <div class="modal-box">
+            <div class="modal-head">
+                <h3>🎲 Apuestas del duelo</h3>
+                <span class="modal-timer phase-countdown big"></span>
+            </div>
+            <div id="bet-info" class="subtitle"></div>
+            <div id="bet-pairs"></div>
+            <div id="bet-amount-box"></div>
+            <button id="bet-done-btn" class="primary-btn">Listo, a los duelos</button>
+        </div>
+    </div>
+
+    <!-- Menú de pausa -->
+    <div id="pause-menu" class="modal" style="display: none;">
+        <div class="modal-box pause-box">
+            <h2>⏸ Pausa</h2>
+            <p id="pause-info" class="subtitle"></p>
+            <button id="pause-continue" class="primary-btn">▶ Continuar</button>
+            <button id="pause-tutorial" class="secondary-btn">📖 Tutorial</button>
+            <div id="pause-tower"></div>
+            <div id="pause-glossary">
+            <div class="pause-section">📚 Glosario</div>
+            <div class="pause-row">
+                <button class="secondary-btn" data-glossary="heroes">🦸 Héroes</button>
+                <button class="secondary-btn" data-glossary="creeps">👹 Creeps y Jefes</button>
+                <button class="secondary-btn" data-glossary="items">🎒 Ítems</button>
+            </div>
+            </div>
+            <div class="pause-section">⚙ Opciones</div>
+            <div id="pause-options"></div>
+            <button class="secondary-btn" onclick="toggleKeys(true)">⌨️ Teclas</button>
+            <button id="pause-quit" class="secondary-btn danger">🏠 Salir al menú</button>
+        </div>
+    </div>
+
+    <!-- Botones de opciones (se manejan desde la pausa; ocultos para que el código que los actualiza siga funcionando) -->
+    <div style="display: none;">
+        <button id="sprites-btn"></button><button id="sound-btn"></button>
+        <button id="autocast-btn"></button><button id="autopilot-btn"></button>
+    </div>
+
+    <!-- Elegir cualquier héroe (panel que se despliega desde la izquierda, solo en la elección de héroe) -->
+    <div id="hero-any-backdrop" style="display: none;"></div>
+    <div id="hero-any-drawer">
+        <div class="drawer-head">
+            <h3>🔓 Elegir cualquier héroe</h3>
+            <button id="hero-any-close" class="modal-close" title="Cerrar">✕</button>
+        </div>
+        <p class="subtitle">Elegís entre los 11, sin depender de tus 3 opciones al azar. A cambio, <b>arrancás sin oro</b> (en vez de 100g).</p>
+        <div id="hero-any-options" class="options-grid"></div>
+    </div>
+
+    <!-- Tutorial -->
+    <div id="tutorial" style="display: none;">
+        <div id="tutorial-box">
+            <div id="tutorial-side">
+                <div id="tutorial-icon"></div>
+                <div id="tutorial-brand">CÓMO SE JUEGA</div>
+                <div id="tutorial-dots"></div>
+            </div>
+            <div id="tutorial-main">
+                <div id="tutorial-head"><h3 id="tutorial-title"></h3><button id="tutorial-close" title="Cerrar (Esc)">✕</button></div>
+                <div id="tutorial-body"></div>
+                <div id="tutorial-foot">
+                    <button id="tutorial-prev">◀ Anterior</button>
+                    <span id="tutorial-step"></span>
+                    <button id="tutorial-next">Siguiente ▶</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Códice de Héroes -->
+    <div id="view-heroes" class="codex-view">
+        <div class="codex-back"><button class="primary-btn back-btn">← Volver</button><span>Glosario · Héroes</span></div>
+        <div class="codex-layout">
+            <div id="hero-codex"></div>
+        </div>
+    </div>
+
+    <!-- Códice de Ítems -->
+    <div id="view-items" class="codex-view">
+        <div class="codex-back"><button class="primary-btn back-btn">← Volver</button><span>Glosario · Ítems</span></div>
+        <div class="codex-layout"><div id="item-codex"></div></div>
+    </div>
+
+    <!-- Códice de Creeps -->
+    <div id="view-creeps" class="codex-view">
+        <div class="codex-back"><button class="primary-btn back-btn">← Volver</button><span>Glosario · Creeps y Jefes</span></div>
+        <div class="codex-layout"><div id="creep-codex"></div></div>
+    </div>
+    </div>
+
+    <!-- Orden de carga: utilidades → datos → entidades/combate → flujo → interfaz → arranque -->
+    <script src="js/utils.js"></script>
+    <script src="js/keymap.js"></script>
+    <script src="js/data/tags.js"></script>
+    <script src="js/data/registry.js"></script>
+    <script src="js/data/heroes/axe.js"></script>
+    <script src="js/data/heroes/sniper.js"></script>
+    <script src="js/data/heroes/assassin.js"></script>
+    <script src="js/data/heroes/vampire.js"></script>
+    <script src="js/data/heroes/arcanist.js"></script>
+    <script src="js/data/heroes/frostwitch.js"></script>
+    <script src="js/data/heroes/necromancer.js"></script>
+    <script src="js/data/heroes/voidsage.js"></script>
+    <script src="js/data/heroes/alchemist.js"></script>
+    <script src="js/data/heroes/dancer.js"></script>
+    <script src="js/data/heroes/zeus.js"></script>
+    <script src="js/data/items.js"></script>
+    <script src="js/data/neutrals.js"></script>
+    <script src="js/data/guides.js"></script>
+    <script src="js/data/creeps.js"></script>
+    <script src="js/data/bosses.js"></script>
+    <script src="js/effects.js"></script>
+    <script src="js/fx.js"></script>
+    <script src="js/fxSkills.js"></script>
+    <script src="js/data/sounds.js"></script>
+    <script src="js/data/gameIcons.js"></script>
+    <script src="js/audio.js"></script>
+    <script src="js/sprites.js"></script>
+    <script src="js/itemicons.js"></script>
+    <script src="js/scenery.js"></script>
+    <script src="js/progression.js"></script>
+    <script src="js/hero.js"></script>
+    <script src="js/combat.js"></script>
+    <script src="js/bodies.js"></script>
+    <script src="js/items.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/world.js"></script>
+    <script src="js/menu.js"></script>
+    <script src="js/duels.js"></script>
+    <script src="js/bets.js"></script>
+    <script src="js/rewards.js"></script>
+    <script src="js/bosses.js"></script>
+    <script src="js/roundEconomy.js"></script>
+    <script src="js/matchSummary.js"></script>
+    <script src="js/death.js"></script>
+    <script src="js/timers.js"></script>
+    <script src="js/creeps.js"></script>
+    <script src="js/ai.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/mouse.js"></script>
+    <script src="js/padControls.js"></script>
+    <script src="js/pause.js"></script>
+    <script src="js/main.js"></script>
+    <!-- Pruebas automáticas: solo corren con index.html?test (abrir tests.html) -->
+    <script src="js/tests.js"></script>
+</body>
+</html>

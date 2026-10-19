@@ -1,0 +1,159 @@
+// Motor de los creeps: armar la oleada según su tema, hacerlos aparecer, moverlos y atacar.
+// Los tipos y temas están en data/creeps.js.
+
+// Infinite Tower no existe en este proyecto (bifurcado de custom-hero-chaos, docs/MAPA-CODIGO.md): el aviso de golpe
+// y la parada de espada eran suyos. Ya daban siempre false con gameMode fijo en 'normal'; estos stubs solo evitan
+// el error de función no definida (sin windup ni parry, los creeps pegan al toque como siempre en Custom Hero).
+function creepWindsUp() { return false; }
+function startCreepWindup() {}
+function creepAttackGap(c, base) { return base; } // sin windup, el ritmo de ataque queda tal cual
+function parryCatchesMelee() { return false; }
+function parryMelee() {}
+
+let nextWave = null; // oleada ya sorteada para mostrar el aviso en la tienda
+
+// Sortea el tema de la oleada de una ronda: las rondas 1-4 usan los temas de su nivel; después se repiten los del
+// nivel 4 (cada vez más fuertes). Cada 5 rondas, además, hay jefe de ronda después de los duelos (ver bosses.js).
+function rollWave(number) {
+    const tier = Math.min(number, WAVE_THEMES.length) - 1;
+    const theme = pickRandom(WAVE_THEMES[tier]);
+    return { name: theme.name, groups: theme.groups, boss: theme.boss };
+}
+
+// Cantidad real de unidades de cada grupo (los grupos de Enjambre traen 4 por unidad pedida).
+function groupUnits(g) { return g.count * (CREEP_TYPES[g.type].groupSize || 1); }
+
+// Los creeps se hacen CREEP_GROWTH veces más fuertes por ronda, acumulado (exponencial): tienen que alcanzar a los héroes,
+// que escalan con niveles, ítems y Ascensos, para que el PvE vaya eliminando héroes (medido en DISEÑO.md §9).
+let CREEP_GROWTH = 1.10; // con un duelo por ronda: partidas de ~30 rondas (con 1,13 duraban ~20). let: se puede ajustar para medir
+function creepStatMult(round) { return Math.pow(CREEP_GROWTH, round - 1); }
+
+// --- PRESIÓN AL LÍDER ---
+// Los creeps y jefes se adaptan al poder del héroe que enfrentan: más fuertes contra el que va más fuerte que el promedio
+// de los que siguen en juego, más suaves con el que va atrás. Poder = nivel (×100) + oro invertido en ítems + neutral.
+// Multiplicador = 1 + (poder / promedio − 1) × PRESSURE.factor, entre PRESSURE.min y PRESSURE.max (vida y daño).
+const PRESSURE = { factor: 1, min: 0.85, max: 1.25 };
+let PRESSURE_ON = true; // se puede apagar para medir
+
+function heroPower(h) {
+    const items = h.inventory.reduce((s, inv) => s + (itemTotalCost(ITEMS[inv.key]) || 0), 0);
+    return h.level * 100 + items + (h.neutral ? NEUTRAL_ITEMS[h.neutral].tier * 150 : 0);
+}
+function pressureMult(hero) {
+    const alive = aliveHeroes();
+    if (!PRESSURE_ON || alive.length < 2 || !hero) return 1;
+    const avg = alive.reduce((s, h) => s + heroPower(h), 0) / alive.length;
+    if (avg <= 0) return 1;
+    return Math.max(PRESSURE.min, Math.min(PRESSURE.max, 1 + (heroPower(hero) / avg - 1) * PRESSURE.factor));
+}
+
+// Llena una arena con los creeps de la oleada (ajustados al poder del héroe de esa arena).
+function spawnWave(arena, wave) {
+    arena.creeps = []; arena.boss = null; arena.projectiles = [];
+    arena.pressure = pressureMult(arena.heroes[0]);
+    const statMult = creepStatMult(waveNumber) * arena.pressure;
+    const add = c => { c.arena = arena; arena.creeps.push(c); return c; };
+    // Aparecen en casillas distintas de las columnas 13 a 18; el jefe, en la última columna
+    const cells = shuffle(Array.from({ length: 6 * ROWS }, (_, i) => [13 + Math.floor(i / ROWS), i % ROWS]));
+    let next = 0;
+    wave.groups.forEach(g => {
+        for (let i = 0; i < groupUnits(g); i++) {
+            const [x, y] = cells[next++];
+            add(makeCreep(CREEP_TYPES[g.type], x, y, statMult, false, 0));
+        }
+    });
+    arena.boss = add(makeCreep(CREEP_TYPES[wave.boss], COLS - 1, Math.floor(Math.random() * ROWS), statMult, true, 0.35));
+}
+
+// El héroe al que ataca un creep: el de su arena o, si hay varios (jefe de ronda), el vivo más cercano.
+function creepTarget(c) {
+    const list = c.arena.heroes;
+    if (list.length === 1) return list[0];
+    let best = null, bestDist = Infinity;
+    list.forEach(h => {
+        if (h.eliminated || !h.isAlive()) return;
+        const d = Math.hypot(h.x - c.x, h.y - c.y);
+        if (d < bestDist) { bestDist = d; best = h; }
+    });
+    return best || list[0];
+}
+
+// --- MOVIMIENTO ---
+// Mueve un creep una casilla hacia (tx, ty) respetando su velocidad (y ralentizaciones).
+// Cuerpos físicos (bodies.js): si la casilla del camino está ocupada, prueba el otro eje si está libre; si no, empuja
+// (el paso tarda más según el tamaño del que está ahí).
+function stepCreepToward(c, tx, ty, dt) {
+    if (c.x === tx && c.y === ty) return;
+    if (c.arena && c.arena.walls) { towerStepCreep(c, tx, ty, dt); return; } // Torre: camino rodeando paredes
+    c.moveTimer += dt * 1000;
+    const stepTime = c.moveInterval / (effMoveMult(c) * MOVE_SPEED_MULT);
+    if (c.moveTimer < stepTime) return;
+    const dx = tx - c.x, dy = ty - c.y;
+    const main = Math.abs(dx) >= Math.abs(dy) ? [Math.sign(dx), 0] : [0, Math.sign(dy)];
+    const alt = main[0] ? [0, Math.sign(dy)] : [Math.sign(dx), 0];
+    let [sx, sy] = main;
+    let penalty = bodyPenalty(c, c.x + sx, c.y + sy);
+    if (penalty > 0 && (alt[0] || alt[1]) && bodyPenalty(c, c.x + alt[0], c.y + alt[1]) === 0) { [sx, sy] = alt; penalty = 0; }
+    if (c.moveTimer < stepTime * (1 + penalty)) return;
+    c.moveTimer = 0;
+    c.x += sx; c.y += sy;
+}
+
+// Se aleja de `from` (ej: el Ladrón huyendo), sin salir del mapa.
+function stepCreepAway(c, from, dt) {
+    const tx = Math.max(0, Math.min(COLS - 1, c.x + (Math.sign(c.x - from.x) || 1) * 3));
+    const ty = Math.max(0, Math.min(ROWS - 1, c.y + Math.sign(c.y - from.y) * 3));
+    stepCreepToward(c, tx, ty, dt);
+}
+
+// --- IA DE UN CREEP ---
+// Aura del jefe, comportamiento propio del tipo (update), acercarse al jugador y atacarlo; si el jugador
+// está muerto, vuelve a su lugar. Pasado el tiempo de la oleada, pegan más fuerte y más rápido (enrageMult).
+// Las reacciones al daño (Contraataque, Furia, Forma Inmortal) las manejan los hooks onDamaged del héroe.
+function updateCreep(c, dt) {
+    if (!c.isAlive()) return;
+    // Si el héroe murió (o quedó eliminado) en este mismo frame, el resto de los creeps no sigue pegando
+    if (!inCombat() || c.arena.done) return;
+    if (c.windup && creepWindupTick(c)) return; // preparando un golpe (Torre, towerWindup.js)
+    if (hasFlag(c, 'stun')) return;
+    const target = creepTarget(c);
+    if (!target.isAlive()) { stepCreepToward(c, c.spawnX, c.spawnY, dt); return; } // perdió el agro
+    if (c.type.update && c.type.update(c, dt)) return;
+
+    const enrage = enrageMult(c.arena);
+    let effAtk = effAttack(c) * enrage; // effAttack: incluye mejoras del creep (ej: cabezas de la Hidra)
+    const boss = c.arena.boss;
+    if (!c.isBoss && boss && boss.isAlive()) {
+        const dBoss = Math.hypot(c.x - boss.x, c.y - boss.y);
+        if (dBoss <= boss.auraRadius) effAtk *= 1 + boss.auraAtkBonus;
+    }
+
+    const dTarget = Math.hypot(c.x - target.x, c.y - target.y);
+    if (dTarget > c.range) { stepCreepToward(c, target.x, target.y, dt); return; }
+
+    c.attackTimer += dt;
+    if (c.attackTimer < creepAttackGap(c, 1 / (effAtkSpeed(c) * enrage))) return;
+    c.attackTimer = 0;
+    if (creepWindsUp(c)) { startCreepWindup(c, target, effAtk); return; } // en la Torre, cada golpe se prepara y se puede esquivar
+    creepStrike(c, target, effAtk);
+}
+// El golpe en sí (al instante, o al terminar la preparación en la Torre)
+function creepStrike(c, target, effAtk) {
+    if (parryCatchesMelee(target, c)) { parryMelee(target, c); return; } // la parada de la espada: no te toca y lo aturde (towerParry.js)
+    // dealDamage resuelve la muerte del héroe (revivir, Condenado o eliminación) a través de onHeroDeath
+    // Animación según cómo ataca: golpe (con tajo), disparo o hechizo
+    if (c.range <= 2) { fxAttack(c, target, 'melee'); if (fxArena(c)) fxSlash(c, target, c.color, false); }
+    else fxAttack(c, target, c.attackType === 'magical' ? 'cast' : 'ranged', c.attackType === 'magical' ? c.color : '#fefae0');
+    const result = dealDamage(c, target, Math.round(effAtk), c.attackType, { isAttack: true });
+    if (result.evaded) log(`💨 Esquivaste el ataque de ${c.label}.`);
+    if (c.type.onAttack) c.type.onAttack(c, target, result);
+    if (c.champion) championOnAttack(c, target, result); // Infinite Tower: afijos de campeón (towerWorld.js)
+}
+
+// --- AVISO DE LA PRÓXIMA OLEADA ---
+// Tipos distintos de la oleada (con cantidades), para el aviso en la tienda y para que la IA se arme.
+function waveSummary(wave) {
+    const counts = {};
+    wave.groups.forEach(g => { counts[g.type] = (counts[g.type] || 0) + groupUnits(g); });
+    return Object.entries(counts).map(([type, count]) => ({ type: CREEP_TYPES[type], count }));
+}
