@@ -3,33 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Custom Hero · Infinite Tower</title>
+    <title>MATCH</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tiny5&display=swap">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Portada: escena en pixel art animada (titleScreen.js), el nombre del juego y la elección de modo -->
+    <!-- Portada: escena en pixel art animada (titleScreen.js), el nombre del juego y la entrada -->
     <div id="title-screen">
         <canvas id="title-canvas"></canvas>
         <div class="ts-content">
             <div class="ts-logo">
-                <div class="ts-logo-main">CUSTOM HERO <span>&amp; INFINITE TOWER</span></div>
-                <div class="ts-logo-sub">elegí tu juego</div>
+                <div class="ts-logo-main">MATCH</div>
+                <div class="ts-logo-sub">show de competencia futurista · en vivo</div>
             </div>
             <div class="ts-modes">
                 <button class="ts-card" data-lobby="normal">
                     <span class="ts-card-art" id="ts-art-normal"></span>
-                    <b>⚔ Custom Hero</b>
-                    <em>arena · 8 héroes</em>
-                    <span>Oleadas de creeps, duelos, apuestas y jefes. Armá tu kit mezclando habilidades de cualquier héroe y quedate último en pie.</span>
-                </button>
-                <button class="ts-card tower" data-lobby="tower">
-                    <span class="ts-card-art" id="ts-art-tower"></span>
-                    <b>🗼 Infinite Tower</b>
-                    <em>roguelike · 10 pisos</em>
-                    <span>Despertás en la base de una torre sin nada. Cada piso es un bioma con su pueblo, su laberinto y su guardián. Tu clase la arma el equipo.</span>
+                    <b>⚔ Jugar</b>
+                    <em>arena · 11 competidores</em>
+                    <span>Oleadas de robots, duelos, apuestas y jefes. Armá tu kit mezclando habilidades de cualquier competidor y quedate último en pie.</span>
                 </button>
             </div>
             <div class="ts-lobby" id="ts-lobby"></div>
@@ -39,11 +33,8 @@
                     <button class="secondary-btn" data-glossary="heroes">🦸 Héroes</button>
                     <button class="secondary-btn" data-glossary="creeps">👹 Creeps y jefes</button>
                     <button class="secondary-btn" data-glossary="items">🎒 Ítems</button>
-                    <a href="?muneco" class="secondary-btn" title="Laboratorio para probar los movimientos, los golpes y las cajas de golpe">🧪 Muñeco de prueba</a>
-                    <a href="?galeria" class="secondary-btn" title="Todos los personajes con todas sus animaciones">🎞️ Galería de personajes</a>
-                    <a href="3d/" class="secondary-btn">🧊 Prototipo 3D</a>
                 </div>
-                <p class="ts-foot"><span id="game-version"></span> · Íconos: <a href="https://game-icons.net" target="_blank" rel="noopener">game-icons.net</a> (CC BY 3.0) · Música: <a href="https://opengameart.org" target="_blank" rel="noopener">opengameart.org</a> (CC0; volcán de Wolfgang_, CC BY 4.0) · <a href="docs/CREDITOS.md" target="_blank" rel="noopener">créditos</a></p>
+                <p class="ts-foot"><span id="game-version"></span> · Íconos: <a href="https://game-icons.net" target="_blank" rel="noopener">game-icons.net</a> (CC BY 3.0) · Música: <a href="https://opengameart.org" target="_blank" rel="noopener">opengameart.org</a> (CC0) · <a href="docs/CREDITOS.md" target="_blank" rel="noopener">créditos</a></p>
             </div>
         </div>
     </div>
@@ -71,7 +62,6 @@
                     <span class="mh-spacer"></span>
                     <span class="mh-item" id="lives-text" title="Vidas"></span>
                     <span class="mh-item mh-gold" title="Oro">💰 <span id="player-gold">0</span>g <span id="player-income" class="mh-income" title="Lo que cobrás al terminar la ronda: interés (+1 cada 10g ahorrados, tope 5) y la racha (🔥 ganadas / 🧊 perdidas seguidas)"></span></span>
-                    <span class="mh-item mh-essence" id="essence-text" title="Esencia: moneda permanente (no se pierde al morir)"></span>
                     <span class="mh-item" id="points-text" title="Puntos y puesto en el ranking"></span>
                     <button id="map-toggle" title="Agrandar o achicar el mapa (tecla M)">⤢</button>
                     <button id="pause-btn" title="Pausa, tutorial, glosario y opciones (Esc)">⏸</button>
@@ -82,10 +72,7 @@
                 <div id="bet-banner"></div>
                 <div id="map-wrap">
                     <canvas id="ascii-canvas"></canvas>
-                    <div id="float-log"></div>
-                    <div id="tower-badges"></div>
                 </div>
-                <div id="relic-bar" style="display: none;"></div>
                 <div id="hero-bar" style="display: none;">
                     <div id="hb-portrait">
                         <div id="hb-symbol"></div>
@@ -105,7 +92,7 @@
                         <div id="hb-effects"></div>
                     </div>
                 </div>
-                <div id="controls-hint">Caminar: clic derecho · Atacar: clic derecho sobre un rival · Habilidades: E R T F Q y clic para apuntar · Objetivo: clic izquierdo · W A S D y lanzamiento rápido: en Opciones · Automáticas: H · Tienda/Herrero: B · Códice: J · Mapa grande: M · Piloto: P</div>
+                <div id="controls-hint">Caminar: clic derecho · Atacar: clic derecho sobre un rival · Habilidades: E R T F Q y clic para apuntar · Objetivo: clic izquierdo · W A S D y lanzamiento rápido: en Opciones · Automáticas: H · Tienda: B · Piloto: P</div>
             </div>
 
             <!-- Derecha: lo que toca en esta fase y el registro -->
@@ -155,60 +142,6 @@
         </div>
     </div>
 
-    <!-- Infinite Tower: equipo e inventario (tecla I) -->
-    <div id="inv-container" class="modal" style="display: none;">
-        <div class="modal-box wide inv-box">
-            <div class="modal-head">
-                <h3>🎒 Equipo e inventario</h3>
-                <button class="modal-close" id="inv-close" title="Cerrar (I o Esc)">✕</button>
-            </div>
-            <div class="inv-layout">
-                <div id="inv-gear"></div>
-                <div class="inv-right">
-                    <div id="inv-bag"></div>
-                    <p class="subtitle" id="inv-held"></p>
-                    <div id="inv-tooltip"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Infinite Tower: forja (al subir de nivel una pieza) -->
-    <div id="forge-container" class="modal" style="display: none;">
-        <div class="modal-box forge-box">
-            <div class="modal-head"><h3 id="forge-title">⚒ Forjar</h3></div>
-            <p class="subtitle" id="forge-sub"></p>
-            <div id="forge-options" class="draft-grid"></div>
-        </div>
-    </div>
-
-    <!-- Infinite Tower: mercader del pueblo (B en el pueblo) -->
-    <div id="tshop-container" class="modal" style="display: none;">
-        <div class="modal-box wide">
-            <div class="modal-head">
-                <h3 id="tshop-title">🛒 Mercader del pueblo</h3>
-                <span class="modal-gold" id="tshop-gold"></span>
-                <button class="modal-close" id="tshop-close" title="Cerrar (B o Esc)">✕</button>
-            </div>
-            <div class="tshop-layout">
-                <div><h4>A la venta</h4><div id="tshop-stock"></div></div>
-                <div><h4>Tu bolsa (vender)</h4><div id="tshop-bag"></div></div>
-                <div id="tshop-tooltip"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Infinite Tower: la piedra de regreso del círculo de la base (towerWaystone.js) -->
-    <div id="waystone-container" class="modal" style="display: none;">
-        <div class="modal-box">
-            <div class="modal-head">
-                <h3>🪨 Piedra de regreso</h3>
-                <button class="modal-close" onclick="toggleWaystone(false)" title="Cerrar (Esc)">✕</button>
-            </div>
-            <p class="subtitle">Tocás la piedra y la torre te devuelve a la entrada de un piso al que ya llegaste. Tus restos siguen donde los dejaste.</p>
-            <div id="waystone-list" class="waystone-list"></div>
-        </div>
-    </div>
-
     <!-- Teclas configurables (keymap.js) -->
     <div id="keys-container" class="modal" style="display: none;">
         <div class="modal-box">
@@ -219,62 +152,6 @@
             <p class="subtitle">Clic en una acción y apretá la tecla nueva. Si otra acción la usaba, se intercambian. Las flechas siempre mueven y Esc siempre pausa.</p>
             <div id="keys-list"></div>
             <button class="secondary-btn" onclick="resetKeymap(); renderKeys()">Volver a las de fábrica</button>
-        </div>
-    </div>
-
-    <!-- Infinite Tower: la Bitácora (N: Cuaderno · J: Códice · K: Bestiario), un solo libro con pestañas (towerLogbook.js) -->
-    <div id="logbook-container" class="modal" style="display: none;">
-        <div class="modal-box wide logbook">
-            <div class="modal-head">
-                <h3>📔 Bitácora</h3>
-                <span class="modal-gold" id="codex-count"></span>
-                <button class="modal-close" id="logbook-close" title="Cerrar (Esc, o la tecla de la pestaña)">✕</button>
-            </div>
-            <div id="logbook-tabs" class="logbook-tabs"></div>
-            <div class="logbook-pane" data-pane="notebook">
-                <p class="subtitle">No recordás nada, salvo escribir. Cada página se completa sola la primera vez que hacés esa acción, y queda para siempre.</p>
-                <div id="notebook-pages"></div>
-                <div id="aren-pages"></div>
-            </div>
-            <div class="logbook-pane" data-pane="codex">
-                <p class="subtitle">Llevá la habilidad de una pieza a su nivel máximo y queda dominada para siempre, aunque mueras. Un Herrero la puede imbuir en una pieza sin alma.</p>
-                <div id="codex-upgrades"></div>
-                <div class="codex-layout"><div id="codex-list"></div><div id="codex-tooltip"></div></div>
-            </div>
-            <div class="logbook-pane" data-pane="bestiary">
-                <div class="bestiary-views"><button data-view="run">Esta run</button><button data-view="all">Colección</button></div>
-                <div id="bestiary-list"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Infinite Tower: Herrero del pueblo (B al lado del yunque) -->
-    <div id="smith-container" class="modal" style="display: none;">
-        <div class="modal-box wide">
-            <div class="modal-head">
-                <h3>⚒️ Herrero</h3>
-                <span class="modal-gold" id="smith-gold"></span>
-                <button class="modal-close" id="smith-close" title="Cerrar (B o Esc)">✕</button>
-            </div>
-            <div class="tshop-layout">
-                <div><h4>1. Pieza sin alma</h4><div id="smith-infuse"></div><h4>2. Poder del Códice</h4><div id="smith-powers"></div><h4>Traspasar crecimiento</h4><p class="subtitle">Una pieza crecida le pasa la mitad de su nivel y sus mejoras a otra de la misma ranura (y desaparece).</p><div id="smith-transfer"></div></div>
-                <div><h4>Fundir 5 piezas → pieza pura</h4><div id="smith-craft"></div><h4>Vaciar una pieza</h4><p class="subtitle">Pierde su habilidad, conserva nivel y afijos.</p><div id="smith-purge"></div><h4>A la venta</h4><div id="smith-stock"></div></div>
-                <div id="smith-tooltip"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Infinite Tower: ventana de stats (tecla C) -->
-    <div id="stats-container" class="modal" style="display: none;">
-        <div class="modal-box">
-            <div class="modal-head">
-                <h3>📊 Stats del héroe</h3>
-                <span class="modal-gold" id="stats-points"></span>
-                <button class="modal-close" id="stats-close" title="Cerrar (C o Esc)">✕</button>
-            </div>
-            <div id="level-cards"></div>
-            <div id="stats-rows"></div>
-            <p class="subtitle">Cada nivel elegís 1 de 3 mejoras (5 puntos en un stat). Elegir el mismo stat 3 y 6 veces destraba una mejora propia. Al morir perdés la mitad de los puntos puestos en cada stat. La partida espera mientras esta ventana está abierta.</p>
         </div>
     </div>
 
@@ -323,7 +200,6 @@
             <p id="pause-info" class="subtitle"></p>
             <button id="pause-continue" class="primary-btn">▶ Continuar</button>
             <button id="pause-tutorial" class="secondary-btn">📖 Tutorial</button>
-            <div id="pause-tower"></div>
             <div id="pause-glossary">
             <div class="pause-section">📚 Glosario</div>
             <div class="pause-row">
@@ -399,6 +275,7 @@
 
     <!-- Orden de carga: utilidades → datos → entidades/combate → flujo → interfaz → arranque -->
     <script src="js/utils.js"></script>
+    <script src="js/pantalla.js"></script>
     <script src="js/keymap.js"></script>
     <script src="js/data/tags.js"></script>
     <script src="js/data/registry.js"></script>
@@ -445,68 +322,16 @@
     <script src="js/timers.js"></script>
     <script src="js/creeps.js"></script>
     <script src="js/ai.js"></script>
-    <script src="js/tower.js"></script>
-    <script src="js/towerItems.js"></script>
-    <script src="js/towerFeel.js"></script>
-    <script src="js/towerAwaken.js"></script>
-    <script src="js/towerWaystone.js"></script>
-    <script src="js/towerUI.js"></script>
-    <script src="js/towerWorld.js"></script>
-    <script src="js/towerLore.js"></script>
-    <script src="js/towerSecrets.js"></script>
-    <script src="js/towerQuests.js"></script>
-    <script src="js/towerMysteries.js"></script>
-    <script src="js/towerRelics.js"></script>
-    <script src="js/towerLevelUp.js"></script>
-    <script src="js/towerArcher.js"></script>
-    <script src="js/towerMage.js"></script>
-    <script src="js/towerSpecials.js"></script>
-    <script src="js/towerBestiary.js"></script>
-    <script src="js/towerCodex.js"></script>
-    <script src="js/towerTelegraph.js"></script>
-    <script src="js/towerBosses.js"></script>
-    <script src="js/towerBullets.js"></script>
-    <script src="js/towerWindup.js"></script>
-    <script src="js/towerChampions.js"></script>
-    <script src="js/towerAtmos.js"></script>
-    <script src="js/towerCraft.js"></script>
-    <script src="js/towerTransfer.js"></script>
-    <script src="js/towerMusic.js"></script>
-    <script src="js/towerMap.js"></script>
-    <script src="js/towerNotebook.js"></script>
-    <script src="js/towerLogbook.js"></script>
-    <script src="js/inkart.js"></script>
+    <script src="js/pixelFx.js"></script>
     <script src="js/ui.js"></script>
-    <script src="js/towerView.js"></script>
-    <script src="js/towerGuide.js"></script>
-    <script src="js/towerPixel.js"></script>
-    <script src="js/towerPixelBeasts.js"></script>
-    <script src="js/towerHeroArt.js"></script>
-    <script src="js/tower2dWorld.js"></script>
-    <script src="js/tower2d.js"></script>
-    <script src="js/tower2dAudio.js"></script>
-    <script src="js/towerPixelHero.js"></script>
-    <script src="js/caballero.js"></script>
-    <script src="js/towerPixelProps.js"></script>
-    <script src="js/towerFolk.js"></script>
-    <script src="js/towerPixelFx.js"></script>
-    <script src="js/towerPixelUi.js"></script>
-    <script src="js/towerSave.js"></script>
+    <script src="js/music.js"></script>
     <script src="js/titleScreen.js"></script>
-    <script src="js/towerClickAttack.js"></script>
-    <script src="js/towerParry.js"></script>
     <script src="js/mouse.js"></script>
-    <script src="js/padControls.js"></script>
     <script src="js/pause.js"></script>
     <script src="js/main.js"></script>
     <!-- MATCH 3D (js/m3d/): three.js y el motor de robots de arena-robots, como módulos -->
     <script type="importmap">{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }</script>
     <script type="module" src="js/m3d/match3d.js"></script>
-    <!-- El muñeco: laboratorio de animaciones y cajas de golpe (index.html?muneco) -->
-    <script src="js/munecoDatos.js"></script>
-    <script src="js/muneco.js"></script>
-    <!-- La galería: todos los personajes con todas sus animaciones (index.html?galeria) -->
-    <script src="js/galeria.js"></script>
     <!-- Pruebas automáticas: solo corren con index.html?test (abrir tests.html) -->
     <script src="js/tests.js"></script>
 </body>

@@ -39,7 +39,6 @@ function fxDamage(target, amount, type, isCrit) {
     const color = target.isHero ? '#ff477e' : DMG_COLORS[type] || '#fff';
     pushFx(arena, { kind: 'text', x: target.x + (Math.random() - 0.5) * 0.6, y: target.y - 0.4, text: isCrit ? `${amount}!` : `${amount}`, color, size: isCrit ? 18 : 12, life: isCrit ? 1.1 : 0.8 });
     if (isCrit) { fxBurst(target, '#ffd166', 6, 3); fxShake(2.5); if (!target.isHero) fxHitStop(0.04); }
-    if (typeof pxBleed === 'function') pxBleed(target, isCrit ? 7 : 3, 'hit'); // salpicadura en pixel art (towerPixelFx.js)
 }
 
 // Te pegaron: el borde de la pantalla se pone rojo un instante, más fuerte cuanto más vida te sacaron (ROADMAP T2: que
@@ -74,7 +73,6 @@ function fxRing(unit, color, radius = 1.6, life = 0.45) {
 function fxDeath(unit) {
     if (fxArena(unit)) sfx(unit.isHero ? 'death' : 'pop');
     fxBurst(unit, unit.color || '#ff477e', unit.isHero ? 22 : 12, unit.isHero ? 5 : 3.5);
-    if (typeof pxBleed === 'function') pxBleed(unit, unit.isHero ? 30 : unit.isGuardian ? 40 : 16, 'death'); // revienta en pedacitos (towerPixelFx.js)
     const arena = fxArena(unit); // pixel art: la criatura destella, se aplasta y se apaga en vez de desaparecer de golpe (2026-10-14)
     if (arena && unit.pxLast && !unit.isHero) pushFx(arena, { kind: 'corpse', x: unit.rx ?? unit.x, y: unit.ry ?? unit.y, fr: unit.pxLast.fr, s: unit.pxLast.s, flip: unit.pxLast.flip, life: 0.4 });
     if (unit.isHero) fxShake(5);
@@ -175,12 +173,11 @@ function drawArenaFx(arena) {
         if (fxTextPass && (f.kind === 'text') !== (fxTextPass === 'only')) return; // pixel art: los textos van aparte (towerPixelFx.js)
         const px = f.x * TILE + TILE / 2, py = f.y * TILE + TILE / 2;
         ctx.globalAlpha = Math.max(0, 1 - t * t);
-        const pixel = typeof pixelEnabled !== 'undefined' && pixelEnabled; // números con fuente de píxeles en los dos modos (towerPixelFx.js)
-        if (f.kind === 'text' && pixel && pxNumberText(f.text)) { // número de daño con la fuente de píxeles
+        if (f.kind === 'text' && pxNumberText(f.text)) { // número con la fuente de píxeles (pixelFx.js) // número de daño con la fuente de píxeles
             pxDrawNumber(f.text, px, py, f.color, Math.max(2, Math.round(2 * f.size / 12 * A11Y.combatText)) + (t < 0.12 ? 1 : 0));
         } else if (f.kind === 'text') {
-            ctx.font = `bold ${Math.round(f.size * A11Y.combatText * (t < 0.15 ? 1 + (0.15 - t) * 3 : 1))}px ${gameMode === 'tower' && !pixel ? 'Georgia, serif' : 'monospace'}`;
-            ctx.lineWidth = 3; ctx.strokeStyle = gameMode === 'tower' ? '#1d1712' : 'rgba(0,0,0,0.8)'; ctx.strokeText(f.text, px, py);
+            ctx.font = `bold ${Math.round(f.size * A11Y.combatText * (t < 0.15 ? 1 + (0.15 - t) * 3 : 1))}px monospace`;
+            ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,0.8)'; ctx.strokeText(f.text, px, py);
             ctx.fillStyle = f.color; ctx.fillText(f.text, px, py);
         } else if (f.kind === 'particle') {
             if (f.style) drawStyledParticle(f, t, px, py);
@@ -210,7 +207,7 @@ function drawArenaFx(arena) {
         } else drawSkillFx(f, t, px, py); // formas de habilidad (fxSkills.js)
     });
     ctx.globalAlpha = 1;
-    if (gameMode !== 'tower' && fxTextPass !== 'skip') drawUltBanner(MAP_W / 2, MAP_H * 0.72); // en la Torre va encima de la niebla (renderTower)
+    if (fxTextPass !== 'skip') drawUltBanner(MAP_W / 2, MAP_H * 0.72);
 }
 
 // Posición dibujada de una unidad: se desliza hacia su casilla (movimiento suave) + el salto del golpe.

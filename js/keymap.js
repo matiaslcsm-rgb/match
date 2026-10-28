@@ -3,26 +3,20 @@
 // Las flechas siempre mueven y Esc siempre pausa (no se cambian).
 
 const KEY_DEFAULTS = {
-    up: 'w', left: 'a', down: 's', right: 'd', dash: ' ',
-    skill1: 'q', skill2: 'e', skill3: 'r',
-    inventory: 'i', stats: 'c', codex: 'j', bestiary: 'k', log: 'l', map: 'm', notebook: 'n', shop: 'b', autocast: 'h', autopilot: 'p', interact: 'f',
-    attack: 'u', attack2: 'o' // sin mouse (padControls.js)
+    up: 'w', left: 'a', down: 's', right: 'd', // W A S D: solo si lo prendés en Opciones (mouse.js)
+    map: 'm', shop: 'b', autocast: 'h', autopilot: 'p'
 };
 const KEY_LABELS = {
-    up: 'Mover arriba', left: 'Mover a la izquierda', down: 'Mover abajo', right: 'Mover a la derecha', dash: 'Esquive',
-    skill1: 'Habilidad del arma', skill2: 'Habilidad de los guantes', skill3: 'Habilidad de la armadura',
-    inventory: 'Equipo e inventario', stats: 'Stats', codex: 'Códice', bestiary: 'Bestiario', log: 'Diario del piso', map: 'Mapa',
-    notebook: 'Cuaderno', shop: 'Tienda / Herrero', autocast: 'Habilidades automáticas', autopilot: 'Piloto automático', interact: 'Agarrar / hablar (Torre)',
-    attack: 'Atacar sin mouse (Torre)', attack2: 'Ataque secundario sin mouse (Torre)'
+    up: 'Mover arriba', left: 'Mover a la izquierda', down: 'Mover abajo', right: 'Mover a la derecha',
+    map: 'Mapa grande', shop: 'Tienda', autocast: 'Habilidades automáticas', autopilot: 'Piloto automático'
 };
-const KEY_FIXED = ['escape', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright', '+', '=', '-', '_', 'g'];
+// Fijas: Esc, las flechas, G (pixel art) y las de las habilidades (hero.js, SKILL_KEYS)
+const KEY_FIXED = ['escape', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'g', 'e', 'r', 't', 'f', 'q', 'v'];
 const KEYMAP = Object.assign({}, KEY_DEFAULTS);
-try { Object.assign(KEYMAP, JSON.parse(localStorage.getItem('chc-keys') || '{}')); } catch (e) { /* las de fábrica */ }
+try { const saved = JSON.parse(localStorage.getItem('chc-keys') || '{}'); Object.keys(KEY_DEFAULTS).forEach(a => { if (saved[a] && !KEY_FIXED.includes(saved[a])) KEYMAP[a] = saved[a]; }); } catch (e) { /* las de fábrica */ }
 
 function keyName(k) { return k === ' ' ? 'ESP' : k === undefined ? '—' : k.length === 1 ? k.toUpperCase() : k.replace('arrow', '↑').toUpperCase(); }
 function actionForKey(k) { return Object.keys(KEYMAP).find(a => KEYMAP[a] === k) || null; }
-// Ranura de la Torre → tecla de su habilidad (towerItems.js)
-function towerSlotKey(slot) { return KEYMAP[{ weapon: 'skill1', gloves: 'skill2', armor: 'skill3' }[slot]]; }
 
 // Cambia la tecla de una acción (intercambiando si hace falta) y actualiza las habilidades que la usaban
 function setKey(action, key) {

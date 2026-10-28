@@ -3,8 +3,8 @@
 
 const KIT_SIZE = 4;            // elecciones de draft en las rondas 1 a 4 (activas + pasivas)
 const FIFTH_SKILL_ROUND = 9;   // y una quinta en la ronda 9 (decidido por el usuario 2026-10-18, como el original: la build sigue creciendo)
-// Cuántas habilidades lleva el kit en esta ronda (en la Torre las da el equipo: siempre KIT_SIZE)
-function kitSize(round = waveNumber) { return gameMode !== 'tower' && round >= FIFTH_SKILL_ROUND ? KIT_SIZE + 1 : KIT_SIZE; }
+// Cuántas habilidades lleva el kit en esta ronda
+function kitSize(round = waveNumber) { return round >= FIFTH_SKILL_ROUND ? KIT_SIZE + 1 : KIT_SIZE; }
 const MAX_HERO_LEVEL = 30;
 const ULT_LEVEL_STEP = 6;      // la definitiva sube 1 nivel cada 6 niveles del héroe (6, 12, 18)
 const DRAFT_OPTIONS = { normal: 3, fragment: 4, book: 6 };
@@ -26,7 +26,7 @@ function skillLevel(hero, skill) { return hero.skillLevels[skill.id] || 0; }
 // de una vez cada un rato largo; en Custom Hero no se toca nada. Solo hace falta definir en towerValues
 // las claves que cambian — el resto sigue saliendo de values.
 function skillValueSource(skill, key) {
-    return (gameMode === 'tower' && skill.towerValues && key in skill.towerValues) ? skill.towerValues : skill.values;
+    return skill.values;
 }
 // Valor de una habilidad en un nivel dado. Con nivel 0 devuelve el de nivel 1.
 function valueAt(skill, key, level) {
@@ -35,8 +35,7 @@ function valueAt(skill, key, level) {
     return v[Math.max(0, Math.min(v.length, level) - 1)];
 }
 // Valor de una habilidad según el nivel que tiene en ese héroe (lo usan cast() y los hooks).
-// Con las mejoras forjadas en la pieza que trae la habilidad (Infinite Tower, ver applySkillBoost en towerItems.js).
-function val(skill, hero, key) { return applySkillBoost(skill, hero, key, valueAt(skill, key, skillLevel(hero, skill))); }
+function val(skill, hero, key) { return valueAt(skill, key, skillLevel(hero, skill)); }
 
 // Texto de un valor: "100/120/140/160%" con el nivel actual resaltado (level 0 = ninguno).
 function formatKey(skill, key, level, pct, mult = 1) {
@@ -56,7 +55,7 @@ function describeSkill(skill, level) {
 // Enfriamientos: todos un 25% más cortos (a pedido: las habilidades salían poco). Los valores de cada habilidad quedan
 // como están; el multiplicador se aplica al lanzarla y en los textos.
 const COOLDOWN_MULT = 0.75;
-function skillCooldown(skill, hero) { return (val(skill, hero, 'cooldown') || 0) * COOLDOWN_MULT * (typeof archerHaste === 'function' ? archerHaste(hero) : 1); } // Ojo Rápido del Arquero (towerArcher.js)
+function skillCooldown(skill, hero) { return (val(skill, hero, 'cooldown') || 0) * COOLDOWN_MULT; }
 
 function skillCostLine(skill, level) {
     if (skill.kind === 'passive') return 'Pasiva';
@@ -124,13 +123,6 @@ const PERMANENT_LABELS = {
 const TOWER_PERM_CAP = { atk: 40, maxHp: 300, str: 15, agi: 15, int: 15, armor: 8, critChance: 15, atkSpeed: 20, lifesteal: 10, hpRegen: 10, manaRegen: 5 };
 // stat: armor | atk | atkSpeed (en %) | critChance | lifesteal | maxHp (bonus directo) o str | agi | int (suma al atributo).
 function grantPermanent(hero, stat, amount, sourceName) {
-    if (gameMode === 'tower' && sourceName && TOWER_PERM_CAP[stat] !== undefined) { // tope por habilidad en la Torre
-        const got = hero.permGains = hero.permGains || {}, key = sourceName + ':' + stat, now = got[key] || 0, cap = TOWER_PERM_CAP[stat];
-        amount = Math.min(amount, cap - now);
-        if (amount <= 0) return;
-        got[key] = now + amount;
-        if (got[key] >= cap && hero === player) log(`📈 ${sourceName} llegó a su tope en la Torre: +${cap} ${PERMANENT_LABELS[stat]}.`);
-    }
     if (stat === 'str' || stat === 'agi' || stat === 'int') hero[stat] += amount;
     else hero.bonus[stat] = (hero.bonus[stat] || 0) + amount;
     hero.recalculateStats();

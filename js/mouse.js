@@ -6,15 +6,13 @@
 //   las mejoras se lanzan al apretar la tecla.
 //   Clic derecho en el mapa (sin estar apuntando): tu héroe camina hasta ahí; sobre un rival, lo ataca. W A S D, solo si
 //   lo prendés en Opciones (y entonces manda el teclado).
-//   En la Torre, el clic izquierdo es el ataque básico hacia el cursor (towerClickAttack.js; se apaga en la pausa).
-//   Con espada, el clic derecho es la parada en vez de caminar (towerParry.js).
 //
 //   Para apuntar no hace falta tocar cada habilidad: mientras se lanza con el mouse, el héroe tiene aimPoint y
 //   nearestEnemy() (combat.js) elige, entre los enemigos a su alcance, el más cercano a ese punto.
 
 // CONTROLES ESTILO DOTA en Custom Hero (MATCH, pedido del usuario 2026-10-18): clic derecho camina y, sobre un rival,
 // lo ataca; las habilidades apuntadas se confirman con clic (salvo que prendas el "lanzamiento rápido"); W A S D solo si
-// lo prendés en Opciones. En la Torre no cambia nada: es un juego de acción (teclado, esquive y clic para pegar).
+// lo prendés en Opciones.
 let quickCast = false, wasdMove = false;
 try { quickCast = localStorage.getItem('chc-lanzamiento-rapido') === 'on'; wasdMove = localStorage.getItem('chc-wasd') === 'on'; } catch (e) { /* sin almacenamiento: como Dota */ }
 function setQuickCast(on) {
@@ -27,8 +25,8 @@ function setWasdMove(on) {
     try { localStorage.setItem('chc-wasd', on ? 'on' : 'off'); } catch (e) { /* no se guarda */ }
     log(on ? '⌨️ Te podés mover con W A S D (y las flechas), además del clic derecho.' : '🖱️ Te movés con clic derecho, como en Dota.');
 }
-function keyboardMoveOn() { return gameMode === 'tower' || wasdMove; }
-function aimWithClick() { return gameMode !== 'tower' && !quickCast; }
+function keyboardMoveOn() { return wasdMove; }
+function aimWithClick() { return !quickCast; }
 
 let targeting = null;               // { skill } mientras se está apuntando una habilidad
 const mouse = { x: 0, y: 0, over: false }; // posición del cursor en casillas (con decimales)
@@ -76,7 +74,7 @@ function castAt(hero, skill, x, y) {
 function mouseToTile(e) {
     if (window.M3D && M3D.active) { const t = M3D.screenToTile(e.clientX, e.clientY); if (t) return t; } // MATCH 3D: rayo contra el piso
     const rect = canvas.getBoundingClientRect();
-    return { x: (e.clientX - rect.left) / rect.width * viewCols() - 0.5 + camera.x, y: (e.clientY - rect.top) / rect.height * viewRows() - 0.5 + camera.y }; // viewCols: con el zoom de la Torre (towerView.js)
+    return { x: (e.clientX - rect.left) / rect.width * VIEW_COLS - 0.5, y: (e.clientY - rect.top) / rect.height * VIEW_ROWS - 0.5 }; // la vista 2D (sin WebGL)
 }
 
 function canControlPlayer() { return player && inCombat() && !autopilot && player.arena && !player.inRest && player.isAlive(); }
@@ -99,8 +97,6 @@ canvas.addEventListener('mousedown', e => {
         return;
     }
     if (e.button === 0 && canControlPlayer()) { // clic izquierdo: marcar un enemigo como objetivo (o desmarcar)
-        if (gameMode === 'tower' && towerClickWeapon(p)) return; // o agarrar un arma del círculo (towerAwaken.js)
-        if (clickAttackOn(player)) { clickAttackPress(p); return; } // Torre: el clic es el golpe (towerClickAttack.js)
         const enemy = enemyUnderCursor(p.x, p.y);
         player.focus = enemy;
         player.focusChase = !!enemy;
@@ -112,30 +108,19 @@ canvas.addEventListener('mousedown', e => {
 // Clic derecho: cancela el apuntado o, como en Dota, ataca al rival que tenga abajo o camina hasta ahí
 function rightClickAt(p) {
     if (targeting) { cancelTargeting(); return; }
-    if (secondaryAction(p)) return; // Torre: la parada, el flechazo o la tormenta
     const tile = { x: Math.max(0, Math.min(COLS - 1, Math.round(p.x))), y: Math.max(0, Math.min(ROWS - 1, Math.round(p.y))), at: fxClock };
     if (player && player.inRest && !player.eliminated && !autopilot) { player.moveTarget = { ...tile, arena: null }; return; } // caminar por la sala de espera
     if (!canControlPlayer()) return;
-    if (gameMode !== 'tower') {
-        const enemy = enemyUnderCursor(p.x, p.y);
-        if (enemy) { // sobre un rival: atacarlo (lo persigue hasta tenerlo a tiro)
-            player.focus = enemy; player.focusChase = true; player.moveTarget = null;
-            fxRing(enemy, '#ff477e', 0.9, 0.3);
-            return;
-        }
-        player.focus = null; player.focusChase = false; // caminar cancela la orden de ataque
+    const enemy = enemyUnderCursor(p.x, p.y);
+    if (enemy) { // sobre un rival: atacarlo (lo persigue hasta tenerlo a tiro)
+        player.focus = enemy; player.focusChase = true; player.moveTarget = null;
+        fxRing(enemy, '#ff477e', 0.9, 0.3);
+        return;
     }
+    player.focus = null; player.focusChase = false; // caminar cancela la orden de ataque
     player.moveTarget = { ...tile, arena: player.arena };
 }
 
-// La acción secundaria de cada clase en la Torre (clic derecho, o la tecla/botón sin mouse: padControls.js)
-function secondaryAction(p) {
-    if (!canControlPlayer()) return false;
-    if (swordParryOn(player)) { swordParry(player, p); return true; } // con espada: la parada (towerParry.js)
-    if (isArcher(player)) { archerSnipe(player, p); return true; } // el Arquero: el flechazo (towerArcher.js)
-    if (isMage(player)) { mageChargeStart(player, 'storm'); return true; } // el Mago: la tormenta, al soltar (towerMage.js)
-    return false;
-}
 // Enemigo bajo el cursor (a menos de 0,8 casillas; si hay varios, el más cercano al cursor).
 function enemyUnderCursor(x, y) {
     let best = null, bestDist = 0.8;
@@ -152,7 +137,6 @@ function focusChaseDirection(hero) {
     const f = hero.focusChase && validFocus(hero);
     if (!f) return null;
     if (Math.hypot(f.x - hero.x, f.y - hero.y) <= effRange(hero)) return null;
-    if (hero.arena && hero.arena.walls) return towerPathDir(hero, f); // en la Torre, rodeando paredes
     return { dx: Math.sign(f.x - hero.x), dy: Math.sign(f.y - hero.y) };
 }
 
@@ -161,7 +145,6 @@ function moveTargetDirection(hero) {
     const t = hero.moveTarget;
     if (!t) return null;
     if (t.arena !== hero.arena || (hero.x === t.x && hero.y === t.y)) { hero.moveTarget = null; return null; }
-    if (hero.arena && hero.arena.walls) return towerPathDir(hero, t) || (hero.moveTarget = null); // en la Torre, rodeando paredes
     return { dx: Math.sign(t.x - hero.x), dy: Math.sign(t.y - hero.y) };
 }
 
@@ -169,7 +152,6 @@ function moveTargetDirection(hero) {
 // noHint: sin el cartel de abajo (el 3D dibuja todo esto en el piso y el cartel aparte, match3d.js)
 function drawMouseOverlay(arena, noHint) {
     if (!player || player.arena !== arena) return;
-    drawPadAim(arena); // la mira sin mouse (padControls.js)
     const px = x => x * TILE + TILE / 2;
     if (player.moveTarget && player.moveTarget.arena === arena) {
         const t = player.moveTarget, age = fxClock - t.at;

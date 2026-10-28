@@ -75,7 +75,6 @@ function creepTarget(c) {
 // (el paso tarda más según el tamaño del que está ahí).
 function stepCreepToward(c, tx, ty, dt) {
     if (c.x === tx && c.y === ty) return;
-    if (c.arena && c.arena.walls) { towerStepCreep(c, tx, ty, dt); return; } // Torre: camino rodeando paredes
     c.moveTimer += dt * 1000;
     const stepTime = c.moveInterval / (effMoveMult(c) * MOVE_SPEED_MULT);
     if (c.moveTimer < stepTime) return;
@@ -105,7 +104,6 @@ function updateCreep(c, dt) {
     if (!c.isAlive()) return;
     // Si el héroe murió (o quedó eliminado) en este mismo frame, el resto de los creeps no sigue pegando
     if (!inCombat() || c.arena.done) return;
-    if (c.windup && creepWindupTick(c)) return; // preparando un golpe (Torre, towerWindup.js)
     if (hasFlag(c, 'stun')) return;
     const target = creepTarget(c);
     if (!target.isAlive()) { stepCreepToward(c, c.spawnX, c.spawnY, dt); return; } // perdió el agro
@@ -123,14 +121,12 @@ function updateCreep(c, dt) {
     if (dTarget > c.range) { stepCreepToward(c, target.x, target.y, dt); return; }
 
     c.attackTimer += dt;
-    if (c.attackTimer < creepAttackGap(c, 1 / (effAtkSpeed(c) * enrage))) return;
+    if (c.attackTimer < 1 / (effAtkSpeed(c) * enrage)) return;
     c.attackTimer = 0;
-    if (creepWindsUp(c)) { startCreepWindup(c, target, effAtk); return; } // en la Torre, cada golpe se prepara y se puede esquivar
     creepStrike(c, target, effAtk);
 }
-// El golpe en sí (al instante, o al terminar la preparación en la Torre)
+// El golpe en sí
 function creepStrike(c, target, effAtk) {
-    if (parryCatchesMelee(target, c)) { parryMelee(target, c); return; } // la parada de la espada: no te toca y lo aturde (towerParry.js)
     // dealDamage resuelve la muerte del héroe (revivir, Condenado o eliminación) a través de onHeroDeath
     // Animación según cómo ataca: golpe (con tajo), disparo o hechizo
     if (c.range <= 2) { fxAttack(c, target, 'melee'); if (fxArena(c)) fxSlash(c, target, c.color, false); }
@@ -138,7 +134,6 @@ function creepStrike(c, target, effAtk) {
     const result = dealDamage(c, target, Math.round(effAtk), c.attackType, { isAttack: true });
     if (result.evaded) log(`💨 Esquivaste el ataque de ${c.label}.`);
     if (c.type.onAttack) c.type.onAttack(c, target, result);
-    if (c.champion) championOnAttack(c, target, result); // Infinite Tower: afijos de campeón (towerWorld.js)
 }
 
 // --- AVISO DE LA PRÓXIMA OLEADA ---

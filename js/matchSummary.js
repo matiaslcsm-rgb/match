@@ -42,7 +42,7 @@ function chProfile() {
 }
 // Una vez por partida: al terminar o al quedar eliminado (con el puesto de ese momento)
 function noteMatchProfile(h = player) {
-    if (!h || h.profileNoted || gameMode !== 'normal' || matchSummaryOff || !(gameState === 'ENDED' || h.eliminated)) return null;
+    if (!h || h.profileNoted || matchSummaryOff || !(gameState === 'ENDED' || h.eliminated)) return null;
     h.profileNoted = true;
     const p = chProfile(), rank = heroRank(h), hp = p.heroes[h.key] || (p.heroes[h.key] = { games: 0, wins: 0, best: 99 });
     p.games++; hp.games++; hp.best = Math.min(hp.best, rank);
@@ -65,13 +65,13 @@ function chProfileHeroesHtml(p = chProfile()) {
 }
 
 function showMatchSummary(h = player) {
-    if (typeof document === 'undefined' || !h || gameMode !== 'normal' || matchSummaryOff) return;
+    if (typeof document === 'undefined' || !h || matchSummaryOff) return;
     noteMatchProfile(h);
     let box = document.getElementById('match-summary');
     if (!box) { box = document.createElement('div'); box.id = 'match-summary'; box.className = 'modal'; document.body.appendChild(box); }
     box.innerHTML = `<div class="modal-box pause-box run-summary">${matchSummaryHtml(h)}</div>`;
     box.style.display = 'block';
-    box.querySelector('#ms-again').onclick = () => { hideMatchSummary(); resetGame(); gameMode = 'normal'; startHeroPick(); };
+    box.querySelector('#ms-again').onclick = () => { hideMatchSummary(); resetGame(); startHeroPick(); };
     box.querySelector('#ms-menu').onclick = () => { hideMatchSummary(); resetGame(); };
     const watch = box.querySelector('#ms-watch'); if (watch) watch.onclick = hideMatchSummary;
 }

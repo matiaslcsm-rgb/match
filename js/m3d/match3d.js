@@ -1,5 +1,6 @@
-// MATCH 3D (2026-10-28, decisión del usuario: "pasemos Custom Hero a 3D y fusionémoslo con MATCH", todo opción A):
-//   · El juego es el mismo: reglas, IA, tienda, draft y pruebas no se tocan. Esto es solo otra forma de DIBUJAR las arenas
+// MATCH en 3D (2026-10-28, decisión del usuario: "pasemos Custom Hero a 3D y fusionémoslo con MATCH", todo opción A;
+// el mismo día MATCH pasa a ser un juego propio, separado de Infinite Tower, y solo en 3D):
+//   · Las reglas, la IA, la tienda, el draft y las pruebas son las de Custom Hero. Esto DIBUJA las arenas
 //     de combate (oleada, duelo y jefe): lee el mismo estado (arena.heroes, arena.creeps, arena.projectiles) y lo muestra
 //     en 3D. La interfaz (tienda, ranking, barra del héroe) sigue igual, encima.
 //   · Cámara desde arriba en diagonal, como Dota; se juega igual que siempre (clic derecho caminar, clic izquierdo
@@ -7,7 +8,7 @@
 //   · Competidores y creeps son robots armados por piezas con el motor de arena-robots (robot.js, parts.js,
 //     skeleton.js, ps1.js), con el look de PS1 y la estética industrial de MATCH.
 //   · Las barras de vida y los números de daño se dibujan en el canvas 2D de siempre, que queda transparente encima.
-//   El descanso, el menú y la Torre siguen en 2D. Se apaga en la pausa (🧊 Vista 3D).
+//   El descanso y el menú siguen en 2D (se pasan después). Sin WebGL, o en las pruebas, la arena se dibuja en 2D (ui.js).
 // Expone window.M3D para el código clásico (ui.js, mouse.js, fxSkills.js).
 import * as THREE from 'three';
 import { buildRobot, animateRobot } from './robot.js';
@@ -47,6 +48,20 @@ const CREEP_BUILDS = {
     chusma: { legs: 'bipedo', core: 'liviano', head: 'sensor', armL: 'pinza', armR: 'pinza' }
 };
 const BOSS_BUILD = { legs: 'oruga', core: 'pesado', head: 'domo', armL: 'canon', armR: 'canon' };
+// Forma de pelear de cada creep (qué armado le toca)
+function creepPlan(u) {
+    const t = u.type;
+    if (!t) return 'footman';
+    if (t.key === 'SWARM') return 'swarm';
+    if (t.key === 'KAMIKAZE') return 'kamikaze';
+    if (t.key === 'CHUSMA') return 'chusma';
+    if (t.key === 'SPECTER') return 'wraith';
+    if (t.key === 'HEALER') return 'plague';
+    if (['BRUTE', 'ARMORED', 'STUNNER'].includes(t.key)) return 'brute';
+    if (t.attackType === 'magical' || ['SHAMAN', 'WARLOCK', 'FROSTCASTER', 'DRUMMER'].includes(t.key)) return 'mage';
+    if (t.range >= 2.5) return 'archer';
+    return 'footman';
+}
 // Altura (en casillas) de cada uno
 const sizeOf = u => u.isRoundBoss ? 3.4 : u.isBoss ? 2.6 : u.isHero ? 2.2 : u.type && u.type.key === 'SWARM' ? 1.1 : u.type && ['BRUTE', 'ARMORED', 'STUNNER'].includes(u.type.key) ? 2.0 : 1.6;
 
@@ -123,8 +138,7 @@ const units = new Map(); // unidad del juego → { robot, scale, yaw, last }
 function buildFor(u) {
     if (u.isHero) return HERO_BUILDS[u.key] || HERO_BUILDS.AXE;
     if (u.isRoundBoss || u.isBoss) return BOSS_BUILD;
-    const plan = typeof inkPlanFor === 'function' ? inkPlanFor(u) : 'footman';
-    return CREEP_BUILDS[plan] || CREEP_BUILDS.footman;
+    return CREEP_BUILDS[creepPlan(u)];
 }
 const heroPaint = u => {
     const attr = u.isHero && typeof HERO_TEMPLATES !== 'undefined' && HERO_TEMPLATES[u.key] ? ATTR_INFO[HERO_TEMPLATES[u.key].primaryAttr].color : null;
@@ -369,14 +383,12 @@ function screenToTile(clientX, clientY) {
     return { x: hitP.x / U - 0.5, y: hitP.z / U - 0.5 };
 }
 
-// --- PRENDER Y APAGAR ---
-let enabled = true;
-try { enabled = localStorage.getItem('chc-view3d') !== 'off'; } catch (e) { /* por defecto, prendida */ }
-if (/[?&]test/.test(location.search) || /[?&]view3d=0/.test(location.search)) enabled = false;
+// --- CUÁNDO SE USA ---
+// Siempre, salvo en las pruebas (index.html?test: corren sin dibujar) o con ?view3d=0 (para revisar el 2D)
+const enabled = !/[?&]test/.test(location.search) && !/[?&]view3d=0/.test(location.search);
 window.M3D = {
-    // ¿Se dibuja esta arena en 3D? (combate de MATCH: oleada, duelo o jefe; no la Torre)
-    wants: arena => enabled && arena && ['wave', 'duel', 'boss'].includes(arena.kind) && gameMode !== 'tower',
+    // ¿Se dibuja esta arena en 3D? (combate: oleada, duelo o jefe)
+    wants: arena => enabled && arena && ['wave', 'duel', 'boss'].includes(arena.kind),
     enabled: () => enabled,
-    set(on) { enabled = on; try { localStorage.setItem('chc-view3d', on ? 'on' : 'off'); } catch (e) { /* no se guarda */ } if (!on) hide(); },
     frame, hide, project, headHeight, screenToTile, active: false
 };

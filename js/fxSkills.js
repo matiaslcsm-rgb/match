@@ -153,29 +153,21 @@ function fxSkill(hero, skill, from) {
     if (skill.isUltimate) { fxUltBanner(skill, hero); fxHitStop(0.12); }
 }
 
-// --- Ataque básico según el arma (Torre: la que tenés equipada; modo normal: tu héroe) ---
+// --- Ataque básico según el arma de cada competidor ---
 const WEAPON_FX = {
     AXE: { el: 'steel', kind: 'heavy' }, VAMPIRE: { el: 'blood', kind: 'slash' }, SNIPER: { el: 'steel', kind: 'shot' }, ASSASSIN: { el: 'shadow', kind: 'twin' },
     DANCER: { el: 'steel', kind: 'twin' }, ARCANIST: { el: 'arcane', kind: 'orb' }, FROSTWITCH: { el: 'ice', kind: 'orb' }, NECROMANCER: { el: 'shadow', kind: 'scythe' },
-    VOIDSAGE: { el: 'void', kind: 'orb' }, ALCHEMIST: { el: 'poison', kind: 'orb' }, ZEUS: { el: 'lightning', kind: 'zap' }, FISTS: { el: 'steel', kind: 'punch' },
-    ADVENTURER_SWORD: { el: 'steel', kind: 'blade' }, ADVENTURER_BOW: { el: 'steel', kind: 'arrow' }, ADVENTURER_STAFF: { el: 'arcane', kind: 'orb' } // las 3 iniciales (antes salían como puños)
+    VOIDSAGE: { el: 'void', kind: 'orb' }, ALCHEMIST: { el: 'poison', kind: 'orb' }, ZEUS: { el: 'lightning', kind: 'zap' }, FISTS: { el: 'steel', kind: 'punch' }
 };
 function weaponFx(hero) {
-    const key = gameMode === 'tower' ? (hero.gear && hero.gear.weapon ? hero.gear.weapon.heroKey : 'FISTS') : hero.key;
-    return WEAPON_FX[key] || WEAPON_FX.FISTS;
+    return WEAPON_FX[hero.key] || WEAPON_FX.FISTS;
 }
 function fxHeroAttack(hero, target, isCrit) {
     const arena = fxArena(hero);
     if (!arena) return;
     const w = weaponFx(hero), el = ELEMENTS[w.el], color = isCrit ? '#ffd166' : el.c2;
-    const angle = Math.atan2(target.y - hero.y, target.x - hero.x), air = !target.isAlive; // air: golpe al aire (ataque con clic)
+    const angle = Math.atan2(target.y - hero.y, target.x - hero.x);
     sfx('swing');
-    if (w.kind === 'blade') { // espada: un tajo corto en arco desde el héroe (el de la Q es más grande, towerFeel.js)
-        const d = Math.hypot(target.x - hero.x, target.y - hero.y) || 1;
-        pushFxAt(arena, { kind: 'sweep', unit: hero, x: hero.x, y: hero.y, angle, reach: 1.5, half: 0.8, flip: (hero.fxSlashFlip = !hero.fxSlashFlip), color: isCrit ? '#ffd166' : '#f3e7c9', color2: '#8a7a5c', life: 0.18 });
-        if (!air) { fxParticles(arena, target.x, target.y, 'steel', 3, 2.5, { life: 0.25 }); fxHitStop(isCrit ? 0.05 : 0.02); }
-        return;
-    }
     if (w.kind === 'heavy') { pushFxAt(arena, { kind: 'slash', x: target.x, y: target.y, angle, flip: true, color, width: isCrit ? 8 : 6, life: 0.28, scale: 1.3 }); fxParticles(arena, target.x, target.y, w.el, 5, 3); fxShake(isCrit ? 3 : 1); }
     else if (w.kind === 'twin') { [0, 0.07].forEach((d, i) => pushFxAt(arena, { kind: 'slash', x: target.x, y: target.y, angle: angle + (i ? 0.5 : -0.5), flip: i === 0, color: i ? el.c1 : color, width: 3, life: 0.18 }, d)); }
     else if (w.kind === 'scythe') { pushFxAt(arena, { kind: 'crescent', x: target.x, y: target.y, color, color2: el.c1, life: 0.3, small: true }); }
@@ -211,7 +203,6 @@ function drawSkillFx(f, t, px, py) {
         ctx.save(); ctx.translate(px, py + TILE * 0.45); ctx.scale(f.flip ? -sx : sx, sy); ctx.imageSmoothingEnabled = false;
         ctx.drawImage(img, -img.width * f.s / 2, -img.height * f.s, img.width * f.s, img.height * f.s); ctx.restore(); return;
     }
-    if (f.kind === 'sweep') { if (f.unit) { px = (f.unit.rx ?? f.unit.x) * TILE + TILE / 2; py = (f.unit.ry ?? f.unit.y) * TILE + TILE / 2; } drawSweepFx(f, t, px, py); return; } // towerFeel.js
     const T = TILE, ex = (f.tx ?? f.x) * T + T / 2, ey = (f.ty ?? f.y) * T + T / 2;
     if (f.unit) { px = (f.unit.rx ?? f.unit.x) * T + T / 2; py = (f.unit.ry ?? f.unit.y) * T + T / 2; }
     ctx.lineCap = 'round';
@@ -294,7 +285,6 @@ function drawUltBanner(cx, cy) {
 // Aturdido (estrellas), frenado (escarcha a los pies), veneno (burbujas), quemado (llamitas), sangrado (gotas),
 // escudo/reducción de daño (burbuja), apurado (líneas de velocidad), provocando (signo rojo).
 function drawStatusFx(u, cx, cy, half) {
-    if (u.elMark) drawElementMark(u, cx, cy, half);
     const eff = activeEffects(u);
     if (!eff.length) return;
     const has = id => eff.some(e => e.id === id), flag = f => eff.some(e => e.flags.includes(f));
@@ -311,86 +301,6 @@ function drawStatusFx(u, cx, cy, half) {
     if (flag('taunt')) { ctx.fillStyle = '#9b2226'; ctx.font = 'bold 14px Georgia, serif'; ctx.textAlign = 'center'; ctx.fillText('!', cx + 12, head); }
     ctx.restore();
 }
-// Marca de elemento (para las reacciones): rombo del color del elemento arriba de la cabeza
-function drawElementMark(u, cx, cy, half) {
-    const m = u.elMark;
-    if (!m || gameClock >= m.until) return;
-    const el = ELEMENTS[m.el], x = cx - 14, y = cy - half - 6;
-    ctx.save(); ctx.fillStyle = el.c1; ctx.strokeStyle = el.c2; ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.moveTo(x, y - 5); ctx.lineTo(x + 4, y); ctx.lineTo(x, y + 5); ctx.lineTo(x - 4, y); ctx.closePath(); ctx.fill(); ctx.stroke();
-    ctx.restore();
-}
-
-// --- REACCIONES ELEMENTALES (Infinite Tower) ---
-// Una habilidad que daña marca al enemigo con su elemento (5 s). Si otra de OTRO elemento le pega mientras tiene la
-// marca, se produce una reacción y la marca se consume (como en Magicka, Divinity o Genshin). Premia combinar
-// habilidades de héroes distintos en el equipo. Los ataques básicos no marcan.
-const ELEMENT_NAMES = { fire: 'Fuego', ice: 'Hielo', lightning: 'Rayo', poison: 'Veneno', arcane: 'Arcano', shadow: 'Sombra', blood: 'Sangre', steel: 'Acero', holy: 'Luz', void: 'Vacío' };
-const REACTIONS = {
-    'fire+ice': { name: 'Derretir', desc: 'el golpe hace +60% de daño', mult: 1.6 },
-    'fire+poison': { name: 'Explosión Tóxica', desc: 'explota: 50% del golpe a los de alrededor (radio 2)', after: (src, t, dealt) => reactionSplash(src, t, dealt * 0.5, 2) },
-    'ice+lightning': { name: 'Fragmentar', desc: 'aturde 1,2 s', after: (src, t) => addEffect(t, { id: 'STUN', name: 'Fragmentado', duration: 1.2, flags: ['stun'] }) },
-    'lightning+poison': { name: 'Sobrecarga', desc: 'salta al 40% a 2 enemigos cercanos', after: (src, t, dealt) => reactionChain(src, t, dealt * 0.4, 2) },
-    'fire+lightning': { name: 'Plasma', desc: 'el golpe hace +40% y quema', mult: 1.4, after: (src, t) => creepDot(src, t, 'BURN', 'Quemado', 0.25) },
-    'blood+shadow': { name: 'Cosecha', desc: 'te curás el 35% del golpe', after: (src, t, dealt) => healUnit(src, dealt * 0.35) },
-    'blood+steel': { name: 'Desgarro', desc: 'sangra fuerte (3 s)', after: (src, t) => creepDot(src, t, 'BLEED', 'Desgarrado', 0.35) },
-    'ice+steel': { name: 'Quebrar', desc: 'el golpe hace +50% de daño', mult: 1.5 },
-    'poison+shadow': { name: 'Plaga', desc: 'el veneno se contagia a los de alrededor', after: (src, t) => enemiesOf(src).filter(c => c.isAlive() && c !== t && Math.hypot(c.x - t.x, c.y - t.y) <= 2.5).forEach(c => creepDot(src, c, 'POISON', 'Plaga', 0.3)) },
-    'arcane': { name: 'Desestabilizar', desc: 'recibe +25% de daño por 4 s', after: (src, t) => addEffect(t, { id: 'UNSTABLE', name: 'Desestabilizado', duration: 4, tags: ['PERJUICIO'], mods: { dmgTakenPct: 0.25 } }) },
-    'void': { name: 'Implosión', desc: 'atrae a los de alrededor y les pega el 30%', after: (src, t, dealt) => reactionSplash(src, t, dealt * 0.3, 2.5, true) }
-};
-let projectileElement = null;
-function currentDamageElement() { return fxCastingSkill ? skillVfx(fxCastingSkill).el : projectileElement; }
-function reactionFor(a, b) {
-    if (a === b) return null;
-    const key = [a, b].sort().join('+');
-    if (REACTIONS[key]) return REACTIONS[key];
-    if (a === 'void' || b === 'void') return REACTIONS.void;     // el vacío reacciona con todo
-    if (a === 'arcane' || b === 'arcane') return REACTIONS.arcane; // lo arcano también
-    return null;
-}
-// Antes del golpe: multiplicador de la reacción (y la deja preparada para después del golpe)
-function elementReactionMult(source, target) {
-    if (gameMode !== 'tower' || !source || !source.isHero || target.isHero) return 1;
-    const el = currentDamageElement();
-    if (!el || el === 'holy') return 1;
-    const mark = target.elMark && gameClock < target.elMark.until ? target.elMark.el : null;
-    const r = mark && reactionFor(mark, el);
-    if (!r) { target.elMark = { el, until: gameClock + 5 }; return 1; }
-    target.elMark = null;
-    target.pendingReaction = { r, a: mark, b: el };
-    return r.mult || 1;
-}
-// Después del golpe: efecto de la reacción, cartel y aviso la primera vez
-function elementReactionAfter(source, target, dealt) {
-    const p = target.pendingReaction;
-    if (!p) return;
-    target.pendingReaction = null;
-    const prevEl = projectileElement, prevSkill = fxCastingSkill;
-    projectileElement = null; fxCastingSkill = null; // el daño de la reacción no marca ni reacciona
-    try { if (p.r.after) p.r.after(source, target, dealt); } finally { projectileElement = prevEl; fxCastingSkill = prevSkill; }
-    const arena = fxArena(target);
-    if (arena) { fxText(target, p.r.name + '!', ELEMENTS[p.b].c1, 14, 1.2); fxImpact(arena, target.x, target.y, p.b, true); fxParticles(arena, target.x, target.y, p.a, 10, 4); }
-    if (towerRun) {
-        towerRun.reactions = towerRun.reactions || {};
-        if (!towerRun.reactions[p.r.name]) log(`⚗️ ¡Descubriste una reacción: ${p.r.name}! (${ELEMENT_NAMES[p.a]} + ${ELEMENT_NAMES[p.b]}: ${p.r.desc}).`);
-        towerRun.reactions[p.r.name] = (towerRun.reactions[p.r.name] || 0) + 1;
-    }
-}
-function reactionSplash(src, t, dmg, radius, pull = false) {
-    enemiesOf(src).filter(c => c.isAlive() && c !== t && Math.hypot(c.x - t.x, c.y - t.y) <= radius).forEach(c => {
-        if (pull) { const dx = Math.sign(t.x - c.x), dy = Math.sign(t.y - c.y); if (walkable(c.arena, c.x + dx, c.y + dy)) { c.x += dx; c.y += dy; } }
-        dealDamage(src, c, Math.max(1, Math.round(dmg)), 'magical');
-    });
-}
-function reactionChain(src, t, dmg, n) {
-    const arena = fxArena(t);
-    enemiesOf(src).filter(c => c.isAlive() && c !== t && Math.hypot(c.x - t.x, c.y - t.y) <= 4).slice(0, n).forEach(c => {
-        if (arena) pushFxAt(arena, { kind: 'zigzag', x: t.x, y: t.y, tx: c.x, ty: c.y, color: ELEMENTS.lightning.c2, color2: ELEMENTS.lightning.c1, life: 0.25 });
-        dealDamage(src, c, Math.max(1, Math.round(dmg)), 'magical');
-    });
-}
-
 // --- SENSACIÓN DE JUEGO (pedido del usuario, 2026-10-07: "los hechizos se sienten planos y los controles raros") ---
 // Controles estilo Hades: WASD mueve, el mouse apunta, las habilidades salen al instante hacia el cursor, Espacio es
 // el esquive. Cada habilidad mueve el cuerpo del héroe según su forma, los enemigos se sacuden y retroceden.
@@ -419,18 +329,11 @@ function castPose(a, t, k, pose) {
     }
     return pose;
 }
-// Los golpeados se sacuden hacia atrás (solo visual) y, con habilidades de impacto en la Torre, retroceden una casilla
-const KNOCK_SHAPES = new Set(['strike', 'claw', 'reap', 'whirl', 'nova', 'shout', 'meteor', 'sky', 'cone', 'dash']);
+// Los golpeados se sacuden hacia atrás (solo visual)
 function hitFlinch(source, target) {
     if (!source || !fxArena(target)) return;
     const d = Math.hypot(target.x - source.x, target.y - source.y) || 1;
     target.fxKnock = { dx: (target.x - source.x) / d, dy: (target.y - source.y) / d, at: fxClock };
-}
-function skillKnockback(source, target) {
-    if (gameMode !== 'tower' || source !== player || !fxCastingSkill || !target.isAlive() || target.isHero) return;
-    if (target.isGuardian || target.isCaveBoss || target.isBoss || !KNOCK_SHAPES.has(skillVfx(fxCastingSkill).shape)) return;
-    const dx = Math.sign(target.x - source.x), dy = Math.sign(target.y - source.y);
-    if ((dx || dy) && walkable(target.arena, target.x + dx, target.y + dy)) { target.x += dx; target.y += dy; }
 }
 function flinchOffset(u) {
     const f = u.fxKnock;
@@ -441,49 +344,5 @@ function flinchOffset(u) {
     return { ox: f.dx * k, oy: f.dy * k };
 }
 
-// --- ESQUIVE (Espacio) ---
-const DASH = { tiles: 3, cooldown: 1.1, iframes: 0.3 };
-// Hacia donde apunta el cursor, en casillas del mundo (se recalcula con la cámara)
-function cursorWorld() { if (window.M3D && M3D.active) return mouse.over ? { x: mouse.x, y: mouse.y } : null; return mouse.over && mouse.fx !== undefined ? { x: mouse.fx * viewCols() - 0.5 + camera.x, y: mouse.fy * viewRows() - 0.5 + camera.y } : null; }
-function playerDash(dir = null) { // dir: lo pasa el piloto automático (towerTelegraph.js)
-    if ((dir ? !(player && player.isAlive() && player.arena && inCombat()) : !canControlPlayer()) || hasFlag(player, 'stun') || gameClock < (player.dashReadyAt || 0)) return false;
-    if (!dir && isMage(player)) { // el Mago se teletransporta hacia el mouse (towerMage.js)
-        if (!mageBlink(player)) return false;
-        player.dashReadyAt = gameClock + DASH.cooldown; player.moveTarget = null; player.moveTimer = 0;
-        addEffect(player, { id: 'DASH', name: 'Esquive', duration: DASH.iframes, flags: ['invulnerable', 'phasing'], tags: ['MEJORA'] });
-        emit(player, 'onDodge', {});
-        return true;
-    }
-    let d = dir || (isArcher(player) && archerDashDir()) || keyboardDirection(); // el Arquero se impulsa hacia el mouse (towerArcher.js)
-    if (!d.dx && !d.dy) { const c = cursorWorld(); d = c ? { dx: Math.sign(Math.round(c.x - player.x)), dy: Math.sign(Math.round(c.y - player.y)) } : { dx: player.facing || 1, dy: 0 }; }
-    if (!d.dx && !d.dy) d = { dx: player.facing || 1, dy: 0 };
-    const arena = player.arena, from = { x: player.x, y: player.y };
-    let moved = 0;
-    for (let i = 0; i < (isArcher(player) ? ARCHER.dashTiles : DASH.tiles); i++) {
-        const nx = player.x + d.dx, ny = player.y + d.dy;
-        if (!walkable(arena, nx, ny) || (d.dx && d.dy && (!walkable(arena, nx, player.y) || !walkable(arena, player.x, ny)))) break;
-        player.x = nx; player.y = ny; moved++;
-    }
-    if (!moved) return false;
-    player.dashReadyAt = gameClock + DASH.cooldown * archerHaste(player) * (hasLevelFlag(player, 'quickDash') ? 0.6 : 1); // Paso de Viento (towerLevelUp.js)
-    player.moveTarget = null; player.moveTimer = 0;
-    addEffect(player, { id: 'DASH', name: 'Esquive', duration: DASH.iframes, flags: ['invulnerable', 'phasing'], tags: ['MEJORA'] });
-    emit(player, 'onDodge', {}); // reliquias que se activan al esquivar (towerRelics.js)
-    if (d.dx) player.facing = d.dx;
-    const fa = fxArena(player);
-    if (fa) {
-        pushFxAt(fa, { kind: 'afterimage', x: from.x, y: from.y, tx: player.x, ty: player.y, color: '#f3e7c9', life: 0.3 });
-        fxParticles(fa, from.x, from.y, 'steel', 8, 2, { style: 'smoke', size: 3.5, life: 0.5 });
-        player.fxAttack = { kind: 'dashpose', dx: d.dx, dy: d.dy, at: fxClock };
-        sfx('dash');
-    }
-    emit(player, 'onMove', { steps: moved });
-    return true;
-}
-// Recarga del esquive: arquito a los pies del héroe mientras se recarga
-function drawDashMeter(u, cx, cy) {
-    if (u !== player || !u.dashReadyAt || gameClock >= u.dashReadyAt) return;
-    const left = (u.dashReadyAt - gameClock) / DASH.cooldown;
-    ctx.save(); ctx.strokeStyle = 'rgba(243,231,201,0.9)'; ctx.lineWidth = 2.5;
-    ctx.beginPath(); ctx.arc(cx, cy + TILE * 0.38, TILE * 0.32, Math.PI * 0.15, Math.PI * 0.15 + Math.PI * 1.7 * (1 - left)); ctx.stroke(); ctx.restore();
-}
+// Hacia donde apunta el cursor, en casillas del mundo
+function cursorWorld() { if (window.M3D && M3D.active) return mouse.over ? { x: mouse.x, y: mouse.y } : null; return mouse.over && mouse.fx !== undefined ? { x: mouse.fx * VIEW_COLS - 0.5, y: mouse.fy * VIEW_ROWS - 0.5 } : null; }

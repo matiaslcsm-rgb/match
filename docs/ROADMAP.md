@@ -1,4 +1,7 @@
-# Roadmap a la versión 1.0 — Custom Hero e Infinite Tower
+# Roadmap a la versión 1.0 — MATCH
+
+> **Aviso (2026-10-28):** MATCH se separó de Infinite Tower y es un juego propio, solo en 3D (ver `docs/ESTADO.md`).
+> Las fases de la Torre que siguen abajo quedan como historia: se continúan en el repo `custon-hero-chaos`.
 
 Dos juegos en la misma página (se elige en la portada):
 - **Custom Hero** (antes "Custom Hero Chaos"): arena de 8 héroes con oleadas, duelos, apuestas y jefes. Armás tu

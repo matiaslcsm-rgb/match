@@ -1,7 +1,9 @@
-# Custom Hero — ASCII Edition
+# MATCH
 
-Juego inspirado en Custom Hero: elegís un héroe, drafteás habilidades de todos los héroes,
-subís de nivel, comprás ítems y sobrevivís oleadas de creeps.
+Show de competencia futurista en vivo: elegís un competidor, drafteás habilidades de todos, subís de nivel, comprás
+ítems y sobrevivís oleadas de robots, duelos y jefes en una arena 3D. Gana el último en pie.
+
+- **Jugar online:** https://matiaslcsm-rgb.github.io/match/
 
 - **Jugar:** abrir `index.html` (doble clic). Tecla **P** (o el botón 🤖): la IA juega por vos.
 - **Probar:** abrir `tests.html` (doble clic). Corre todas las pruebas automáticas y muestra ✅/❌.

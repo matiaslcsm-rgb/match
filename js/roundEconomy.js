@@ -74,7 +74,7 @@ function showRoundSummary(h = player) {
 }
 // En la barra de oro: lo que vas a cobrar al terminar la ronda (interés + racha si la seguís)
 function incomeHint(h) {
-    if (!h || gameMode === 'tower') return '';
+    if (!h) return '';
     const s = h.streak || 0, i = interestFor(h);
     return `+${i}${Math.abs(s) >= 1 ? ` ${s > 0 ? '🔥' : '🧊'}${Math.abs(s)}` : ''}`;
 }
@@ -85,7 +85,7 @@ function incomeHint(h) {
 // Medido con el piloto (8 partidas cada uno): sin muerte súbita 33-46 rondas y 33-39 min; desde la 15 con +50% por
 // ronda, 20-26 rondas y 16-21 min, con 6 ganadores distintos (con +20% eran 23-32 rondas y el Sniper ganaba 5 de 8).
 const SUDDEN = { from: 15, perRound: 0.5 };
-function suddenDeathBonus() { return gameMode !== 'tower' && waveNumber >= SUDDEN.from ? SUDDEN.perRound * (waveNumber - SUDDEN.from + 1) : 0; }
+function suddenDeathBonus() { return waveNumber >= SUDDEN.from ? SUDDEN.perRound * (waveNumber - SUDDEN.from + 1) : 0; }
 function announceSuddenDeath() {
     const b = suddenDeathBonus();
     if (!b) return;

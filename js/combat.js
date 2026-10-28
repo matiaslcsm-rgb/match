@@ -125,18 +125,14 @@ function dealDamage(source, target, amount, type = 'physical', opts = {}) {
     let final = amount;
     // Pasiva del Guerrero (Templanza): el daño físico de sus habilidades también tira crítico (los golpes ya lo tiran)
     if (source && source.heroClass === 'warrior' && type === 'physical' && opts.isCrit === undefined && !opts.relic && Math.random() < effCritChance(source) / 100) { final *= 2; opts = { ...opts, isCrit: true }; }
-    final *= elementReactionMult(source, target); // reacciones elementales (Torre, fxSkills.js)
     if (type === 'magical' && source) final *= 1 + effSpellAmp(source) / 100;
     if (source && source.isHero && target.isHero && target.arena && target.arena.kind === 'duel') final *= 1 - DUEL_DAMAGE_REDUCTION;
-    if (source && target.arena && target.arena.height) final *= heightDamageMult(source, target); // Torre: altura (towerWorld.js)
     final = mitigate(target, final * (1 - effDmgReduction(target)), type);
     let takenPct = sumMod(target, 'dmgTakenPct'); // ej: Condenado
     if (target.isHero && typeof suddenDeathBonus === 'function') takenPct += suddenDeathBonus(); // muerte súbita (roundEconomy.js; en la Torre es 0)
     // La maldición (Condenado) solo amplifica el daño de creeps y de héroes sin maldición
     if (source && source.isHero && isCondemned(source)) takenPct -= (getEffect(target, 'CONDEMNED') || { mods: {} }).mods.dmgTakenPct || 0;
     final = Math.round(final * (1 + takenPct));
-    if (target.relicShield) { const before = final; final = relicAbsorb(target, final); // escudo de las reliquias (towerRelics.js)
-        if (target.shieldReflect && source && source !== target && !opts.relic && before > final) dealDamage(target, source, Math.round((before - final) * target.shieldReflect), 'pure', { relic: true }); } // agravante del Ascenso (towerLore.js)
     if (target.oneHit) final = target.hp;
     const floor = hasFlag(target, 'preventDeath') ? 1 : 0;
     const hpLost = Math.max(0, Math.min(final, target.hp - floor));
@@ -144,9 +140,7 @@ function dealDamage(source, target, amount, type = 'physical', opts = {}) {
     fxDamage(target, hpLost, type, opts.isCrit);
     // dealt en el evento es el daño completo (sin recortar por la vida restante): lo usa Forma Inmortal para acumular
     emit(target, 'onDamaged', { source, dealt: final, type });
-    if (target.type && target.type.thorns) beastThorns(target, source, hpLost, opts); // criaturas con espinas (towerBestiary.js)
-    if (target.pendingReaction) elementReactionAfter(source, target, final);
-    if (source && hpLost > 0) { hitFlinch(source, target); skillKnockback(source, target); } // sacudida y empujón (fxSkills.js)
+    if (source && hpLost > 0) hitFlinch(source, target); // sacudida (fxSkills.js)
     if (hpLost > 0 && source && source.isHero && target.isHero && target.arena && target.arena.stats) { target.arena.stats.dmg += hpLost; if (dodgeableHit) target.arena.stats.avoidable += hpLost; }
     if (hpLost > 0) target.lastHitAt = gameClock; // el campeón Regenerador se corta un rato (towerChampions.js)
     if (source && hpLost > 0) emit(source, 'onDealDamage', { target, dealt: hpLost, type, isCrit: opts.isCrit, relic: opts.relic });
@@ -209,8 +203,7 @@ function resolveBasicHit(attacker, target, dmg, isCrit) {
 // --- PROYECTILES (ataques básicos a distancia con velocidad de proyectil) ---
 function fireProjectile(attacker, target, dmg, isCrit) {
     if (attacker.isHero && fxArena(attacker)) sfx('shoot');
-    attacker.arena.projectiles.push({ attacker, x: attacker.x, y: attacker.y, target, dmg, isCrit, speed: attacker.projectileSpeed || 10,
-        arrow: attacker.isHero && gameMode === 'tower' && weaponFx(attacker).kind === 'arrow' ? 'arrow' : null }); // el arco tira flechas (towerFeel.js)
+    attacker.arena.projectiles.push({ attacker, x: attacker.x, y: attacker.y, target, dmg, isCrit, speed: attacker.projectileSpeed || 10 });
 }
 
 // Proyectil de habilidad: a diferencia del de arriba, no persigue a un enemigo — viaja en línea recta hacia
@@ -241,16 +234,13 @@ function updateProjectiles(arena, dt) {
             const step = p.speed * dt;
             p.traveled += step;
             p.x += p.dx * step; p.y += p.dy * step;
-            // Sólidos (flechas y orbes de la Torre): una pared los frena
-            if (p.solid && !walkable(arena, Math.round(p.x), Math.round(p.y))) { if (arena.cracks) hitCrack(arena, Math.round(p.x), Math.round(p.y), p.attacker); fxProjectileHit(p, p.x, p.y); projectiles.splice(i, 1); continue; } // la flecha también rompe grietas (towerSecrets.js)
             let stopped = false;
             enemiesOf(p.attacker).forEach(c => {
                 if (stopped || !c.isAlive() || p.hitSet.has(c) || Math.hypot(c.x - p.x, c.y - p.y) > p.radius) return;
                 p.hitSet.add(c);
-                projectileElement = p.fxEl; // el proyectil de habilidad marca con su elemento
                 let dealt;
                 dodgeableHit = true;
-                try { dealt = p.basic ? resolveBasicHit(p.attacker, c, p.dmg, p.isCrit) : dealDamage(p.attacker, c, p.dmg, p.dmgType, { isCrit: p.isCrit }).dealt; } finally { projectileElement = null; dodgeableHit = false; } // basic: el disparo con clic (towerClickAttack.js)
+                try { dealt = p.basic ? resolveBasicHit(p.attacker, c, p.dmg, p.isCrit) : dealDamage(p.attacker, c, p.dmg, p.dmgType, { isCrit: p.isCrit }).dealt; } finally { dodgeableHit = false; }
                 if (p.onHit) p.onHit(c, dealt);
                 if (p.stopOnHit) stopped = true; // no atraviesa: se queda en el primero
             });
@@ -305,18 +295,16 @@ function killCreep(c, killer) {
     c.hp = 0;
     fxDeath(c);
     if (!killer || !killer.isHero) return;
-    if (c.arena && c.arena.kind === 'tower') towerLootOnKill(c.arena, c, killer); // Infinite Tower: botín
     if (c.type && c.type.onDeath) c.type.onDeath(c, killer);
-    if (c.champion) championOnDeath(c);
-    if (killer === player && fxArena(c) && (c.champion || c.isBoss || c.isGuardian || c.isCaveBoss || c.isCarrier)) { fxHitStop(0.09); fxShake(4); } // muerte pesada: pausa de impacto
+    if (killer === player && fxArena(c) && (c.isBoss || c.isRoundBoss)) { fxHitStop(0.09); fxShake(4); } // muerte pesada: pausa de impacto
     const timeAlive = gameClock - (c.spawnTime || gameClock);
     const speedMult = speedGoldMultiplier(timeAlive);
-    const gold = Math.max(1, Math.round(c.gold * speedMult * (c.arena && c.arena.kind === 'tower' ? TOWER.goldMult : 1))); // Torre: economía propia
+    const gold = Math.max(1, Math.round(c.gold * speedMult));
     killer.gold += gold;
     fxText(c, `+${gold}g`, '#ffd166', 10, 1);
     if (fxArena(c) && killer === player) sfx('coin');
     applyScalingOnCreepKill(killer);
-    gainXp(killer, (c.xp || 0) * (c.arena && c.arena.kind === 'tower' ? towerXpFactor(killer, c.arena.floor) : 1)); // Torre: ritmo de niveles (towerWorld.js)
+    gainXp(killer, c.xp || 0);
     emit(killer, 'onKill', { victim: c });
     const bonusTag = speedMult > 1.05 ? ` ⚡x${speedMult.toFixed(1)}` : '';
     log(`${c.isBoss ? '👹 ¡Eliminaste al Jefe!' : '⚔️ Eliminaste un ' + c.label} (+${gold}g${bonusTag})`);

@@ -1,7 +1,7 @@
 // Interfaz: paneles de selección/draft/tienda, códice de héroes, HUD de stats y render del canvas.
 
 const canvas = document.getElementById('ascii-canvas');
-let ctx = canvas.getContext('2d'); // let: los efectos en pixel art lo cambian un momento por su capa (towerPixelFx.js)
+let ctx = canvas.getContext('2d'); // let: los efectos del piso 3D lo cambian un momento por su canvas (withCtx, pixelFx.js)
 const TILE = 34; // más grande desde que se sacó la barra de arriba
 const MAP_W = VIEW_COLS * TILE, MAP_H = VIEW_ROWS * TILE; // tamaño lógico de la pantalla (se dibuja siempre en estas coordenadas)
 
@@ -9,13 +9,12 @@ const MAP_W = VIEW_COLS * TILE, MAP_H = VIEW_ROWS * TILE; // tamaño lógico de 
 let mapScale = 1;
 const BIG_MAP_SCALE = 1.3;
 function applyMapSize() {
-    if (typeof towerLayout !== 'undefined' && towerLayout) { fitTowerCanvas(); return; } // la Torre usa toda la ventana (towerView.js)
     const k = mapScale * (window.devicePixelRatio || 1);
     canvas.width = Math.round(MAP_W * k); canvas.height = Math.round(MAP_H * k);
     canvas.style.width = `${Math.round(MAP_W * mapScale)}px`; canvas.style.height = `${Math.round(MAP_H * mapScale)}px`;
     document.body.classList.toggle('big-map', mapScale > 1);
 }
-function toggleBigMap() { if (typeof towerLayout !== 'undefined' && towerLayout) return; mapScale = mapScale > 1 ? 1 : BIG_MAP_SCALE; applyMapSize(); }
+function toggleBigMap() { mapScale = mapScale > 1 ? 1 : BIG_MAP_SCALE; applyMapSize(); }
 applyMapSize();
 
 function setStateText(text) { document.getElementById('game-state-text').textContent = text; }
@@ -553,14 +552,7 @@ function renderHeroBar() {
         cd.style.height = `${Math.min(100, left / total * 100)}%`;
         cd.textContent = left > 0 ? left.toFixed(left < 10 ? 1 : 0) : '';
         slot.classList.toggle('no-mana', skillLevel(p, s) > 0 && p.mana < (val(s, p, 'manaCost') || 0));
-        if (s.chargeable) feelSlotCharge(slot, p, s); // la barra de tensar y el destello del tiro perfecto (towerFeel.js)
-        if (s.comboHits) feelSlotCombo(slot, p);
     });
-    const parry = document.getElementById('hb-sword'); // espada: los puntitos del combo y la recarga de la parada (towerParry.js)
-    if (parry) feelSlotCombo(parry, p);
-    if (parry) { const left = Math.max(0, (p.parryReadyAt || 0) - gameClock), cd = parry.querySelector('.cd'); cd.style.height = `${Math.min(100, left / PARRY.cooldown * 100)}%`; cd.textContent = left > 0.05 ? left.toFixed(1) : ''; parry.classList.toggle('perfect-now', parryActive(p)); }
-    const dash = document.getElementById('hb-dash');
-    if (dash) { const left = Math.max(0, (p.dashReadyAt || 0) - gameClock), cd = dash.querySelector('.cd'); cd.style.height = `${Math.min(100, left / DASH.cooldown * 100)}%`; cd.textContent = left > 0 ? left.toFixed(1) : ''; }
     const effects = activeEffects(p).filter(e => !e.flags.includes('item') && !e.flags.includes('passive'));
     const effSig = effects.map(e => e.id + (isFinite(e.until) ? Math.ceil(e.until - gameClock) : '')).join('|');
     const effBox = document.getElementById('hb-effects');
@@ -570,7 +562,7 @@ function renderHeroBar() {
     }
 
     // Estructura (solo si cambió algo)
-    const signature = [p.level, p.skillPoints, clickAttack, p.neutral, p.inventory.map(i => i.key).join(','), p.gear ? EQUIP_SLOTS.map(s => p.gear[s] && p.gear[s].id).join(',') : '', Math.floor(p.attr('str')), Math.floor(p.attr('agi')),
+    const signature = [p.level, p.skillPoints, p.neutral, p.inventory.map(i => i.key).join(','), Math.floor(p.attr('str')), Math.floor(p.attr('agi')),
         Math.floor(p.attr('int')), p.armor.toFixed(1), ...p.skills.map(s => s.id + ':' + skillLevel(p, s) + ':' + p.keyBindings[s.id] + ':' + !!levelUpBlocker(p, s))].join('|');
     if (signature === lastKitSignature) return;
     lastKitSignature = signature;
@@ -578,60 +570,35 @@ function renderHeroBar() {
     const portrait = document.getElementById('hb-portrait');
     portrait.title = heroTooltip();
     const sym = document.getElementById('hb-symbol');
-    // Retrato del muñeco en pixel art (towerPixelBeasts.js): en la Torre sale del equipo puesto, en Custom Hero
-    // de la pinta fija de cada héroe (pxHeroLook). pixelEnabled es global a los dos modos; pixelOn() solo a la Torre.
-    const usePixelDoll = gameMode === 'tower' ? pixelOn() : pixelEnabled;
-    const url = usePixelDoll ? pixelPortrait(p) : (gameMode === 'tower' ? inkPortrait(p) : heroSpriteUrl(p));
-    if (url) sym.innerHTML = `<img src="${url}" alt="${p.symbol}" class="${gameMode === 'tower' ? 'ink-portrait' : 'pixel-img'}"${usePixelDoll ? ' style="image-rendering:pixelated"' : ''}>`;
+    const url = heroSpriteUrl(p);
+    if (url) sym.innerHTML = `<img src="${url}" alt="${p.symbol}" class="pixel-img">`;
     else { sym.textContent = p.symbol; sym.style.color = heroColor(p); }
-    document.getElementById('hb-level').innerHTML = `Nv ${p.level}` + (p.skillPoints > 0 && gameMode !== 'tower' ? ` <span class="pts" title="Puntos de habilidad para repartir con [+]">+${p.skillPoints}</span>` : '');
+    document.getElementById('hb-level').innerHTML = `Nv ${p.level}` + (p.skillPoints > 0 ? ` <span class="pts" title="Puntos de habilidad para repartir con [+]">+${p.skillPoints}</span>` : '');
     document.getElementById('hb-name').textContent = p.name;
     const stats = document.getElementById('hb-stats');
     stats.innerHTML = `<span class="st-str">FUE ${Math.floor(p.attr('str'))}</span> <span class="st-agi">AGI ${Math.floor(p.attr('agi'))}</span> ` +
         `<span class="st-int">INT ${Math.floor(p.attr('int'))}</span> <span>ARM ${p.armor.toFixed(1)}</span> <span class="st-more">ⓘ</span>`;
     stats.title = heroTooltip();
 
-    // Habilidades activas: 4 casillas en Custom Hero (se llenan en el draft); en la Torre son exactamente
-    // 3 (arma/guantes/armadura, ver REWORK.md §2 fase 3), nunca 4, porque solo esas 3 ranuras dan activas.
+    // Habilidades activas: 4 casillas (5 desde la ronda de la quinta), se llenan en el draft
     const skills = document.getElementById('hb-skills'); skills.innerHTML = '';
     const actives = p.skills.filter(s => s.kind === 'active');
-    const swordBar = gameMode === 'tower' && swordWielder(p) && clickAttack; // la espada no da Q: su casilla muestra el combo (clic) y la parada (clic derecho)
-    if (swordBar) {
-        const c = document.createElement('div'); c.className = 'skill-slot sword-slot'; c.id = 'hb-sword';
-        c.title = `Espada (sin Q)
-Clic: combo de tres tajos en arco hacia el cursor (mantenelo para seguir); el tercero es el remate: pega más, empuja y tarda un poco más. Los tajos desvían proyectiles.
-Clic derecho: parada. Tajo corto con una ventana de ${PARRY.window}s: los disparos que agarra vuelven a quien los tiró, el doble de fuertes; los golpes cuerpo a cuerpo de ese lado no te tocan y aturden ${PARRY.stun}s. Si agarra algo se recarga casi al instante; si no, tarda ${PARRY.cooldown}s.`;
-        c.innerHTML = `<span class="key">Der</span><span class="nm">Parada</span><span class="combo"><b></b><b></b><b></b></span><div class="cd"></div>`;
-        skills.appendChild(c);
-    }
-    const slotCount = gameMode === 'tower' ? (swordBar ? 2 : 3) : Math.max(kitSize(), actives.length);
+    const slotCount = Math.max(kitSize(), actives.length);
     for (let i = 0; i < slotCount; i++) {
         const s = actives[i];
         const slot = document.createElement('div');
-        if (!s) { slot.className = 'skill-slot empty'; slot.textContent = 'libre'; slot.title = gameMode === 'tower' ? 'Espacio libre: equipá una pieza con habilidad activa' : 'Espacio libre: se llena en el draft'; skills.appendChild(slot); continue; }
+        if (!s) { slot.className = 'skill-slot empty'; slot.textContent = 'libre'; slot.title = 'Espacio libre: se llena en el draft'; skills.appendChild(slot); continue; }
         const lvl = skillLevel(p, s), max = maxSkillLevel(s);
         slot.className = 'skill-slot' + (lvl === 0 ? ' locked' : '') + (s.isUltimate ? ' ult' : '');
         slot.dataset.id = s.id;
         slot.title = `${s.name}${s.isUltimate ? ' (definitiva)' : ''}\n${stripHtml(skillCostLine(s, lvl))}\n${stripHtml(describeSkill(s, lvl))}` +
             (p.skillPoints > 0 && levelUpBlocker(p, s) ? `\n🔒 ${levelUpBlocker(p, s)}` : '');
         const keyLabel = keyName(p.keyBindings[s.id]); // keymap.js
-        slot.innerHTML = (gameMode === 'tower' ? `<img class="ink-skill-icon" src="${inkSkillIcon(s)}">` : '') +
-            `<span class="key">${keyLabel}</span><span class="nm">${s.name}</span>` +
-            `<span class="pips">${Array.from({ length: max }, (_, j) => `<i class="${j < lvl ? 'on' : ''}"></i>`).join('')}</span><div class="cd"></div>` +
-            (gameMode === 'tower' && s.chargeable ? '<div class="charge"><i></i></div>' : '') + // carga del arco (towerFeel.js)
-            (gameMode === 'tower' && s.comboHits ? '<span class="combo"><b></b><b></b><b></b></span>' : ''); // paso del combo de la espada
-        const btn = gameMode === 'tower' ? null : levelButton(s); if (btn) slot.appendChild(btn); // en la Torre las habilidades suben forjando
+        slot.innerHTML = `<span class="key">${keyLabel}</span><span class="nm">${s.name}</span>` +
+            `<span class="pips">${Array.from({ length: max }, (_, j) => `<i class="${j < lvl ? 'on' : ''}"></i>`).join('')}</span><div class="cd"></div>`;
+        const btn = levelButton(s); if (btn) slot.appendChild(btn);
         skills.appendChild(slot);
     }
-    if (gameMode === 'tower') { // el esquive también se ve, con su recarga (fxSkills.js)
-        const d = document.createElement('div');
-        d.className = 'skill-slot dash-slot'; d.id = 'hb-dash';
-        d.title = `Esquive (Espacio)
-${DASH.tiles} casillas, invulnerable ${DASH.iframes}s, recarga ${DASH.cooldown}s. Si tenés una habilidad de movilidad en el espacio, sale esa primero.`;
-        d.innerHTML = `<img class="ink-skill-icon" src="${inkIcon('mobility', '#2b2118')}"><span class="key">${keyName(KEYMAP.dash)}</span><span class="nm">Esquive</span><div class="cd"></div>`;
-        skills.appendChild(d);
-    }
-
     // Innato y pasivas: chips (las pasivas drafteadas también se suben con [+])
     const passives = document.getElementById('hb-passives'); passives.innerHTML = '';
     [{ a: p.innate, innate: true }, ...p.skills.filter(s => s.kind === 'passive').map(a => ({ a }))].forEach(({ a, innate }) => {
@@ -641,25 +608,12 @@ ${DASH.tiles} casillas, invulnerable ${DASH.iframes}s, recarga ${DASH.cooldown}s
         chip.className = 'passive-chip' + (innate ? ' innate' : '') + (lvl === 0 ? ' locked' : '');
         chip.innerHTML = innate ? `◆ ${a.name} <span class="badge-innate">Innato</span>` : `◇ ${a.name} ${lvl}/${maxSkillLevel(a)}`;
         chip.title = `${innate ? 'Innato' : 'Pasiva'}: ${a.name}\n${stripHtml(innate ? a.description : describeSkill(a, lvl))}`;
-        if (!innate && gameMode !== 'tower') { const btn = levelButton(a); if (btn) chip.appendChild(btn); }
+        if (!innate) { const btn = levelButton(a); if (btn) chip.appendChild(btn); }
         passives.appendChild(chip);
     });
 
-    // Inventario: 6 casillas + el neutral (en la Torre: las 8 ranuras de equipo; clic abre el inventario)
+    // Inventario: 6 casillas + el neutral
     const slots = document.getElementById('hb-slots'); slots.innerHTML = '';
-    if (gameMode === 'tower' && p.gear) {
-        document.querySelector('#hb-side .hb-title').textContent = 'Equipo (I)';
-        EQUIP_SLOTS.forEach(s => {
-            const item = p.gear[s], el = document.createElement('div');
-            el.className = 'item-slot ink-gear' + (item ? '' : ' empty');
-            if (item) { el.innerHTML = `<img class="ink-icon" src="${towerItemIcon(item)}">`; el.style.borderColor = qColor(item); el.title = `${item.name} (nivel ${item.level})`; }
-            else el.title = TOWER_SLOTS[slotKind(s)].name + ': vacío';
-            el.onclick = () => toggleInventory(true);
-            slots.appendChild(el);
-        });
-        return;
-    }
-    document.querySelector('#hb-side .hb-title').textContent = 'Inventario';
     for (let i = 0; i < INVENTORY_SLOTS; i++) {
         const inv = p.inventory[i], el = document.createElement('div');
         el.className = 'item-slot' + (inv ? '' : ' empty');
@@ -701,7 +655,6 @@ function updateHud() {
     renderHeroStats();
     document.getElementById('player-gold').textContent = player.gold;
     document.getElementById('player-income').textContent = incomeHint(player); // interés y racha (roundEconomy.js)
-    document.getElementById('essence-text').textContent = gameMode === 'tower' ? `✦ ${essence()}` : '';
     document.getElementById('round-num').textContent = `${waveNumber}${isRoundBossRound() ? ' 👹' : ''}${suddenDeathBonus() ? ` ☠+${Math.round(suddenDeathBonus() * 100)}%` : ''}`; // sin límite fijo: hasta que quede uno (☠: muerte súbita)
     document.getElementById('pause-btn').style.visibility = canPause() ? 'visible' : 'hidden';
     document.getElementById('lives-text').innerHTML = `<span class="hearts">${'♥'.repeat(Math.max(0, player.lives))}${'♡'.repeat(Math.max(0, 2 - player.lives))}</span>` +
@@ -710,7 +663,6 @@ function updateHud() {
     renderScoreboard();
     renderHeroBar();
     renderCombatInfo();
-    renderTowerBadges(); // avisos sobre el mapa de la Torre (towerView.js)
 }
 
 // Aviso de la presión al líder en tu arena.
@@ -738,7 +690,6 @@ function renderCombatInfo() {
     } else if (gameState === 'ENDED') html = `<h3>Fin de la partida</h3><p class="subtitle">Mirá el ranking a la izquierda. Tocá "Nueva Partida" para jugar otra.</p>`;
     else if (player.eliminated) html = `<h3>Quedaste eliminado</h3><p class="subtitle">Podés seguir mirando: clic en un héroe del ranking.</p>`;
     else if (gameState === 'BOSS') html = `<h3>👹 Jefe de ronda</h3>${pressureNote(arena)}<p class="subtitle">${arena && arena.boss ? `<b>${arena.boss.label}</b>: ${arena.boss.type.mechanic} ${arena.boss.type.escalation}` : 'Esperando a que terminen los demás.'}</p><p class="subtitle">Morir cuesta vidas. Pasados ${BOSS_FIGHT.enrageAfter}s se enfurece. Los 3 más rápidos cobran extra.</p>`;
-    else if (arena && arena.kind === 'tower') html = towerInfoHtml();
     else if (arena && arena.kind === 'duel') {
         const rival = arena.heroes.find(h => h !== hero);
         html = `<h3>⚔ Duelo</h3><p class="subtitle">${hero === player ? 'Peleás' : hero.name + ' pelea'} contra <b>${rival.displayName}</b>. Gana quien mata al otro o, a los ${DUEL_TIME}s, quien tenga más % de vida.</p>` +
@@ -757,8 +708,7 @@ function renderTimer() {
     } else if (inCombat() && player) {
         const hero = viewedHero || player, arena = hero.arena;
         const waiting = arenas.filter(a => !a.done).length;
-        if (arena && arena.kind === 'tower') { text = towerStatusText(); }
-        else if (hero.inRest || !arena || arena.done) { text = `🏕 Descansando · ${waiting} arena${waiting === 1 ? '' : 's'} en curso`; }
+        if (hero.inRest || !arena || arena.done) { text = `🏕 Descansando · ${waiting} arena${waiting === 1 ? '' : 's'} en curso`; }
         else if (arena.kind === 'duel') { const left = DUEL_TIME - arena.elapsed; text = `⚔ Duelo ${Math.max(0, Math.ceil(left))}s`; if (left <= 5) cls = 'urgent'; }
         else if (!hero.isAlive() && hero.respawnAt) { text = `☠ Revive en ${Math.max(0, hero.respawnAt - gameClock).toFixed(1)}s`; cls = 'urgent'; }
         else if (arena.kind === 'boss') { const left = BOSS_FIGHT.enrageAfter - arena.elapsed; text = left > 0 ? `👹 Jefe · se enfurece en ${Math.ceil(left)}s` : `🔥 Jefe enfurecido +${Math.round((enrageMult(arena) - 1) * 100)}%`; if (left <= 10) cls = 'urgent'; }
@@ -852,7 +802,6 @@ function resetHud() {
     document.getElementById('round-num').textContent = '1';
     ['lives-text', 'points-text', 'player-gold', 'player-income'].forEach(id => { document.getElementById(id).textContent = ''; });
     document.getElementById('hero-bar').style.display = 'none';
-    document.getElementById('relic-bar').style.display = 'none';
     document.getElementById('hero-stats-panel').style.display = 'none';
     document.getElementById('combat-info').style.display = 'none';
     document.getElementById('scoreboard').innerHTML = ''; lastScoreboardSignature = '';
@@ -879,28 +828,22 @@ function drawUnit(u, color, symbol, pos = u, opts = {}) {
     if (sprite) {
         const size = spriteSize(u, opts);
         halfHeight = Math.max(TILE / 2, size / 2);
-        const pxBody = pixelBodyFor(u); // cuerpo en pixel art (towerPixelBeasts.js), también en Custom Hero
-        if (gameMode === 'tower' && inkPlanFor(u)) halfHeight = pxBody ? pixelHalfHeight(u) : inkHalfHeight(u); // figuras de tinta (o pixel art): más altas
-        else if (pxBody) halfHeight = pixelHalfHeight(u);
         // Sombra en el piso; en los héroes, un aro del color del bando (celeste vos, naranja los rivales)
-        if (gameMode !== 'tower' && !pxBody) { // en la Torre la sombra la dibuja la figura de tinta (y los sprites de pixel art traen la suya)
         ctx.fillStyle = 'rgba(0,0,0,0.45)';
         ctx.beginPath(); ctx.ellipse(cx, cy + size * 0.42, size * 0.34, size * 0.12, 0, 0, Math.PI * 2); ctx.fill();
-        }
-        if (u.isHero && gameMode !== 'tower') { ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(cx, cy + size * 0.42, size * 0.4, size * 0.15, 0, 0, Math.PI * 2); ctx.stroke(); }
+        if (u.isHero) { ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(cx, cy + size * 0.42, size * 0.4, size * 0.15, 0, 0, Math.PI * 2); ctx.stroke(); }
         if (u.bobSeed === undefined) u.bobSeed = Math.random() * 6;
         const bob = Math.sin(fxClock * 5 + u.bobSeed) * 1.2;
         const pose = pos.pose;
         const look = !u.isHero && u.type ? CREEP_LOOKS[u.type.key] : null;
         if (look) drawCreepLook(u, look, cx, cy, size);
-        if (opts.glow && gameMode !== 'tower' && !pxBody) { ctx.shadowColor = color; ctx.shadowBlur = 8; } // en la Torre, sin brillo (estética tinta)
+        if (opts.glow) { ctx.shadowColor = color; ctx.shadowBlur = 8; }
         if (pose && pose.glow) { ctx.shadowColor = pose.glow; ctx.shadowBlur = 16; }
         const alpha = look && look.alpha ? look.alpha(u) : 1;
         if (alpha < 1) ctx.globalAlpha = alpha;
         const jitter = look && look.jitter ? (Math.random() - 0.5) * look.jitter : 0;
         const facing = u.facing || (u.isHero ? 1 : -1);
-        if (gameMode === 'tower') { if (drawPixelUnit(u, cx + Math.round(jitter), cy, facing, hit, pose)) { /* criatura en pixel art (towerPixelBeasts.js) */ } else if (!drawInkUnit(u, cx + jitter, cy + bob, size, facing, hit, pose)) drawInkedSprite(sprite, cx + jitter, cy + bob, size, facing, hit, pose); }
-        else if (!(pxBody && drawPixelUnit(u, cx + Math.round(jitter), cy, facing, hit, pose))) drawSprite(sprite, cx + jitter, cy + bob, size, facing, hit, pose);
+        drawSprite(sprite, cx + jitter, cy + bob, size, facing, hit, pose);
         ctx.globalAlpha = 1; ctx.shadowBlur = 0;
         if (pose && pose.flash > 0 && u.fxAttack) { // fogonazo del disparo
             const a = u.fxAttack; ctx.globalAlpha = pose.flash; ctx.fillStyle = '#fff3b0';
@@ -912,15 +855,13 @@ function drawUnit(u, color, symbol, pos = u, opts = {}) {
         ctx.fillStyle = hit ? '#ffffff' : color; ctx.fillText(symbol, cx, cy + 1);
         ctx.shadowBlur = 0;
     }
-    if ((u.effects && u.effects.length) || u.elMark) drawStatusFx(u, cx, cy, halfHeight); // estados y marca de elemento (fxSkills.js)
-    if (u === player && u.isAlive()) drawDashMeter(u, cx, cy);
-    if (u.maxHp && u.isAlive()) { // tendido (la caída del héroe, towerPixelHero.js): sin barra
+    if (u.effects && u.effects.length) drawStatusFx(u, cx, cy, halfHeight); // estados (fxSkills.js)
+    if (u.maxHp && u.isAlive()) {
         const pct = Math.max(0, u.hp / u.maxHp), w = Math.max(TILE - 4, opts.big ? 40 : 0), top = cy - halfHeight - 3;
-        const ink = gameMode === 'tower'; // en la Torre: barra roja con borde de tinta
-        ctx.fillStyle = ink ? '#1d1712' : 'rgba(0,0,0,0.7)'; ctx.fillRect(cx - w / 2 - 1, top - 1, w + 2, 5);
-        ctx.fillStyle = ink ? (u.isHero ? '#a8382d' : pct > 0.5 ? '#8f2d24' : '#c0522f') : pct > 0.5 ? '#2dc653' : pct > 0.25 ? '#ffb703' : '#ff0055';
+        ctx.fillStyle = 'rgba(0,0,0,0.7)'; ctx.fillRect(cx - w / 2 - 1, top - 1, w + 2, 5);
+        ctx.fillStyle = pct > 0.5 ? '#2dc653' : pct > 0.25 ? '#ffb703' : '#ff0055';
         ctx.fillRect(cx - w / 2, top, w * pct, 3);
-        if (u.isHero && u.maxMana) { ctx.fillStyle = ink ? '#2f5d62' : '#4895ef'; ctx.fillRect(cx - w / 2, top + 4, w * Math.max(0, u.mana / u.maxMana), 2); }
+        if (u.isHero && u.maxMana) { ctx.fillStyle = '#4895ef'; ctx.fillRect(cx - w / 2, top + 4, w * Math.max(0, u.mana / u.maxMana), 2); }
     }
     if (u.effects && u.effects.length) {
         ctx.font = '10px monospace';
@@ -1001,10 +942,9 @@ function renderRestArea(dt = 0) {
 function renderTitle() {
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.font = 'bold 30px monospace'; ctx.fillStyle = '#ffb703';
-    const title = gameState === 'MENU' ? 'CUSTOM HERO' : gameMode === 'tower' ? 'INFINITE TOWER' : 'CUSTOM HERO';
-    ctx.fillText(title, MAP_W / 2, MAP_H / 2 - 30);
+    ctx.fillText('MATCH', MAP_W / 2, MAP_H / 2 - 30);
     ctx.font = '13px monospace'; ctx.fillStyle = '#8ecae6';
-    ctx.fillText(gameState === 'MENU' ? 'Elegí un modo: Custom Hero o Infinite Tower →' : 'Elegí tu héroe →', MAP_W / 2, MAP_H / 2 + 10);
+    ctx.fillText('Elegí tu competidor →', MAP_W / 2, MAP_H / 2 + 10);
     ctx.font = '20px monospace';
     const order = { STR: 0, AGI: 1, INT: 2 }; // agrupados por atributo, en su color
     Object.values(HERO_TEMPLATES).sort((a, b) => order[a.primaryAttr] - order[b.primaryAttr]).forEach((t, i, all) => {
@@ -1047,7 +987,7 @@ function render3d(arena, dt) {
         const t = (fxClock - f.born) / f.life; if (t < 0) return;
         const p = M3D.project(f.x, f.y, 1.4);
         ctx.globalAlpha = Math.max(0, 1 - t * t);
-        if (typeof pxNumberText === 'function' && pxNumberText(f.text)) pxDrawNumber(f.text, p.x, p.y, f.color, Math.max(2, Math.round(2 * f.size / 12 * A11Y.combatText)) + (t < 0.12 ? 1 : 0));
+        if (pxNumberText(f.text)) pxDrawNumber(f.text, p.x, p.y, f.color, Math.max(2, Math.round(2 * f.size / 12 * A11Y.combatText)) + (t < 0.12 ? 1 : 0));
         else { ctx.font = `bold ${Math.round(f.size * A11Y.combatText)}px monospace`; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,0.8)'; ctx.strokeText(f.text, p.x, p.y); ctx.fillStyle = f.color; ctx.fillText(f.text, p.x, p.y); }
     });
     ctx.globalAlpha = 1;
@@ -1061,14 +1001,14 @@ function render3d(arena, dt) {
 function render() {
     const dt = tickFx();
     if (window.M3D) { M3D.active = false; M3D.hide(); canvas.style.backgroundColor = ''; } // MATCH 3D: solo si esta arena se dibuja en 3D (render3d)
-    if (typeof pxUiSync === 'function') pxUiSync(); // tema de interfaz en pixel art (towerPixelUi.js)
+    pxUiSync(); // tema de interfaz en pixel art (pantalla.js)
     document.body.classList.toggle('on-title', gameState === 'MENU'); // portada (titleScreen.js)
-    musicTick(dt); // música del menú y de Custom Hero (en la Torre la maneja renderTower, towerMusic.js)
-    const k = (towerLayout ? 1 : mapScale) * (window.devicePixelRatio || 1);
+    musicTick(dt); // music.js
+    const k = mapScale * (window.devicePixelRatio || 1);
     ctx.setTransform(k, 0, 0, k, 0, 0);
     const hero = viewedHero || player;
     if (hero && (hero.inRest || !hero.arena) && gameState !== 'HERO_SELECT' && gameState !== 'MENU') { renderRestArea(dt); return; }
-    ctx.fillStyle = '#050507'; ctx.fillRect(0, 0, screenW(), screenH());
+    ctx.fillStyle = '#050507'; ctx.fillRect(0, 0, MAP_W, MAP_H);
     if (gameState === 'MENU' || gameState === 'HERO_SELECT' || !hero || !hero.arena || !inCombat()) {
         ctx.strokeStyle = '#151821';
         for (let c = 0; c < VIEW_COLS; c++) for (let r = 0; r < VIEW_ROWS; r++) ctx.strokeRect(c * TILE, r * TILE, TILE, TILE);
@@ -1076,8 +1016,8 @@ function render() {
         return;
     }
     const arena = hero.arena;
-    if (arena.kind === 'tower') { renderTower(arena, dt); return; }
-    if (window.M3D && M3D.wants(arena)) { render3d(arena, dt); return; } // MATCH 3D (js/m3d/match3d.js)
+    if (window.M3D && M3D.wants(arena)) { render3d(arena, dt); return; } // la arena en 3D (js/m3d/match3d.js)
+    // Sin WebGL (o en las pruebas): la arena en 2D, como antes del 3D
     updateArenaFx(arena, dt);
     ctx.save();
     if (shakeAmount) ctx.translate((Math.random() - 0.5) * shakeAmount * 2, (Math.random() - 0.5) * shakeAmount * 2);
@@ -1103,8 +1043,6 @@ function render() {
         ctx.stroke();
     }
 
-    const px = typeof pixelEnabled !== 'undefined' && pixelEnabled; // pixel art de la Torre también acá (towerPixelFx.js)
-    if (px) pxDrawDebris(arena, 'ground'); // sangre y restos en el piso
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     arena.creeps.forEach(c => { if (c.isAlive()) drawUnit(c, c.color, c.symbol, drawPos(c, dt), { glow: c.isBoss || c.isRoundBoss, big: c.isRoundBoss }); });
     // Proyectiles con estela, del color de quien los disparó (o el propio de la habilidad, ver vfx en su definición)
@@ -1124,7 +1062,7 @@ function render() {
             ctx.globalAlpha = 1;
         }
     });
-    if (!px) drawProjectiles();
+    drawProjectiles();
     arena.heroes.forEach(h => {
         if (h.eliminated) return;
         // Muerto esperando revivir: una calavera en el lugar donde va a reaparecer
@@ -1137,11 +1075,7 @@ function render() {
         ctx.restore();
         drawUnit(h, hasFlag(h, 'invulnerable') ? '#ffffff' : heroColor(h), h.symbol, pos, { glow: true });
     });
-    if (px) { // proyectiles, tajos y hechizos con el píxel de los sprites; sangre que vuela; números aparte
-        pxFxLayer('over', () => { drawProjectiles(); fxTextPass = 'skip'; drawArenaFx(arena); fxTextPass = null; });
-        pxDrawDebris(arena, 'air');
-        fxTextPass = 'only'; drawArenaFx(arena); fxTextPass = null;
-    } else drawArenaFx(arena);
+    drawArenaFx(arena);
     if (targeting && !canControlPlayer()) cancelTargeting();
     drawMouseOverlay(arena);
     ctx.restore();

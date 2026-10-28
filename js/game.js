@@ -1,9 +1,9 @@
 // Flujo de la partida: estado global, selección de héroe, draft, tienda, oleadas en paralelo de los 8 héroes
 // (ver world.js) y la actualización de cada frame de cada arena (movimiento, ataques, IA).
 
-// Pantalla: siempre 20×12 casillas. Mundo: 20×12 en el modo normal; en la Torre, el tamaño del nivel (tower.js).
+// La arena: 20×12 casillas, entra entera en la pantalla.
 const VIEW_COLS = 20, VIEW_ROWS = 12;
-let COLS = VIEW_COLS, ROWS = VIEW_ROWS;
+const COLS = VIEW_COLS, ROWS = VIEW_ROWS;
 
 let player = null;
 let gameState = 'MENU', waveNumber = 1, gameClock = 0, keys = {};
@@ -19,11 +19,9 @@ let MOVE_ATTACK_RULE = 'free'; // a pedido: se ataca caminando; el equilibrio se
 // Solo el movimiento: ataques y proyectiles quedan igual.
 const MOVE_SPEED_MULT = 0.65; // bajado otra vez a pedido (antes 0,8)
 
-// Segundos que tarda una unidad en avanzar una casilla (con sus efectos). En Infinite Tower el héroe camina más rápido
-// (TOWER.heroSpeed): el mapa es mucho más grande que una arena. Lo usa también el dibujo para deslizarse sin frenar.
+// Segundos que tarda una unidad en avanzar una casilla (con sus efectos). Lo usa también el dibujo para deslizarse sin frenar.
 function heroStepTime(hero) {
-    const tower = hero.arena && hero.arena.kind === 'tower' ? TOWER.heroSpeed : 1;
-    return hero.moveInterval / (effMoveMult(hero) * MOVE_SPEED_MULT * tower);
+    return hero.moveInterval / (effMoveMult(hero) * MOVE_SPEED_MULT);
 }
 function unitStepTime(u) {
     if (u.isHero) return u.inRest ? u.moveInterval / MOVE_SPEED_MULT : heroStepTime(u);
@@ -35,27 +33,14 @@ window.addEventListener('keydown', e => {
     const k = e.key.toLowerCase();
     keys[k] = true;
     if (keysOpen) { if (k === 'escape') toggleKeys(false); return; } // con la ventana de teclas abierta no se juega (keymap.js)
-    const act = actionForKey(k), tower = gameMode === 'tower'; // teclas configurables (keymap.js)
-    if (tower && statsOpen && act !== 'stats' && levelCardKey(k)) return; // elegir la carta de nivel sin mouse (towerLevelUp.js)
+    const act = actionForKey(k); // teclas configurables (keymap.js)
     if (act === 'autopilot') { setAutopilot(!autopilot); return; }
-    if (act === 'shop') { if (tower) towerShopKey(); else toggleShop(); return; }
-    if (act === 'map') { if (tower) toggleTowerMap(); else toggleBigMap(); return; } // en la Torre, el mapa del piso (towerMap.js)
+    if (act === 'shop') { toggleShop(); return; }
+    if (act === 'map') { toggleBigMap(); return; }
     if (act === 'autocast') { setAutoCast(!autoCast); return; }
     if (k === 'g') { setSprites(!spritesOn); return; }
-    if (tower && act === 'stats') { toggleStatsWindow(); return; }
-    if (tower && act === 'inventory') { toggleInventory(); return; }
-    if (tower && act === 'bestiary') { toggleBestiary(); return; }
-    if (tower && act === 'codex') { toggleCodex(); return; }
-    if (tower && act === 'log') { toggleTowerLog(); return; }
-    if (tower && act === 'notebook') { toggleNotebook(); return; }
-    if (tower && act === 'interact' && !paused && towerInteract()) return; // agarrar un arma del círculo (towerAwaken.js)
-    if ((k === '+' || k === '=') && towerLayout) { towerZoom(1); return; }
-    if ((k === '-' || k === '_') && towerLayout) { towerZoom(-1); return; }
     if (k === 'escape') { handleEscape(); return; }
-    if (act === 'dash') { e.preventDefault(); if (!paused) spaceAction(); return; } // esquive o habilidad de movilidad (ver spaceAction)
     if (paused) return; // en pausa no responden las demás teclas
-    if (tower && (act === 'attack' || act === 'attack2')) { padKeyDown(act, e); return; } // sin mouse (padControls.js)
-    if (tower && act === 'skill3' && inCombat() && !autopilot && classSpecial(player)) return; // la especial de la clase (towerSpecials.js)
     if (inCombat() && !autopilot) handleSkillKeypress(k);
 });
 window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
@@ -66,7 +51,6 @@ window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
 const GOLD_PENALTY_FREE_PICK = 0;
 
 function selectHero(template, freePick = false) {
-    if (gameMode === 'tower') { startTowerRun(); return; }
     applyBanChoice(); // la habilidad baneada (progression.js)
     player = new Hero(template);
     if (freePick) player.gold = GOLD_PENALTY_FREE_PICK;
@@ -319,46 +303,27 @@ function endGame() {
 
 // Vuelve todo al estado inicial (menú) sin recargar la página.
 function resetGame() {
-    // primero las ventanas de la Torre, con el jugador todavía puesto: sin él, sus toggle no hacen nada y quedaban abiertas
-    if (statsOpen) toggleStatsWindow(false);
-    if (invOpen) toggleInventory(false);
-    if (forgeOpen) { forgeOpen = false; showPanel('forge-container', false); }
-    if (tshopOpen) { tshopOpen = false; showPanel('tshop-container', false); }
-    if (smithOpen) { smithOpen = false; showPanel('smith-container', false); }
-    if (waystoneOpen) toggleWaystone(false);
-    if (logbookTab) closeLogbook();
-    if (typeof towerMapOpen !== 'undefined' && towerMapOpen) toggleTowerMap(false);
     player = null; heroes = []; arenas = []; viewedHero = null; bannedSkills = new Set();
-    gameMode = 'normal'; towerRun = null; document.body.classList.remove('ink-theme'); if (towerLayout) setTowerLayout(false); COLS = VIEW_COLS; ROWS = VIEW_ROWS; camera.x = 0; camera.y = 0;
     gameState = 'MENU'; waveNumber = 1; gameClock = 0; heroOffers = null;
     currentDraft = null; savedPrepTime = null; nextWave = null; logMuted = false;
     duelPlan = null; currentBet = null; duelBets = []; nextRoundBoss = null; lastRoundBoss = null; lastDuelPair = [];
     cancelTargeting();
     paused = false; showPanel('pause-menu', false);
     hideMatchSummary(); const rsum = document.getElementById('round-summary'); if (rsum) rsum.style.display = 'none'; // la tarjeta de la última ronda
-    if (autopilot) setAutopilot(false); // el piloto de una partida no juega la siguiente (ni pasa de la Torre a Custom Hero)
+    if (autopilot) setAutopilot(false); // el piloto de una partida no juega la siguiente
     setPhaseTimer(PHASE_TIMES.heroSelect);
     resetHud();
     log('🔄 Nueva partida. Tocá "Iniciar partida" cuando quieras.');
 }
 
 // --- HABILIDADES ACTIVAS ---
-// Espacio: en la Torre, las piezas de movilidad (tag MOVILIDAD) se atan siempre a esta tecla (equipItem,
-// towerItems.js) en vez de a Q/E/R — probá lanzarla primero y, si no se pudo (enfriamiento, maná, nivel 0,
-// o directamente no tenés ninguna equipada), caé al esquive de siempre para que la tecla nunca quede "pegada".
-function spaceAction() {
-    if (gameMode !== 'tower') return; // el esquive es de la Torre: en Custom Hero (MATCH, estilo RTS) uno se defiende con la posición y su kit (pedido del usuario 2026-10-18)
-    const skill = canControlPlayer() && player.skillForKey(KEYMAP.dash);
-    if (skill && skillLevel(player, skill) > 0 && tryCastSkill(player, skill, { quiet: true })) return;
-    playerDash();
-}
+// (Sin esquive: en MATCH, estilo RTS, uno se defiende con la posición y su kit; pedido del usuario 2026-10-18.)
 function handleSkillKeypress(k) {
     if (!player || !player.isAlive() || player.inRest || !player.arena) return;
     const skill = player.skillForKey(k);
     if (!skill || skill.kind !== 'active') return;
     if (skillLevel(player, skill) === 0) { log(`🔒 ${skill.name} está en nivel 0: invertile un punto para usarla.`); return; }
     // Lanzamiento al instante (estilo Hades): las que apuntan salen hacia el cursor sin el paso extra del clic
-    if (skill.chargeable) { startCharge(player, skill, k); return; } // se tensa mientras está apretada (towerFeel.js)
     const c = cursorWorld();
     if (isAimedSkill(skill) && c && aimWithClick()) { // como Dota: tecla, apuntar y clic para confirmar (mouse.js)
         if ((player.cooldowns[skill.id] || 0) > 0) return;
@@ -393,7 +358,7 @@ function tryCastSkill(hero, skill, opts = {}) {
     }
     if (!ok) return false;
     hero.mana -= manaCost;
-    hero.cooldowns[skill.id] = skill.cooldownAfter ? skill.cooldownAfter(hero) : skillCooldown(skill, hero); // el combo de la espada varía (towerFeel.js)
+    hero.cooldowns[skill.id] = skillCooldown(skill, hero);
     (hero.cooldownTotals = hero.cooldownTotals || {})[skill.id] = hero.cooldowns[skill.id];
     fxCast(hero, skill, from);
     emit(hero, 'onCast', { skill });
@@ -404,7 +369,6 @@ function tryCastSkill(hero, skill, opts = {}) {
 // Actualiza todas las arenas activas (oleadas o duelos). Los mensajes solo se muestran si son de la arena que mirás.
 function updateWave(dt) {
     if (!inCombat()) return;
-    if (gameState === 'TOWER') { updateTower(dt); return; }
     const shown = viewArena();
     arenas.forEach(arena => {
         if (arena.done) return;
@@ -492,17 +456,14 @@ function updateHero(hero, arena, dt) {
 
     // Ataque automático: al enemigo en rango de mayor prioridad (ej: Sanadores) o, si no, al más cercano
     // (desarmado: como el Manto Fantasma del Nigromante, no ataca pero sigue moviéndose, a diferencia de un aturdimiento)
-    const target = (stunned || hasFlag(hero, 'disarm') || clickAttackOn(hero)) ? null : pickAttackTarget(hero, effRange(hero));
+    const target = (stunned || hasFlag(hero, 'disarm')) ? null : pickAttackTarget(hero, effRange(hero));
     const walking = MOVE_ATTACK_RULE === 'pause' && gameClock < (hero.movingUntil || 0);
-    if (clickAttackOn(hero)) {
-        clickAttackStep(hero, dt, stunned || hasFlag(hero, 'disarm')); // Torre: el golpe sale con el clic (towerClickAttack.js)
-    } else if (target && walking) {
+    if (target && walking) {
         // pausa: mientras camina el ataque no avanza, pero conserva lo que tenía cargado
     } else if (target) {
         hero.attackTimer += dt;
-        if (hero.attackTimer >= (gameMode === 'tower' ? attackGap(hero) : 1 / effAtkSpeed(hero))) {
+        if (hero.attackTimer >= 1 / effAtkSpeed(hero)) {
             hero.attackTimer = 0;
-            if (swordWielder(hero)) { towerSwordAttack(hero, target); hero.regenTick(dt); tickCooldowns(hero, dt); return; } // Torre, espada: el combo de 3 tajos (towerClickAttack.js)
             const { dmg, isCrit } = rollAttackDamage(hero, target);
             if (hero.projectileSpeed > 0) { fxAttack(hero, target, 'ranged', heroColor(hero)); fxHeroShot(hero, target); fireProjectile(hero, target, dmg, isCrit); }
             else { fxAttack(hero, target, 'melee'); fxHeroAttack(hero, target, isCrit); resolveBasicHit(hero, target, dmg, isCrit); } // según el arma (fxSkills.js)
@@ -515,7 +476,7 @@ function updateHero(hero, arena, dt) {
 }
 
 function keyboardDirection() {
-    if (!keyboardMoveOn()) return { dx: 0, dy: 0 }; // en Custom Hero, W A S D solo si lo prendés en Opciones (mouse.js)
+    if (!keyboardMoveOn()) return { dx: 0, dy: 0 }; // W A S D solo si lo prendés en Opciones (mouse.js)
     return {
         dx: (keys[KEYMAP.right] || keys['arrowright'] ? 1 : 0) - (keys[KEYMAP.left] || keys['arrowleft'] ? 1 : 0),
         dy: (keys[KEYMAP.down] || keys['arrowdown'] ? 1 : 0) - (keys[KEYMAP.up] || keys['arrowup'] ? 1 : 0)

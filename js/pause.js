@@ -30,16 +30,11 @@ function renderPauseMenu() {
         opt('music', '🎵 Música', musicOn) +
         opt('sprites', '🎨 Pixel art (G)', spritesOn) +
         opt('colorblind', '🎨 Zonas de ataque para daltonismo (azul y naranja)', A11Y.colorblind) +
-        opt('weather', '🌧 Clima (lluvia, nieve, ceniza…)', weatherOn) +
-        (gameMode !== 'tower' && window.M3D ? opt('view3d', '🧊 Vista 3D (MATCH)', M3D.enabled()) : '') +
-
-        (gameMode === 'tower' ? `<button class="pm-toggle on" data-opt="loot">🎒 Levantar botín<span>${LOOT_FILTERS[lootFilter].name.toUpperCase()}</span></button>` : '') +
-        (gameMode === 'tower' ? opt('clickattack', '🖱️ Ataque con clic (si no, automático)', clickAttack) : '') +
-        (gameMode === 'tower' ? '' : opt('quickcast', '⚡ Lanzamiento rápido (la habilidad sale al apretar la tecla)', quickCast)) +
-        (gameMode === 'tower' ? '' : opt('wasd', '⌨️ Moverse con W A S D (además del clic derecho)', wasdMove)) +
+        opt('quickcast', '⚡ Lanzamiento rápido (la habilidad sale al apretar la tecla)', quickCast) +
+        opt('wasd', '⌨️ Moverse con W A S D (además del clic derecho)', wasdMove) +
         opt('autocast', '✨ Habilidades automáticas (H)', autoCast) +
         opt('autopilot', '🤖 Piloto automático (P)', autopilot) +
-        (gameMode === 'tower' ? '' : opt('bigmap', '⤢ Mapa grande (M)', mapScale > 1)); // en la Torre el mapa ya ocupa la ventana
+        opt('bigmap', '⤢ Mapa grande (M)', mapScale > 1);
     // Deslizadores: volumen general, música, efectos y temblor de pantalla
     const slider = (key, label, max = 1) => `<label class="pm-slider">${label}<input type="range" min="0" max="${max * 100}" step="5" value="${Math.round(VOLUME[key] * 100)}" data-vol="${key}"><b>${Math.round(VOLUME[key] * 100)}%</b></label>`;
     document.getElementById('pause-options').insertAdjacentHTML('afterbegin',
@@ -56,15 +51,12 @@ function renderPauseMenu() {
     });
     document.querySelectorAll('#pause-options .pm-toggle').forEach(btn => {
         btn.onclick = () => {
-            ({ sound: () => setSound(!soundOn), music: () => setMusic(!musicOn), colorblind: () => setA11y('colorblind', !A11Y.colorblind), weather: () => setWeather(!weatherOn), view3d: () => M3D.set(!M3D.enabled()), pixel: () => setPixelStyle(!pixelEnabled), loot: cycleLootFilter, sprites: () => setSprites(!spritesOn), autocast: () => setAutoCast(!autoCast), quickcast: () => setQuickCast(!quickCast), wasd: () => setWasdMove(!wasdMove), clickattack: () => setClickAttack(!clickAttack),
+            ({ sound: () => setSound(!soundOn), music: () => setMusic(!musicOn), colorblind: () => setA11y('colorblind', !A11Y.colorblind), sprites: () => setSprites(!spritesOn), autocast: () => setAutoCast(!autoCast), quickcast: () => setQuickCast(!quickCast), wasd: () => setWasdMove(!wasdMove),
                autopilot: () => setAutopilot(!autopilot), bigmap: toggleBigMap })[btn.dataset.opt]();
             renderPauseMenu();
         };
     });
-    document.getElementById('pause-tower').innerHTML = gameMode === 'tower' && towerRun ? towerPauseHtml() : '';
-    document.getElementById('pause-quit').textContent = gameMode === 'tower' && canSaveTower() ? '💾 Guardar y salir al menú' : '🏠 Salir al menú';
-    document.getElementById('pause-glossary').style.display = gameMode === 'tower' ? 'none' : '';
-    document.getElementById('pause-info').textContent = gameMode === 'tower' && towerRun ? `Aventurero nivel ${player.level} · piso ${towerRun.floor} de ${TOWER.floors} · ${player.gold}g` : player
+    document.getElementById('pause-info').textContent = player
         ? `${player.name} · ronda ${waveNumber} · ${aliveHeroes().length} héroes en juego · ${heroRank(player)}º con ${player.points} puntos` : '';
 }
 
@@ -85,8 +77,7 @@ function isGlossaryOpen() { return ['heroes', 'creeps', 'items'].some(v => docum
 
 
 function quitToMenu() {
-    const towerSaved = gameMode === 'tower' && saveTowerRun(); // la run de la Torre se guarda: se continúa desde el menú (towerSave.js)
-    if (player && !towerSaved && !confirm('¿Salir al menú? Se pierde la partida en curso.')) return; // eligiendo héroe no hay nada que perder
+    if (player && !confirm('¿Salir al menú? Se pierde la partida en curso.')) return; // eligiendo héroe no hay nada que perder
     setPaused(false);
     resetGame();
 }
@@ -94,19 +85,9 @@ function quitToMenu() {
 // Esc: cierra lo que esté abierto (apuntado, tienda, tutorial, glosario) y si no hay nada, pausa o reanuda.
 function handleEscape() {
     if (targeting) { cancelTargeting(); return; }
-    if (typeof waystoneOpen !== 'undefined' && waystoneOpen) { toggleWaystone(false); return; }
     if (document.getElementById('tutorial').style.display === 'flex') { closeTutorial(); return; }
     if (closeGlossary()) return;
-    if (statsOpen) { toggleStatsWindow(false); return; }
-    if (invOpen) { toggleInventory(false); return; }
-    if (tshopOpen) { toggleTowerShop(false); return; }
-    if (bestiaryOpen) { toggleBestiary(false); return; }
-    if (codexOpen) { toggleCodex(false); return; }
-    if (smithOpen) { toggleSmith(false); return; }
-    if (towerLogOpen) { toggleTowerLog(false); return; }
-    if (towerMapOpen) { toggleTowerMap(false); return; }
     if (keysOpen) { toggleKeys(false); return; }
-    if (notebookOpen) { toggleNotebook(false); return; }
     if (document.getElementById('hero-any-drawer').classList.contains('open')) { closeHeroDrawer(); return; }
     if (document.getElementById('shop-container').style.display === 'block') { closeShop(); return; }
     togglePause();

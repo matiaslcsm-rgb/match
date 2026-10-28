@@ -2,22 +2,24 @@
 
 Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas del juego están en [`DISEÑO.md`](../DISEÑO.md).
 
-- **Jugar online:** https://matiaslcsm-rgb.github.io/custon-hero-chaos/ (GitHub Pages, se actualiza con cada push a `main`)
-- **Repositorio:** https://github.com/matiaslcsm-rgb/custon-hero-chaos
-- **Carpeta local:** `Desktop\mattbox\custom-hero-chaos`
+- **Jugar online:** https://matiaslcsm-rgb.github.io/match/ (GitHub Pages, se actualiza con cada push a `main`)
+- **Repositorio:** https://github.com/matiaslcsm-rgb/match
+- **Carpeta local:** `Desktop\mattbox\match`
 
-## Rumbo actual (2026-10-25, decidido por el usuario)
-- **MATCH 3D (2026-10-28, decisión del usuario, todo opción A):** Custom Hero se fusiona con MATCH y pasa a 3D. Se
-  mantienen las reglas, la IA y las pruebas; cambia el dibujo de las arenas de combate (oleada, duelo, jefe): escena
-  3D con cámara en diagonal como Dota (se juega igual, con el mouse), competidores y creeps como robots por piezas con
-  el motor de `arena-robots` (copiado en `js/m3d/`), look PS1 industrial. El 2D queda como opción en la pausa
-  (🧊 Vista 3D) mientras el 3D se completa. Esto **reactiva el RTS de MATCH** que estaba en pausa. El repo aparte
-  `match` (una copia vieja del 19/10) quedó archivado en GitHub. Hecho: la arena en 3D jugable y los efectos de
-  habilidades en 3D (tajos, áreas y mira en el piso; rayos, trazadoras, meteoros y chispas en el aire; los robots se
-  caen al morir). Faltan el descanso en 3D, jefes robot más grandes y el garaje para armar competidores.
-- **Infinite Tower vuelve en 2D lateral**, metroidvania conectado, como modo nuevo en paralelo (`torre2d.html`,
-  `js/tower2d.js`; fase T2D del roadmap). Prototipo jugable: playa + 3 salas + sala de pruebas de materiales (por el
-  muelle de la playa, a la izquierda), mundo de píxeles, enemigos dibujados con cajas de golpe a medida, luz, sonido y joystick.
+## Rumbo actual (decidido por el usuario)
+- **MATCH es un juego propio (2026-10-28, decisión del usuario):** "vamos a dejar las mecánicas de Custom Hero con los
+  modelos 3D y vamos a llamarlo MATCH; entre tanta actualización se mezclaron los proyectos". Elegido: repo y página
+  propios (este), **solo 3D**, nombre MATCH. Se armó desde `custon-hero-chaos` (con su historia) sacando todo lo de
+  Infinite Tower: los archivos `tower*.js`, la tinta, el muñeco, la galería, la Torre 2D, el prototipo de la isla 3D,
+  las ventanas de la Torre, el esquive, las reacciones elementales, la música de los biomas y sus 129 pruebas. Lo que
+  Custom Hero usaba de ahí pasó a archivos propios: `js/pantalla.js` (la pantalla fija), `js/pixelFx.js` (números de
+  daño en píxeles y `withCtx`) y `js/music.js` (taller, combate y jefe). Portada nueva: el estadio del show de noche.
+  Las teclas configurables quedan para lo de MATCH (moverse, tienda, mapa, automáticas, piloto).
+- **MATCH 3D (2026-10-28, decisión del usuario, todo opción A):** escena 3D con cámara en diagonal como Dota (se juega
+  igual, con el mouse), competidores y creeps como robots por piezas con el motor de `arena-robots` (copiado en
+  `js/m3d/`), look PS1 industrial. Esto **reactiva el RTS de MATCH** que estaba en pausa. Hecho: la arena en 3D jugable
+  y los efectos de habilidades en 3D (tajos, áreas y mira en el piso; rayos, trazadoras, meteoros y chispas en el aire;
+  los robots se caen al morir). Faltan el descanso en 3D, jefes robot más grandes y el garaje para armar competidores.
 - **MATCH:** foco en la creación de personajes (los 8 competidores y después un creador para el jugador) y los menús.
   Estética nueva para todo MATCH: ciencia ficción industrial (2026-10-26). Primer competidor aprobado: **Rec**
   (`docs/competidores/rec.md`), reemplaza al Sniper; falta programarlo.

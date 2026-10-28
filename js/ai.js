@@ -23,7 +23,6 @@ function isRanged(hero) { return hero.attackRange >= AI.rangedFrom; }
 // --- MOVIMIENTO ---
 // Devuelve la dirección del próximo paso: { dx, dy } con valores -1, 0 o 1.
 function aiMoveDirection(hero) {
-    if (hero.arena && hero.arena.walls) return towerAutoDir(hero); // la Torre tiene su propio piloto (tower.js)
     const enemies = enemiesOf(hero).filter(c => c.isAlive());
     if (!enemies.length) return { dx: 0, dy: 0 };
     const nearest = nearestEnemy(hero);
@@ -68,11 +67,6 @@ function retreatStep(hero, enemies) {
 
 // --- HABILIDADES ---
 function aiWantsToCast(hero, skill, nearCount, bossNear, nearestDist = Infinity, nearest = null) {
-    if (skill.aiWants) return skill.aiWants(hero, nearest, nearestDist); // las que saben cuándo conviene (towerFeel.js)
-    // En la Torre, la movilidad solo para alcanzar a un enemigo a la vista y cerca (si no, se teletransportaba hacia
-    // creeps del otro lado de una pared y quedaba yendo y viniendo para siempre)
-    if (skill.tags.includes('MOVILIDAD') && hero.arena && hero.arena.kind === 'tower')
-        return !!nearest && nearestDist > hero.attackRange + 0.5 && nearestDist <= 6 && lineClear(hero.arena, hero.x, hero.y, nearest.x, nearest.y);
     // Cuerpo a cuerpo: los saltos y teletransportes se guardan para cuando el enemigo está fuera de su alcance
     // (antes los usaba apenas estaban listos, aunque ya estuviera pegado, y después no podía alcanzar a los que se alejaban).
     if (skill.tags.includes('MOVILIDAD') && !isRanged(hero)) return nearestDist > hero.attackRange + 0.5 && nearestDist <= 8;
