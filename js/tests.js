@@ -1971,6 +1971,18 @@ test('Arena de duelo con columnas: no se pisan, frenan los proyectiles, sin verl
     check(moved && lineOfSight(a, player, rival), 'la IA rodea la columna hasta verlo');
 });
 
+test('Panel del rival en el duelo: muestra al otro (no a vos) y se dibuja también mientras prepara un golpe', () => {
+    newGame('ZEUS');
+    const rival = new Hero(HERO_TEMPLATES.FROSTWITCH);
+    gameState = 'DUEL'; arenas = makeDuelArenas({ pairs: [[player, rival]] });
+    checkEq(rivalOf(player.arena), rival, 'el rival es el otro');
+    rival.addSkill(SKILL_INDEX.FROSTWITCH_BLAST); rival.skillLevels.FROSTWITCH_BLAST = 1; rival.mana = rival.maxMana;
+    rival.windup = { skill: SKILL_INDEX.FROSTWITCH_BLAST, at: gameClock, until: gameClock + 1, fromX: 1, fromY: 1, aimX: 2, aimY: 2, r: 1 };
+    let ok = true; try { drawRivalPanel(player.arena); } catch (e) { ok = false; }
+    check(ok, 'se dibuja sin errores');
+    checkEq(rivalOf(makeArena('wave', [player])), null, 'fuera del duelo, no hay panel');
+});
+
 test('Clic derecho: el héroe camina hasta el destino; el teclado lo cancela', () => {
     newGame('AXE');
     creeps.forEach(c => { c.hp = 0; });

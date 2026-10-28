@@ -955,6 +955,36 @@ function renderTitle() {
     });
 }
 
+// El panel del rival en el duelo (MATCH, roadmap fase 2): su vida y maná y cada habilidad activa, lista o con lo que le
+// falta. Si está preparando un golpe anunciado, esa fila titila en rojo. Para leerlo: ¿tiene el golpe listo?
+function rivalOf(arena) { const me = viewedHero || player; return arena.kind === 'duel' ? arena.heroes.find(h => h !== me) : null; }
+function drawRivalPanel(arena) {
+    const r = rivalOf(arena);
+    if (!r || r.eliminated) return;
+    const skills = r.skills.filter(s => s.kind === 'active' && skillLevel(r, s) > 0);
+    const w = 150, row = 13, x = MAP_W - w - 6, y = TILE * 1.05, h = 30 + skills.length * row;
+    ctx.save();
+    ctx.fillStyle = 'rgba(12,13,16,0.82)'; ctx.fillRect(x, y, w, h);
+    ctx.strokeStyle = '#ffb703'; ctx.lineWidth = 1; ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
+    ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    ctx.font = 'bold 10px monospace'; ctx.fillStyle = '#ffd27a'; ctx.fillText(shortName(r.displayName, 22), x + 5, y + 8);
+    ctx.fillStyle = '#330a0a'; ctx.fillRect(x + 5, y + 15, w - 10, 3); ctx.fillStyle = '#e8a33a'; ctx.fillRect(x + 5, y + 15, (w - 10) * Math.max(0, r.hp / r.maxHp), 3);
+    ctx.fillStyle = '#0a1830'; ctx.fillRect(x + 5, y + 20, w - 10, 2); ctx.fillStyle = '#4895ef'; ctx.fillRect(x + 5, y + 20, (w - 10) * (r.maxMana ? Math.max(0, r.mana / r.maxMana) : 0), 2);
+    ctx.font = '9px monospace';
+    skills.forEach((s, i) => {
+        const ry = y + 31 + i * row, left = Math.max(0, r.cooldowns[s.id] || 0), total = (r.cooldownTotals && r.cooldownTotals[s.id]) || skillCooldown(s, r) || 1;
+        const winding = r.windup && r.windup.skill === s, noMana = r.mana < (val(s, r, 'manaCost') || 0);
+        if (winding && Math.floor(fxClock * 8) % 2 === 0) { ctx.fillStyle = 'rgba(255,42,42,0.35)'; ctx.fillRect(x + 2, ry - 6, w - 4, row - 1); }
+        ctx.fillStyle = s.isUltimate ? '#ffd166' : '#e9e5d8'; ctx.fillText(shortName(s.name, 15), x + 5, ry);
+        ctx.textAlign = 'right';
+        ctx.fillStyle = winding ? '#ff5a4a' : left > 0 ? '#8d8b99' : noMana ? '#4895ef' : '#2dc653';
+        ctx.fillText(winding ? '¡PREPARA!' : left > 0 ? left.toFixed(left < 10 ? 1 : 0) + 's' : noMana ? 'sin maná' : 'LISTO', x + w - 5, ry);
+        ctx.textAlign = 'left';
+        if (left > 0) { ctx.fillStyle = 'rgba(141,139,153,0.5)'; ctx.fillRect(x + 5, ry + 5, (w - 10) * Math.min(1, left / total), 1); }
+    });
+    ctx.restore();
+}
+
 // MATCH 3D: la arena se dibuja en 3D (js/m3d/match3d.js) y este canvas, transparente encima, lleva los carteles, las
 // barras de vida con el nombre de cada competidor y los números de daño, en el lugar de la pantalla de cada uno.
 function render3d(arena, dt) {
@@ -964,7 +994,7 @@ function render3d(arena, dt) {
     ctx.clearRect(0, 0, MAP_W, MAP_H);
     M3D.frame(arena, dt);
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    if (arena.kind === 'duel') { ctx.font = 'bold 13px monospace'; ctx.fillStyle = '#ffb703'; ctx.fillText(`⚔ DUELO: ${arena.heroes[0].displayName}  vs  ${arena.heroes[1].displayName}`, MAP_W / 2, TILE * 0.5); }
+    if (arena.kind === 'duel') { ctx.font = 'bold 13px monospace'; ctx.fillStyle = '#ffb703'; ctx.fillText(`⚔ DUELO: ${arena.heroes[0].displayName}  vs  ${arena.heroes[1].displayName}`, MAP_W / 2, TILE * 0.5); drawRivalPanel(arena); }
     if (arena.kind === 'boss' && arena.boss) {
         const b = arena.boss;
         ctx.font = 'bold 13px monospace'; ctx.fillStyle = b.color; ctx.fillText(`👹 ${b.label}: ${Math.max(0, b.hp)} / ${b.maxHp}`, MAP_W / 2, TILE * 0.5);
@@ -1102,6 +1132,7 @@ function render() {
     if (targeting && !canControlPlayer()) cancelTargeting();
     drawMouseOverlay(arena);
     ctx.restore();
+    if (arena.kind === 'duel') drawRivalPanel(arena);
     if (hero !== player) {
         ctx.font = '11px monospace'; ctx.fillStyle = '#ffb703';
         ctx.fillText(`👁 Mirando a ${hero.displayName} (clic en tu fila del ranking para volver)`, MAP_W / 2, MAP_H - 8);

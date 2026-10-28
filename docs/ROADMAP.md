@@ -45,7 +45,9 @@ La base para que los competidores nuevos funcionen. Es el plan de `docs/MATCH.md
   darse cuenta y no lo ve el 20% de las veces; sale del camino del golpe (no solo del punto); con un control listo, se
   lo tira primero al que prepara. Banco de 66: esquiva el 30% de los golpes anunciados (meta 30-70%), duelo mediano
   6,0 → 6,7 s. El banco ahora cuenta los golpes anunciados y cuántos se esquivan.
-- [ ] **Panel del rival en el duelo:** sus habilidades con el enfriamiento (¿tiene el golpe listo?).
+- [x] **Panel del rival en el duelo:** sus habilidades con el enfriamiento (¿tiene el golpe listo?). Hecho 2026-10-28
+  (ui.js, drawRivalPanel): arriba a la derecha, su vida y maná y cada habilidad activa con LISTO, los segundos que le
+  faltan o "sin maná"; la que está preparando titila en rojo (¡PREPARA!). En 3D y en 2D.
 - [x] **Arena de duelo con 2 a 4 columnas** que frenan proyectiles, para cubrirse. Hecho 2026-10-28: 4 columnas
   (`DUEL_COLUMNS`, duels.js) que no se pisan y frenan los ataques y las habilidades; a distancia hay que ver al rival
   (`lineOfSight`, bodies.js) y la IA rodea las columnas para buscarlo; pilares en 3D. Banco de 66: duelo mediano 5,8 s
