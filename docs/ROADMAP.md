@@ -19,8 +19,11 @@ Que todo lo que se juega se vea en 3D y que no quede nada de la Torre.
 - [x] **La zona de descanso en 3D:** los boxes del show, donde tu robot espera entre oleadas mientras comprás.
   Hecho 2026-10-28: portones de garaje, estación de reparación con grúa (donde estaba la fuente), dos estaciones de
   carga (las fogatas), los 8 boxes numerados y la calle de boxes en el piso; se camina igual (clic derecho o W A S D).
-- [ ] **Jefes robot propios:** cada jefe de ronda (rondas 5, 10, 15 y 20) con su propio robot, más grande y con piezas
-  únicas, en vez del robot genérico agrandado.
+- [x] **Jefes robot propios:** cada jefe de ronda (rondas 5, 10, 15 y 20) con su propio robot, más grande y con piezas
+  únicas, en vez del robot genérico agrandado. Hecho 2026-10-28 (`js/m3d/bosses3d.js`): los 8 con armado, pintura, ojos
+  que brillan y piezas que dicen qué hacen (la Prensa con puños, la Reina con panales, el Dragón con alas y cola, el Abismo
+  con cuernos y reactor, la Hidra con tres cabezas, el Liche con corona y capa, el Titán con hojas y tanques, el Espectro
+  con jirones).
 - [ ] **Limpieza:** sacar de `style.css` lo de la Torre (tema de pergamino, inventario, forja, herrero, bitácora) y los
   comentarios que todavía hablan de la Torre.
 

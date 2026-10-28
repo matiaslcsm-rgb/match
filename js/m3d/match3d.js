@@ -14,6 +14,7 @@
 // Expone window.M3D para el código clásico (ui.js, mouse.js, fxSkills.js).
 import * as THREE from 'three';
 import { buildRobot, animateRobot } from './robot.js';
+import { BOSS_ROBOTS, addExtras } from './bosses3d.js';
 import { RES, setRes, makeRenderer, floorTex, wallTex, mat, ps1Material } from './ps1.js';
 
 const U = 1;                  // una casilla = 1 metro
@@ -49,7 +50,7 @@ const CREEP_BUILDS = {
     kamikaze: { legs: 'ruedas', core: 'liviano', head: 'sensor', armL: 'pinza', armR: 'pinza' },
     chusma: { legs: 'bipedo', core: 'liviano', head: 'sensor', armL: 'pinza', armR: 'pinza' }
 };
-const BOSS_BUILD = { legs: 'oruga', core: 'pesado', head: 'domo', armL: 'canon', armR: 'canon' };
+const BOSS_BUILD = { legs: 'oruga', core: 'pesado', head: 'domo', armL: 'canon', armR: 'canon' }; // los creeps jefe de las oleadas; los de ronda tienen el suyo (bosses3d.js)
 // Forma de pelear de cada creep (qué armado le toca)
 function creepPlan(u) {
     const t = u.type;
@@ -198,8 +199,10 @@ function placeCamera(aspect) {
 
 // --- LAS UNIDADES ---
 const units = new Map(); // unidad del juego → { robot, scale, yaw, last }
+const roundBossRobot = u => u.isRoundBoss && u.type && BOSS_ROBOTS[u.type.key];
 function buildFor(u) {
     if (u.isHero) return HERO_BUILDS[u.key] || HERO_BUILDS.AXE;
+    if (u.isRoundBoss && roundBossRobot(u)) return roundBossRobot(u).build;
     if (u.isRoundBoss || u.isBoss) return BOSS_BUILD;
     return CREEP_BUILDS[creepPlan(u)];
 }
@@ -210,8 +213,9 @@ const heroPaint = u => {
 function unitObj(u) {
     let o = units.get(u);
     if (o) return o;
-    const robot = buildRobot(buildFor(u));
-    paintRobot(robot, heroPaint(u));
+    const robot = buildRobot(buildFor(u)), boss = roundBossRobot(u);
+    if (boss) addExtras(robot, boss);
+    paintRobot(robot, boss ? boss.paint : heroPaint(u));
     const box = new THREE.Box3().setFromObject(robot), h = Math.max(0.1, box.max.y - box.min.y);
     const scale = sizeOf(u) / h;
     robot.scale.setScalar(scale);
