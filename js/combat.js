@@ -69,7 +69,7 @@ function pickAttackTarget(unit, range) {
     enemiesOf(unit).forEach(c => {
         if (!c.isAlive()) return;
         const d = Math.hypot(c.x - unit.x, c.y - unit.y);
-        if (d > range) return;
+        if (d > range || (range > 1.5 && !lineOfSight(unit.arena, unit, c))) return; // a distancia, hay que verlo
         const key = [-(c.priority || 0), d];
         if (!best || key[0] < bestKey[0] || (key[0] === bestKey[0] && key[1] < bestKey[1])) { best = c; bestKey = key; }
     });
@@ -235,6 +235,7 @@ function updateProjectiles(arena, dt) {
             const step = p.speed * dt;
             p.traveled += step;
             p.x += p.dx * step; p.y += p.dy * step;
+            if (!walkable(arena, Math.round(p.x), Math.round(p.y)) && arena.walls) { fxProjectileHit(p, p.x, p.y); projectiles.splice(i, 1); continue; } // chocó con una columna
             let stopped = false;
             enemiesOf(p.attacker).forEach(c => {
                 if (stopped || !c.isAlive() || p.hitSet.has(c) || Math.hypot(c.x - p.x, c.y - p.y) > p.radius) return;
@@ -267,6 +268,7 @@ function updateProjectiles(arena, dt) {
         }
         p.x += (dx / dist) * step;
         p.y += (dy / dist) * step;
+        if (arena.walls && !walkable(arena, Math.round(p.x), Math.round(p.y))) { fxProjectileHit(p, p.x, p.y); projectiles.splice(i, 1); } // chocó con una columna
     }
 }
 

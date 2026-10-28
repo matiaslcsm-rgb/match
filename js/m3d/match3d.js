@@ -181,6 +181,25 @@ function drawRestDecal() {
     }
 }
 
+// Las columnas de la arena de duelo (arena.walls, duels.js): pilares de chapa con franja de peligro y una luz arriba
+const pillars = new THREE.Group(); scene.add(pillars);
+let pillarsOf = null;
+function placePillars(arena) {
+    if (pillarsOf === arena.walls) return;
+    pillarsOf = arena.walls;
+    while (pillars.children.length) pillars.remove(pillars.children[0]);
+    if (!arena.walls) return;
+    const wall = ps1Material(new THREE.MeshLambertMaterial({ map: wallTex() }));
+    arena.walls.forEach((row, y) => row.forEach((on, x) => {
+        if (!on) return;
+        const add = (geo, m, h) => { const o = new THREE.Mesh(geo, m); o.position.set((x + 0.5) * U, h, (y + 0.5) * U); pillars.add(o); };
+        add(new THREE.BoxGeometry(1, 0.2, 1), mat('carbon'), 0.1);
+        add(new THREE.BoxGeometry(0.8, 2.4, 0.8), wall, 1.4);
+        add(new THREE.BoxGeometry(0.84, 0.25, 0.84), mat('peligro'), 0.6);
+        add(new THREE.BoxGeometry(0.5, 0.12, 0.5), new THREE.MeshBasicMaterial({ color: '#fff4c8' }), 2.66);
+    }));
+}
+
 // Marca en el piso: el aro de los competidores (celeste vos, naranja los rivales) y el aro de rango del jugador
 function ringMesh(r0, r1, color, opacity) {
     const m = new THREE.Mesh(new THREE.RingGeometry(r0, r1, 32), new THREE.MeshBasicMaterial({ color, transparent: true, opacity, depthWrite: false }));
@@ -375,6 +394,7 @@ function frame(arena, dt) {
     const boss = arena.kind === 'boss', rest = arena.kind === 'rest';
     hemi.color.set(boss ? '#f0b8b0' : rest ? '#f2e6d2' : '#dfe6f2'); scene.fog.color.set(boss ? '#1a0b0c' : rest ? '#14110e' : '#0c0d10');
     arenaGroup.visible = !rest; restGroup.visible = rest;
+    placePillars(arena); pillars.visible = !rest;
     const rec = arenaGroup.getObjectByName('rec'); rec.visible = Math.floor(performance.now() / 600) % 2 === 0;
     if (rest) { // la grúa va y viene, la pantalla titila y los paneles de carga laten
         const now = performance.now() / 1000;

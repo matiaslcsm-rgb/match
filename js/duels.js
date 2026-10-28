@@ -19,6 +19,14 @@ const DUEL_DAMAGE_REDUCTION = 0.6; // en duelo, los héroes se hacen 60% menos d
 const DUEL_CURSE_ALIVE = 3; // con 3 héroes en juego o menos, perder un duelo suma una instancia de maldición
 const DUEL_DEATH_ALIVE = 2; // con 2, perder el duelo además cuesta una vida
 const DUEL_STARTS = [{ x: 3, y: 6 }, { x: 16, y: 6 }];
+// Columnas de la arena de duelo (MATCH, roadmap fase 2): frenan los proyectiles y no se pueden pisar; dejan libre la línea
+// del medio, así el duelo arranca con los dos a la vista y cada uno elige si se cubre.
+const DUEL_COLUMNS = [[7, 3], [7, 8], [12, 3], [12, 8]];
+function duelWalls() {
+    const w = Array.from({ length: ROWS }, () => new Array(COLS).fill(false));
+    DUEL_COLUMNS.forEach(([x, y]) => { w[y][x] = true; });
+    return w;
+}
 
 function inCombat() { return gameState === 'WAVE' || gameState === 'DUEL' || gameState === 'BOSS'; }
 
@@ -50,6 +58,7 @@ function makeDuelArenas(plan) {
     const { pairs, bye } = plan;
     const list = pairs.map(([a, b]) => {
         const arena = makeArena('duel', [a, b]);
+        arena.walls = duelWalls();
         arena.stats = { lead: null, changes: 0, dmg: 0, avoidable: 0 };
         [a, b].forEach((h, i) => {
             restoreHero(h);

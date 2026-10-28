@@ -1045,6 +1045,7 @@ function render() {
     if (shakeAmount) ctx.translate((Math.random() - 0.5) * shakeAmount * 2, (Math.random() - 0.5) * shakeAmount * 2);
     ctx.drawImage(arenaBackground(arena.kind), 0, 0, MAP_W, MAP_H);
     drawSceneryOverlay(arena.kind);
+    if (arena.walls) arena.walls.forEach((row, y) => row.forEach((on, x) => { if (on) { ctx.fillStyle = '#3a3e43'; ctx.fillRect(x * TILE + 2, y * TILE + 2, TILE - 4, TILE - 4); ctx.fillStyle = '#f2c21a'; ctx.fillRect(x * TILE + 2, y * TILE + TILE / 2 - 2, TILE - 4, 4); } })); // columnas del duelo
     if (arena.kind === 'duel') {
         ctx.font = 'bold 13px monospace'; ctx.textAlign = 'center'; ctx.fillStyle = '#ffb703';
         ctx.fillText(`⚔ DUELO: ${arena.heroes[0].displayName}  vs  ${arena.heroes[1].displayName}`, MAP_W / 2, TILE * 0.7);

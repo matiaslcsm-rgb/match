@@ -72,6 +72,7 @@ function aiMoveDirection(hero) {
         .sort((a, b) => b.priority - a.priority || distance(hero, a) - distance(hero, b))[0] || nearest;
     if (isRanged(hero)) {
         if (distance(hero, nearest) < range * AI.kiteDistance) return retreatStep(hero, enemies);
+        if (!lineOfSight(hero.arena, hero, focus)) return stepToward(hero, focus, true); // detrás de una columna: lo busca
         return distance(hero, focus) > range ? stepToward(hero, focus) : { dx: 0, dy: 0 };
     }
     if (distance(hero, focus) > Math.max(1, hero.attackRange)) return stepToward(hero, focus);
@@ -86,8 +87,19 @@ function circleStep(hero, target) {
     return next ? { dx: Math.sign(next.x - hero.x), dy: Math.sign(next.y - hero.y) } : { dx: 0, dy: 0 };
 }
 
-function stepToward(hero, target) {
-    return { dx: Math.sign(target.x - hero.x), dy: Math.sign(target.y - hero.y) };
+// Con columnas en la arena, rodea: elige la casilla vecina libre que más lo acerca (y, si see, que lo deje ver al otro)
+function stepToward(hero, target, see = false) {
+    const straight = { dx: Math.sign(target.x - hero.x), dy: Math.sign(target.y - hero.y) };
+    if (!hero.arena || !hero.arena.walls) return straight;
+    const score = (x, y) => Math.hypot(target.x - x, target.y - y) + (see && !lineOfSight(hero.arena, { x, y }, target) ? 4 : 0);
+    let best = { dx: 0, dy: 0 }, bestS = score(hero.x, hero.y);
+    for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) {
+        const x = hero.x + dx, y = hero.y + dy;
+        if ((!dx && !dy) || !walkable(hero.arena, x, y) || (dx && dy && (!walkable(hero.arena, hero.x + dx, hero.y) || !walkable(hero.arena, hero.x, hero.y + dy)))) continue;
+        const s = score(x, y);
+        if (s < bestS - 1e-6) { bestS = s; best = { dx, dy }; }
+    }
+    return best;
 }
 
 // Elige la casilla vecina que más lo aleja del enemigo más cercano a ella. Si está acorralado, se queda.

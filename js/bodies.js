@@ -25,6 +25,14 @@ function walkable(arena, x, y) {
     return !(arena && arena.walls && arena.walls[y][x]);
 }
 
+// ¿Se ve b desde a? Sin columnas en el medio (las paredes de la arena frenan los proyectiles, combat.js).
+function lineOfSight(arena, a, b) {
+    if (!arena || !arena.walls) return true;
+    const d = Math.hypot(b.x - a.x, b.y - a.y), n = Math.ceil(d * 4);
+    for (let i = 1; i < n; i++) if (!walkable(arena, Math.round(a.x + (b.x - a.x) * i / n), Math.round(a.y + (b.y - a.y) * i / n))) return false;
+    return true;
+}
+
 // Unidades vivas de la arena que ocupan una casilla (sin contar a `self`).
 function bodiesAt(arena, x, y, self) {
     if (!arena) return [];

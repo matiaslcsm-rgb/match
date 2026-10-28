@@ -46,7 +46,10 @@ La base para que los competidores nuevos funcionen. Es el plan de `docs/MATCH.md
   lo tira primero al que prepara. Banco de 66: esquiva el 30% de los golpes anunciados (meta 30-70%), duelo mediano
   6,0 → 6,7 s. El banco ahora cuenta los golpes anunciados y cuántos se esquivan.
 - [ ] **Panel del rival en el duelo:** sus habilidades con el enfriamiento (¿tiene el golpe listo?).
-- [ ] **Arena de duelo con 2 a 4 columnas** que frenan proyectiles, para cubrirse.
+- [x] **Arena de duelo con 2 a 4 columnas** que frenan proyectiles, para cubrirse. Hecho 2026-10-28: 4 columnas
+  (`DUEL_COLUMNS`, duels.js) que no se pisan y frenan los ataques y las habilidades; a distancia hay que ver al rival
+  (`lineOfSight`, bodies.js) y la IA rodea las columnas para buscarlo; pilares en 3D. Banco de 66: duelo mediano 5,8 s
+  (dentro del ruido), 4% por tiempo (nadie se traba). Falta que la IA las use para cubrirse.
 
 **Cierra cuando:** los duelos duran 15 a 30 s (hoy 5 s), quien va ganando cambia más de una vez por duelo (hoy 0,7) y
 la IA evita entre el 30% y el 70% de los golpes anunciados.

@@ -1952,6 +1952,25 @@ test('La IA lee los golpes anunciados: con tiempo de persona sale de la marca; s
     } finally { Math.random = sawIt; }
 });
 
+test('Arena de duelo con columnas: no se pisan, frenan los proyectiles, sin verlo no se le tira y la IA rodea para verlo', () => {
+    newGame('SNIPER');
+    const rival = new Hero(HERO_TEMPLATES.AXE);
+    gameState = 'DUEL'; arenas = makeDuelArenas({ pairs: [[player, rival]] });
+    const a = player.arena, [cx, cy] = DUEL_COLUMNS[0];
+    check(a.walls && !walkable(a, cx, cy), 'la columna no se pisa');
+    check(lineOfSight(a, player, rival), 'arrancan a la vista (la línea del medio está libre)');
+    player.x = cx - 2; player.y = cy; rival.x = cx + 2; rival.y = cy; // la columna en el medio
+    check(!lineOfSight(a, player, rival), 'con la columna en el medio no se ven');
+    checkEq(pickAttackTarget(player, effRange(player)), null, 'a distancia no le tira a uno que no ve');
+    fireSkillProjectile(player, { tx: rival.x, ty: rival.y, speed: 10, radius: 0.5, dmg: 50, skillName: 'prueba' });
+    const hp0 = rival.hp;
+    for (let i = 0; i < 20 && a.projectiles.length; i++) updateProjectiles(a, 0.05);
+    check(!a.projectiles.length && rival.hp === hp0, 'la columna frenó el proyectil');
+    let moved = false;
+    for (let i = 0; i < 4 && !lineOfSight(a, player, rival); i++) { const s = stepToward(player, rival, true); if (s.dx || s.dy) moved = true; player.x += s.dx; player.y += s.dy; }
+    check(moved && lineOfSight(a, player, rival), 'la IA rodea la columna hasta verlo');
+});
+
 test('Clic derecho: el héroe camina hasta el destino; el teclado lo cancela', () => {
     newGame('AXE');
     creeps.forEach(c => { c.hp = 0; });
