@@ -998,6 +998,28 @@ function render3d(arena, dt) {
     if (paused) { ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(0, 0, MAP_W, MAP_H); ctx.font = 'bold 30px monospace'; ctx.fillStyle = '#ffb703'; ctx.fillText('PAUSA', MAP_W / 2, MAP_H / 2); }
 }
 
+// MATCH 3D: los boxes del show (el área de descanso) en 3D; encima, el título, los nombres y la ayuda
+const restScene = { kind: 'rest', heroes: [], creeps: [], projectiles: [], fx: [] };
+function renderRest3d(dt) {
+    restScene.heroes = heroes.filter(h => h.inRest && !h.eliminated);
+    M3D.active = true;
+    canvas.style.backgroundColor = 'transparent';
+    ctx.clearRect(0, 0, MAP_W, MAP_H);
+    M3D.frame(restScene, dt);
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.strokeStyle = 'rgba(0,0,0,0.85)';
+    ctx.font = 'bold 16px monospace'; ctx.lineWidth = 4;
+    ctx.strokeText('BOXES DEL SHOW', MAP_W / 2, TILE * 0.6); ctx.fillStyle = '#f2c21a'; ctx.fillText('BOXES DEL SHOW', MAP_W / 2, TILE * 0.6);
+    ctx.font = '11px monospace'; ctx.lineWidth = 3;
+    const note = (t, y) => { ctx.strokeText(t, MAP_W / 2, y); ctx.fillStyle = '#e9e5d8'; ctx.fillText(t, MAP_W / 2, y); };
+    note(wasdMove ? 'Podés caminar con W A S D o clic derecho' : 'Caminá con clic derecho', TILE * 1.25);
+    note('Volvés al combate con vida y maná completos', MAP_H - TILE * 0.35);
+    restScene.heroes.forEach(h => {
+        const p = M3D.project(h.rx ?? h.x, h.ry ?? h.y, M3D.headHeight(h)), name = h.displayName;
+        ctx.font = 'bold 10px monospace'; ctx.strokeText(name, p.x, p.y - 4); ctx.fillStyle = h === player ? '#00f5d4' : '#ffd27a'; ctx.fillText(name, p.x, p.y - 4);
+    });
+    if (paused) { ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(0, 0, MAP_W, MAP_H); ctx.font = 'bold 30px monospace'; ctx.fillStyle = '#ffb703'; ctx.fillText('PAUSA', MAP_W / 2, MAP_H / 2); }
+}
+
 function render() {
     const dt = tickFx();
     if (window.M3D) { M3D.active = false; M3D.hide(); canvas.style.backgroundColor = ''; } // MATCH 3D: solo si esta arena se dibuja en 3D (render3d)
@@ -1007,7 +1029,7 @@ function render() {
     const k = mapScale * (window.devicePixelRatio || 1);
     ctx.setTransform(k, 0, 0, k, 0, 0);
     const hero = viewedHero || player;
-    if (hero && (hero.inRest || !hero.arena) && gameState !== 'HERO_SELECT' && gameState !== 'MENU') { renderRestArea(dt); return; }
+    if (hero && (hero.inRest || !hero.arena) && gameState !== 'HERO_SELECT' && gameState !== 'MENU') { if (window.M3D && M3D.enabled()) renderRest3d(dt); else renderRestArea(dt); return; }
     ctx.fillStyle = '#050507'; ctx.fillRect(0, 0, MAP_W, MAP_H);
     if (gameState === 'MENU' || gameState === 'HERO_SELECT' || !hero || !hero.arena || !inCombat()) {
         ctx.strokeStyle = '#151821';

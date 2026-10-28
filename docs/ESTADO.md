@@ -19,7 +19,7 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
   igual, con el mouse), competidores y creeps como robots por piezas con el motor de `arena-robots` (copiado en
   `js/m3d/`), look PS1 industrial. Esto **reactiva el RTS de MATCH** que estaba en pausa. Hecho: la arena en 3D jugable
   y los efectos de habilidades en 3D (tajos, áreas y mira en el piso; rayos, trazadoras, meteoros y chispas en el aire;
-  los robots se caen al morir). Faltan el descanso en 3D y jefes robot propios.
+  los robots se caen al morir) y el descanso en 3D: los boxes del show. Faltan jefes robot propios.
 - **Roadmap nuevo (2026-10-28):** `docs/ROADMAP.md`, corto y en orden: terminar el 3D → duelos que se leen → los
   competidores de MATCH (Rec primero) → el show "En Vivo" → balance y 1.0. **El garaje / creador de competidor para el
   jugador queda descartado por ahora (decisión del usuario: "no es algo que sume por ahora").**

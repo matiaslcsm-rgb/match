@@ -16,7 +16,9 @@ algo que sume por ahora"). Se juega con los competidores del show.
 
 ## Fase 1 — Terminar el 3D
 Que todo lo que se juega se vea en 3D y que no quede nada de la Torre.
-- [ ] **La zona de descanso en 3D:** los boxes del show, donde tu robot espera entre oleadas mientras comprás.
+- [x] **La zona de descanso en 3D:** los boxes del show, donde tu robot espera entre oleadas mientras comprás.
+  Hecho 2026-10-28: portones de garaje, estación de reparación con grúa (donde estaba la fuente), dos estaciones de
+  carga (las fogatas), los 8 boxes numerados y la calle de boxes en el piso; se camina igual (clic derecho o W A S D).
 - [ ] **Jefes robot propios:** cada jefe de ronda (rondas 5, 10, 15 y 20) con su propio robot, más grande y con piezas
   únicas, en vez del robot genérico agrandado.
 - [ ] **Limpieza:** sacar de `style.css` lo de la Torre (tema de pergamino, inventario, forja, herrero, bitácora) y los

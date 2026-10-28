@@ -8,7 +8,9 @@
 //   · Competidores y creeps son robots armados por piezas con el motor de arena-robots (robot.js, parts.js,
 //     skeleton.js, ps1.js), con el look de PS1 y la estética industrial de MATCH.
 //   · Las barras de vida y los números de daño se dibujan en el canvas 2D de siempre, que queda transparente encima.
-//   El descanso y el menú siguen en 2D (se pasan después). Sin WebGL, o en las pruebas, la arena se dibuja en 2D (ui.js).
+//   · El descanso (2026-10-28) son los boxes del show: portones de garaje, la estación de reparación (donde estaba la
+//     fuente) y dos de carga (las fogatas); en el piso, los 8 boxes numerados. Se camina igual.
+//   El menú sigue en 2D. Sin WebGL, o en las pruebas, todo se dibuja en 2D (ui.js).
 // Expone window.M3D para el código clásico (ui.js, mouse.js, fxSkills.js).
 import * as THREE from 'three';
 import { buildRobot, animateRobot } from './robot.js';
@@ -117,6 +119,67 @@ const arenaGroup = new THREE.Group(); scene.add(arenaGroup);
     const rec = new THREE.Mesh(new THREE.SphereGeometry(0.22, 8, 6), new THREE.MeshBasicMaterial({ color: '#ff2a2a' }));
     rec.position.set(COLS / 2, 0.75, -0.25); rec.name = 'rec'; arenaGroup.add(rec);
 }
+// LOS BOXES DEL SHOW (el área de descanso): lo que no se pisa está donde dice restBlocked (game.js): la estación de
+// reparación en lugar de la fuente y las dos de carga en lugar de las fogatas
+const restGroup = new THREE.Group(); restGroup.visible = false; scene.add(restGroup);
+{
+    const at = (m, x, y, h) => { m.position.set((x + 0.5) * U, h, (y + 0.5) * U); restGroup.add(m); return m; };
+    const box = (w, h, d, material, x, y, lift = 0) => at(new THREE.Mesh(new THREE.BoxGeometry(w, h, d), material), x, y, lift + h / 2);
+    const glow = c => new THREE.MeshBasicMaterial({ color: c });
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(COLS, ROWS), ps1Material(new THREE.MeshLambertMaterial({ map: floorTex(1), color: '#c9c4b8' })));
+    floor.material.map.repeat.set(COLS / 2, ROWS / 2);
+    floor.rotation.x = -Math.PI / 2; floor.position.set(COLS / 2, 0, ROWS / 2); restGroup.add(floor);
+    const outer = new THREE.Mesh(new THREE.PlaneGeometry(COLS + 30, ROWS + 30), new THREE.MeshLambertMaterial({ color: '#2a2b2e' }));
+    outer.rotation.x = -Math.PI / 2; outer.position.set(COLS / 2, -0.02, ROWS / 2); restGroup.add(outer);
+    // la pared del fondo: cuatro portones de garaje, con su luz arriba
+    const wall = ps1Material(new THREE.MeshLambertMaterial({ map: wallTex() }));
+    box(COLS + 1, 3.2, 0.4, wall, COLS / 2 - 0.5, -1.2);
+    for (let i = 0; i < 4; i++) {
+        const x = 2 + i * 5;
+        box(3.2, 2.4, 0.1, mat('gris'), x, -0.95);
+        for (let k = 0; k < 6; k++) box(3.2, 0.05, 0.12, mat('carbon'), x, -0.94, 0.3 + k * 0.38);   // las tablillas del portón
+        box(3.4, 0.12, 0.14, mat('peligro'), x, -0.92, 2.45);
+        box(2.4, 0.12, 0.2, glow('#fff4c8'), x, -0.9, 2.8);
+    }
+    // la estación de reparación (donde estaba la fuente): base, columna, grúa y la pantalla
+    const sx = 10, sy = 4;
+    box(1.5, 0.35, 1.5, mat('carbon'), sx, sy);
+    box(1.6, 0.08, 1.6, mat('peligro'), sx, sy, 0.35);
+    box(0.4, 2.6, 0.4, mat('oliva'), sx, sy, 0.43);
+    const crane = new THREE.Group(); at(crane, sx, sy, 2.9); crane.name = 'crane';                   // la grúa gira sobre la columna
+    const part = (w, h, d, m, x, y) => { const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); b.position.set(x, y, 0); crane.add(b); };
+    part(2.2, 0.25, 0.3, mat('ama'), 0.9, 0);
+    part(0.08, 0.9, 0.08, mat('metal'), 1.8, -0.55);                                                     // el cable
+    part(0.3, 0.2, 0.3, mat('nar'), 1.8, -1.05);                                                         // el gancho
+    box(0.9, 0.6, 0.06, glow('#3cd8f0'), sx, sy + 0.25, 1.4).name = 'screen';
+    // las estaciones de carga (donde estaban las fogatas): gabinete con el panel naranja, el cable y su luz
+    for (const x of [5, 15]) {
+        box(0.9, 1.5, 0.7, mat('gris'), x, 7);
+        box(0.6, 0.5, 0.04, glow('#ff8a2a'), x, 7.37, 0.7).name = 'charge';
+        box(0.95, 0.08, 0.75, mat('peligro'), x, 7, 1.5);
+        box(0.12, 0.12, 1.2, mat('ama'), x, 6.3, 0.06);
+        at(new THREE.PointLight('#ff9a40', 8, 6, 1.8), x, 7.6, 1.2);
+    }
+    at(new THREE.PointLight('#fff1d6', 14, 22, 1.4), 10, 6, 6);
+}
+// El piso de los boxes: los 8 lugares numerados, la calle de boxes y la cruz de a dónde caminás
+function drawRestDecal() {
+    const px = v => v * TILE + TILE / 2;
+    dctx.strokeStyle = 'rgba(242,194,26,0.85)'; dctx.lineWidth = 2;
+    dctx.setLineDash([8, 6]); dctx.beginPath(); dctx.moveTo(0, px(10.6)); dctx.lineTo(MAP_W, px(10.6)); dctx.stroke(); dctx.setLineDash([]);
+    dctx.font = 'bold 13px monospace'; dctx.fillStyle = 'rgba(242,194,26,0.5)'; dctx.fillText('CALLE DE BOXES', MAP_W / 2, px(11.1));
+    (typeof REST_SPOTS !== 'undefined' ? REST_SPOTS : []).forEach(([x, y], i) => {
+        dctx.strokeStyle = 'rgba(233,229,216,0.7)'; dctx.strokeRect(px(x) - TILE * 0.6, px(y) - TILE * 0.6, TILE * 1.2, TILE * 1.2);
+        dctx.font = 'bold 9px monospace'; dctx.fillStyle = 'rgba(233,229,216,0.75)'; dctx.fillText(String(i + 1).padStart(2, '0'), px(x) - TILE * 0.38, px(y) - TILE * 0.42);
+    });
+    const me = typeof player !== 'undefined' ? player : null;
+    if (me && me.inRest && me.moveTarget) {
+        const t = me.moveTarget, s = 5;
+        dctx.strokeStyle = '#2dc653'; dctx.lineWidth = 2; dctx.beginPath();
+        dctx.moveTo(px(t.x) - s, px(t.y) - s); dctx.lineTo(px(t.x) + s, px(t.y) + s); dctx.moveTo(px(t.x) + s, px(t.y) - s); dctx.lineTo(px(t.x) - s, px(t.y) + s); dctx.stroke();
+    }
+}
+
 // Marca en el piso: el aro de los competidores (celeste vos, naranja los rivales) y el aro de rango del jugador
 function ringMesh(r0, r1, color, opacity) {
     const m = new THREE.Mesh(new THREE.RingGeometry(r0, r1, 32), new THREE.MeshBasicMaterial({ color, transparent: true, opacity, depthWrite: false }));
@@ -185,6 +248,7 @@ function drawDecal(arena) {
     withCtx(dctx, () => {
         dctx.setTransform(1, 0, 0, 1, 0, 0); dctx.clearRect(0, 0, MAP_W, MAP_H);
         dctx.textAlign = 'center'; dctx.textBaseline = 'middle';
+        if (arena.kind === 'rest') { drawRestDecal(); return; }
         if (arena.boss && arena.boss.isAlive()) { // el aura del jefe
             const b = arena.boss;
             dctx.strokeStyle = 'rgba(255,0,85,0.55)'; dctx.lineWidth = 2;
@@ -303,10 +367,17 @@ function frame(arena, dt) {
     if (rw !== RES.w || rh !== RES.h) { setRes(rw, rh); renderer.setSize(rw, rh, false); }
     placeCamera(w / Math.max(1, h));
     if (shakeAmount) { camera.position.x += (Math.random() - 0.5) * shakeAmount * 0.03; camera.position.z += (Math.random() - 0.5) * shakeAmount * 0.03; } // temblor de los golpes fuertes
-    // Jefe: luz más roja
-    const boss = arena.kind === 'boss';
-    hemi.color.set(boss ? '#f0b8b0' : '#dfe6f2'); scene.fog.color.set(boss ? '#1a0b0c' : '#0c0d10');
+    // Jefe: luz más roja; los boxes, más cálidos
+    const boss = arena.kind === 'boss', rest = arena.kind === 'rest';
+    hemi.color.set(boss ? '#f0b8b0' : rest ? '#f2e6d2' : '#dfe6f2'); scene.fog.color.set(boss ? '#1a0b0c' : rest ? '#14110e' : '#0c0d10');
+    arenaGroup.visible = !rest; restGroup.visible = rest;
     const rec = arenaGroup.getObjectByName('rec'); rec.visible = Math.floor(performance.now() / 600) % 2 === 0;
+    if (rest) { // la grúa va y viene, la pantalla titila y los paneles de carga laten
+        const now = performance.now() / 1000;
+        restGroup.getObjectByName('crane').rotation.y = Math.sin(now * 0.4) * 0.6;
+        restGroup.getObjectByName('screen').visible = Math.sin(now * 13) > -0.9;
+        restGroup.traverse(o => { if (o.name === 'charge') o.material.color.setHSL(0.07, 1, 0.45 + Math.sin(now * 3) * 0.12); });
+    }
 
     const list = arena.creeps.filter(c => c.isAlive()).concat(arena.heroes.filter(h => !h.eliminated && h.isAlive()));
     for (const u of list) {
@@ -389,6 +460,7 @@ const enabled = !/[?&]test/.test(location.search) && !/[?&]view3d=0/.test(locati
 window.M3D = {
     // ¿Se dibuja esta arena en 3D? (combate: oleada, duelo o jefe)
     wants: arena => enabled && arena && ['wave', 'duel', 'boss'].includes(arena.kind),
+    // los boxes (el descanso) también: ui.js arma una arena de mentira { kind: 'rest', heroes, creeps: [], projectiles: [], fx: [] }
     enabled: () => enabled,
     frame, hide, project, headHeight, screenToTile, active: false
 };
