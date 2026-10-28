@@ -177,8 +177,8 @@ three.js; los robots salen del motor de `arena-robots` (`js/m3d/robot.js`, `part
 competidor tiene su armado de piezas (Rec, el Sniper de hoy, ya con cabeza de cámara y ruedas) y el color de su
 atributo; los creeps, un armado según cómo pelean y su color. Las barras de vida, los nombres y los números de daño
 van en el canvas 2D, transparente encima.
-**Falta:** tajos, áreas y avisos de las habilidades en 3D; el descanso y el menú en 3D; el garaje para armar
-competidores (el creador para el jugador).
+**Falta:** el descanso y el menú en 3D y jefes robot propios (orden en `docs/ROADMAP.md`). El garaje para armar
+competidores quedó **descartado por ahora** (decisión del usuario 2026-10-28).
 
 **Efectos de habilidades en 3D (2026-10-28, hecho):** lo que pasa en el piso (tajos, aros, zonas, auras, la mira y el
 área de la habilidad que apuntás, la cruz de a dónde caminás, el aura del jefe) se dibuja con el mismo código 2D en un

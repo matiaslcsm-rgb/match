@@ -13,7 +13,7 @@ draft, tienda, un duelo por ronda, apuestas, jefes) con competidores y creeps co
   divertido y desafiante**. Diseño en `docs/MATCH.md`; reglas de hoy en `docs/MECANICAS.md`.
 - **Solo 3D (decisión del usuario 2026-10-28):** la arena de combate (oleada, duelo, jefe) se dibuja en 3D con cámara en
   diagonal como Dota (`js/m3d/match3d.js`). El 2D de la arena queda solo para las pruebas y por si el navegador no tiene
-  WebGL. Faltan en 3D el descanso y el menú, jefes robot propios y el garaje para armar competidores.
+  WebGL. El orden de lo que sigue está en `docs/ROADMAP.md` (el garaje para armar competidores quedó descartado por ahora).
 
 ## El equipo
 **Sin agentes (pedido del usuario 2026-10-19):** el trabajo lo hacés vos, sin lanzar agentes. Los agentes de
