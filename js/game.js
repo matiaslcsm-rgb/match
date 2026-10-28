@@ -342,10 +342,11 @@ function handleSkillKeypress(k) {
 // el piso donde va a caer (el punto se fija al empezar: el que se corre a tiempo la esquiva). Si lo aturden mientras
 // tanto, se corta (no gasta maná ni enfriamiento). Al salir, queda expuesto WINDUP_EXPOSED segundos sin moverse ni pegar.
 const WINDUP_EXPOSED = 0.4;
+const windupStats = { fired: 0, hit: 0 }; // en los duelos: golpes anunciados que salieron y que pegaron (banco)
 function startWindup(hero, skill) {
     let aim = hero.aimPoint;
     if (!aim) { const t = nearestEnemy(hero, aimRange(skill, hero)); if (!t) return false; aim = { x: t.x, y: t.y }; }
-    hero.windup = { skill, at: gameClock, until: gameClock + skill.windup, aimX: aim.x, aimY: aim.y, r: skillRadius(skill, hero) };
+    hero.windup = { skill, at: gameClock, until: gameClock + skill.windup, fromX: hero.x, fromY: hero.y, aimX: aim.x, aimY: aim.y, r: skillRadius(skill, hero) };
     hero.moveTarget = null;
     return true;
 }

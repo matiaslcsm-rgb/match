@@ -1932,6 +1932,26 @@ test('Golpe anunciado: se prepara con la marca en el piso, sale al punto fijado 
     check(!player.windup && !player.cooldowns[skill.id] && player.mana === player.maxMana, 'aturdido: se cortó y no gastó nada');
 });
 
+test('La IA lee los golpes anunciados: con tiempo de persona sale de la marca; si no la ve, se la come', () => {
+    newGame('ZEUS');
+    const skill = learn('ZEUS_BOLT', 1), ai = new Hero(HERO_TEMPLATES.AXE);
+    gameState = 'DUEL'; arenas = [makeArena('duel', [player, ai])];
+    player.x = 5; player.y = 5; ai.x = player.x + 3; ai.y = player.y;
+    const sawIt = Math.random; Math.random = () => 0.99; // la ve y tarda lo máximo (0,5 s)
+    try {
+        player.mana = player.maxMana; tryCastSkill(player, skill);
+        checkEq(aiThreat(ai), null, 'recién empieza: todavía no reaccionó');
+        gameClock += 0.55;
+        const w = aiThreat(ai); check(w === player.windup, 'a los 0,55 s ya la vio');
+        const step = dodgeStep(ai, w), d0 = Math.hypot(ai.x - w.aimX, ai.y - w.aimY);
+        check(Math.hypot(ai.x + step.dx - w.aimX, ai.y + step.dy - w.aimY) > d0, 'el paso lo saca de la marca');
+        player.windup = null; player.exposedUntil = 0; player.cooldowns[skill.id] = 0;
+        Math.random = () => 0; // no la ve
+        tryCastSkill(player, skill); gameClock += 2;
+        checkEq(aiThreat(ai), null, 'si no la vio, no se mueve');
+    } finally { Math.random = sawIt; }
+});
+
 test('Clic derecho: el héroe camina hasta el destino; el teclado lo cancela', () => {
     newGame('AXE');
     creeps.forEach(c => { c.hp = 0; });
@@ -2156,6 +2176,7 @@ function benchDuels(list) {
 }
 function runBench(n) {
     testSandbox();
+    windupStats.fired = windupStats.hit = 0;
     const games = [], panel = document.createElement('div');
     panel.id = 'test-report'; document.body.appendChild(panel);
     const step = () => {
@@ -2167,10 +2188,12 @@ function runBench(n) {
         resetGame();
         const rows = benchTable(games), avgRound = Math.round(games.reduce((a, g) => a + g.round, 0) / n);
         const duels = benchDuels(games.flatMap(g => g.duels));
+        duels.windupFired = windupStats.fired; duels.windupDodgedPct = Math.round(100 * (1 - windupStats.hit / (windupStats.fired || 1)));
         window.benchResult = { n, avgRound, rows, games, duels };
         panel.innerHTML = `<h3>📊 Banco de Custom Hero: ${n} partidas, ronda final promedio ${avgRound}</h3>` +
             `<p>⚔️ ${duels.n} duelos: duran ${duels.medianSecs} s (la mitad entre ${duels.p25} y ${duels.p75} s), ${duels.byTimePct}% por tiempo, ` +
-            `${duels.avgChanges} cambios de quién va ganando en promedio, ${duels.avoidablePct}% del daño entre héroes se podía evitar caminando</p>` +
+            `${duels.avgChanges} cambios de quién va ganando en promedio, ${duels.avoidablePct}% del daño entre héroes se podía evitar caminando; ` +
+            `${duels.windupFired} golpes anunciados, ${duels.windupDodgedPct}% esquivados</p>` +
             rows.map(r => `<div>${r.name}: ${r.wins}/${r.games} ganadas (${r.winPct}%), puesto ${r.place}, afuera en la ronda ${r.outRound ?? '—'}</div>`).join('');
         document.title = `📊 banco ${n}/${n} listo`;
         console.log('Banco de Custom Hero', window.benchResult);

@@ -40,8 +40,11 @@ La base para que los competidores nuevos funcionen. Es el plan de `docs/MATCH.md
   (game.js: startWindup/tickWindup; la marca, fx.js drawWindupMark; azul en el modo daltónico). Banco de 66 partidas,
   antes → después: duelo mediano 5,2 → 6,0 s, cambios de quién gana 0,7 → 0,8, evitable 13 → 11%; Zeus gana 27 → 8%
   (el rayo ahora puede fallar: revisar en el balance cuando la IA esquive).
-- [ ] **La IA lee los avisos:** camina fuera de las zonas y de la línea de los proyectiles y corta preparaciones, con
-  tiempos de reacción de una persona.
+- [x] **La IA lee los avisos:** camina fuera de las zonas y de la línea de los proyectiles y corta preparaciones, con
+  tiempos de reacción de una persona. Hecho 2026-10-28 (ai.js: aiNoticed, aiThreat, dodgeStep): tarda 0,2-0,45 s en
+  darse cuenta y no lo ve el 20% de las veces; sale del camino del golpe (no solo del punto); con un control listo, se
+  lo tira primero al que prepara. Banco de 66: esquiva el 30% de los golpes anunciados (meta 30-70%), duelo mediano
+  6,0 → 6,7 s. El banco ahora cuenta los golpes anunciados y cuántos se esquivan.
 - [ ] **Panel del rival en el duelo:** sus habilidades con el enfriamiento (¿tiene el golpe listo?).
 - [ ] **Arena de duelo con 2 a 4 columnas** que frenan proyectiles, para cubrirse.
 

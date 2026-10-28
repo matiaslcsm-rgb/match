@@ -8,23 +8,63 @@
 //   Los dos persiguen primero a los objetivos prioritarios cercanos (ej: Sanadores).
 //   Habilidades: de área con 2+ enemigos cerca, definitiva con 3+ o con el jefe cerca, mejoras cuando hay pelea,
 //   de un objetivo cuando están listas.
+//   Golpes anunciados (game.js, startWindup): los lee como una persona. Tarda en reaccionar (AI.react) y a veces no lo
+//   ve (AI.missWarn); si lo ve y está adentro de la marca, camina para afuera; si tiene un control listo, se lo corta.
 
 const AI = {
     thinkInterval: 0.25,  // cada cuánto decide qué habilidades lanzar (segundos)
     rangedFrom: 2.5,      // desde este rango de ataque se considera héroe a distancia
     kiteDistance: 0.6,    // retrocede si el enemigo más cercano está a menos de este % de su rango
     nearRadius: 3.5,      // radio para contar enemigos "cerca" (decidir habilidades de área y definitivas)
-    focusRadius: 8        // busca objetivos prioritarios (ej: Sanadores) hasta esta distancia
+    focusRadius: 8,       // busca objetivos prioritarios (ej: Sanadores) hasta esta distancia
+    react: [0.2, 0.45],   // golpes anunciados: segundos que tarda en darse cuenta (entre uno y otro, al azar)
+    missWarn: 0.2         // y la probabilidad de no verlo
 };
 
 function distance(a, b) { return Math.hypot(a.x - b.x, a.y - b.y); }
 function isRanged(hero) { return hero.attackRange >= AI.rangedFrom; }
+
+// --- GOLPES ANUNCIADOS ---
+// ¿Ya se dio cuenta de esta preparación? Cada uno sortea una vez cuánto tarda (o si no la ve).
+function aiNoticed(hero, w) {
+    w.react = w.react || new Map();
+    if (!w.react.has(hero)) w.react.set(hero, Math.random() < AI.missWarn ? Infinity : AI.react[0] + Math.random() * (AI.react[1] - AI.react[0]));
+    return gameClock - w.at >= w.react.get(hero);
+}
+// Qué tan lejos está (x, y) del camino del golpe: el proyectil le pega a todo lo que pasa cerca, desde el que lo tira
+// hasta la marca (combat.js, fireSkillProjectile)
+function windupDist(w, x, y) {
+    const vx = w.aimX - w.fromX, vy = w.aimY - w.fromY, len2 = vx * vx + vy * vy;
+    const t = len2 ? Math.max(0, Math.min(1, ((x - w.fromX) * vx + (y - w.fromY) * vy) / len2)) : 1;
+    return Math.hypot(x - (w.fromX + vx * t), y - (w.fromY + vy * t));
+}
+// La marca de un rival que lo va a agarrar (y ya la vio)
+function aiThreat(hero) {
+    for (const e of enemiesOf(hero)) {
+        const w = e.windup;
+        if (w && e.isAlive() && windupDist(w, hero.x, hero.y) <= w.r + 0.6 && aiNoticed(hero, w)) return w;
+    }
+    return null;
+}
+// El paso que más lo aleja del camino del golpe
+function dodgeStep(hero, w) {
+    let best = { dx: 0, dy: 0 }, bestD = windupDist(w, hero.x, hero.y);
+    for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) {
+        const x = hero.x + dx, y = hero.y + dy;
+        if ((!dx && !dy) || x < 0 || y < 0 || x >= COLS || y >= ROWS || !walkable(hero.arena, x, y)) continue;
+        const d = windupDist(w, x, y) + (dx && dy ? 0 : 0.01); // empate: mejor derecho
+        if (d > bestD) { bestD = d; best = { dx, dy }; }
+    }
+    return best;
+}
 
 // --- MOVIMIENTO ---
 // Devuelve la dirección del próximo paso: { dx, dy } con valores -1, 0 o 1.
 function aiMoveDirection(hero) {
     const enemies = enemiesOf(hero).filter(c => c.isAlive());
     if (!enemies.length) return { dx: 0, dy: 0 };
+    const threat = aiThreat(hero);
+    if (threat) return dodgeStep(hero, threat); // primero, salir de la marca
     const nearest = nearestEnemy(hero);
     const range = effRange(hero);
     // Objetivo a perseguir: uno prioritario cercano (ej: Sanador) o, si no hay, el más cercano
@@ -88,9 +128,12 @@ function aiCastSkills(hero) {
     const bossNear = near.some(c => c.isBoss);
     const nearest = nearestEnemy(hero);
     const nearestDist = nearest ? distance(hero, nearest) : Infinity;
-    hero.skills.forEach(s => {
+    // un rival preparando un golpe anunciado: si tiene un control, primero eso (para cortárselo)
+    const winding = enemiesOf(hero).some(e => e.windup && e.isAlive() && aiNoticed(hero, e.windup));
+    const control = s => s.tags.includes('CONTROL');
+    (winding ? [...hero.skills].sort((a, b) => control(b) - control(a)) : hero.skills).forEach(s => {
         if (s.kind !== 'active' || skillLevel(hero, s) === 0 || (hero.cooldowns[s.id] || 0) > 0) return;
-        if (!aiWantsToCast(hero, s, near.length, bossNear, nearestDist, nearest)) return;
+        if (!(winding && control(s)) && !aiWantsToCast(hero, s, near.length, bossNear, nearestDist, nearest)) return;
         tryCastSkill(hero, s, { quiet: true });
     });
 }
