@@ -337,14 +337,46 @@ function handleSkillKeypress(k) {
 // Camino único para lanzar una habilidad (jugador o IA). Devuelve true si se lanzó.
 // Solo se cobra maná y enfriamiento si la habilidad realmente se lanzó (ej: había objetivo en rango).
 // opts.quiet: no muestra los mensajes de un intento fallido (la IA prueba seguido y llenaría el registro).
+// --- GOLPES ANUNCIADOS (MATCH, roadmap fase 2: "duelos que se leen"; docs/MATCH.md §5) ---
+// Una habilidad con `windup` (segundos) no sale al toque: el que la tira se queda quieto preparándola, con una marca en
+// el piso donde va a caer (el punto se fija al empezar: el que se corre a tiempo la esquiva). Si lo aturden mientras
+// tanto, se corta (no gasta maná ni enfriamiento). Al salir, queda expuesto WINDUP_EXPOSED segundos sin moverse ni pegar.
+const WINDUP_EXPOSED = 0.4;
+function startWindup(hero, skill) {
+    let aim = hero.aimPoint;
+    if (!aim) { const t = nearestEnemy(hero, aimRange(skill, hero)); if (!t) return false; aim = { x: t.x, y: t.y }; }
+    hero.windup = { skill, at: gameClock, until: gameClock + skill.windup, aimX: aim.x, aimY: aim.y, r: skillRadius(skill, hero) };
+    hero.moveTarget = null;
+    return true;
+}
+// Cada cuadro: suelta el golpe cuando se cumple el tiempo o lo corta si lo aturdieron. true: está ocupado
+// (preparando o expuesto) y no camina, no ataca ni tira otra cosa.
+function tickWindup(hero) {
+    const w = hero.windup;
+    if (w && (hasFlag(hero, 'stun') || !hero.isAlive())) {
+        hero.windup = null;
+        if (hero.isAlive()) { fxText(hero, '¡Cortado!', '#ffd166', 12); log(`✋ ¡Le cortaron ${w.skill.name} a ${hero.displayName || hero.name}!`); }
+        return false;
+    }
+    if (w && gameClock >= w.until) {
+        hero.windup = null;
+        hero.aimPoint = { x: w.aimX, y: w.aimY };
+        try { tryCastSkill(hero, w.skill, { released: true }); } finally { hero.aimPoint = null; }
+        hero.exposedUntil = gameClock + WINDUP_EXPOSED;
+    }
+    return !!hero.windup || gameClock < (hero.exposedUntil || 0);
+}
+
 function tryCastSkill(hero, skill, opts = {}) {
     if (!hero.isAlive() || skillLevel(hero, skill) === 0 || (hero.cooldowns[skill.id] || 0) > 0) return false;
+    if (!opts.released && (hero.windup || gameClock < (hero.exposedUntil || 0))) return false; // preparando otro golpe o expuesto
     if (hasFlag(hero, 'stun')) { if (!opts.quiet) log('💫 Estás aturdido.'); return false; }
     const manaCost = hasFlag(hero, 'freeCast') ? 0 : (val(skill, hero, 'manaCost') || 0);
     if (hero.mana < manaCost) {
         if (!opts.quiet) log(`❌ Maná insuficiente para ${skill.name} (necesitás ${manaCost}).`);
         return false;
     }
+    if (skill.windup && !opts.released) return startWindup(hero, skill); // golpe anunciado: sale después (tickWindup)
     const outerBuffer = logBuffer;
     logBuffer = [];
     let ok;
@@ -409,7 +441,10 @@ function updateHero(hero, arena, dt) {
         if (!tryRespawn(hero)) { tickCooldowns(hero, dt); return; }
     }
     const aiControlled = hero !== player || autopilot;
-    if (aiControlled && everyInterval(hero, 'AI_THINK', dt, AI.thinkInterval)) {
+    const busy = tickWindup(hero); // preparando un golpe anunciado o expuesto después de tirarlo: quieto
+    if (busy) {
+        // no piensa, no camina, no ataca
+    } else if (aiControlled && everyInterval(hero, 'AI_THINK', dt, AI.thinkInterval)) {
         aiSpendPoints(hero);
         aiCastSkills(hero);
     } else if (hero === player && autoCast && everyInterval(hero, 'AI_THINK', dt, AI.thinkInterval)) {
@@ -425,7 +460,7 @@ function updateHero(hero, arena, dt) {
     const kb = aiControlled ? null : keyboardDirection(), last = hero.lastStepDir;
     const turning = kb && (kb.dx || kb.dy) && last && (kb.dx !== last.dx || kb.dy !== last.dy);
     const need = turning ? stepTime * 0.55 : stepTime; // tiempo que pide este paso
-    if (!stunned && hero.moveTimer > need) {
+    if (!stunned && !busy && hero.moveTimer > need) {
         let dir = aiControlled ? aiMoveDirection(hero) : kb;
         if (!aiControlled) {
             if (dir.dx || dir.dy) { hero.moveTarget = null; hero.focusChase = false; } // el teclado manda sobre el mouse
@@ -456,7 +491,7 @@ function updateHero(hero, arena, dt) {
 
     // Ataque automático: al enemigo en rango de mayor prioridad (ej: Sanadores) o, si no, al más cercano
     // (desarmado: como el Manto Fantasma del Nigromante, no ataca pero sigue moviéndose, a diferencia de un aturdimiento)
-    const target = (stunned || hasFlag(hero, 'disarm')) ? null : pickAttackTarget(hero, effRange(hero));
+    const target = (stunned || busy || hasFlag(hero, 'disarm')) ? null : pickAttackTarget(hero, effRange(hero));
     const walking = MOVE_ATTACK_RULE === 'pause' && gameClock < (hero.movingUntil || 0);
     if (target && walking) {
         // pausa: mientras camina el ataque no avanza, pero conserva lo que tenía cargado

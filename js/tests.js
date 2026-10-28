@@ -1896,8 +1896,40 @@ test('pointTarget (proyectil de habilidad): a diferencia de nearestEnemy, si apu
     c.x = player.x; c.y = player.y + 5;
     // Clic bien lejos del enemigo y fuera de su línea de tiro (con nearestEnemy pegaría igual; acá, no).
     check(castAt(player, skill, player.x + 5, player.y), 'se lanzó igual (había rango para el punto)');
+    gameClock += skill.windup; tickWindup(player); // golpe anunciado: sale después de la preparación
     for (let i = 0; i < 30 && player.arena.projectiles.length; i++) updateProjectiles(player.arena, 0.05);
     checkEq(c.hp, 9999, 'clic errado, no le pegó a nadie');
+});
+
+test('Golpe anunciado: se prepara con la marca en el piso, sale al punto fijado (se esquiva), aturdir lo corta y después queda expuesto', () => {
+    newGame('ZEUS');
+    const skill = learn('ZEUS_BOLT', 1);
+    check(skill.windup >= 0.7, 'el Rayo Relámpago avisa al menos 0,7 s');
+    const c = dummy({ hp: 9999, maxHp: 9999 });
+    c.x = player.x + 3; c.y = player.y;
+    creeps.forEach(o => { if (o !== c) o.hp = 0; });
+    player.mana = player.maxMana; const mana0 = player.mana;
+    check(tryCastSkill(player, skill), 'arranca a prepararlo');
+    check(player.windup && player.windup.aimX === c.x, 'la marca va donde estaba el rival');
+    checkEq(player.arena.projectiles.length, 0, 'todavía no salió');
+    checkEq(player.mana, mana0, 'no gastó maná todavía');
+    const x0 = player.x; player.moveTarget = { x: 0, y: player.y, arena: player.arena };
+    updateHero(player, player.arena, 0.2);
+    checkEq(player.x, x0, 'mientras prepara, no camina');
+    c.y += 3; // el rival se corre de la marca
+    gameClock += skill.windup; updateHero(player, player.arena, 0.01);
+    check(!player.windup && player.arena.projectiles.length === 1, 'salió al cumplirse el tiempo');
+    check(player.mana < mana0 && player.cooldowns[skill.id] > 0, 'recién ahí gasta maná y entra en enfriamiento');
+    check(!tryCastSkill(player, learn('ZEUS_ARC', 1)), 'expuesto: no puede tirar otra cosa enseguida');
+    for (let i = 0; i < 30 && player.arena.projectiles.length; i++) updateProjectiles(player.arena, 0.05);
+    checkEq(c.hp, 9999, 'el que se corrió a tiempo lo esquivó');
+    // aturdirlo mientras prepara lo corta, sin gastar maná ni enfriamiento
+    gameClock += 1; player.cooldowns[skill.id] = 0; player.mana = player.maxMana;
+    c.x = player.x + 3; c.y = player.y;
+    check(tryCastSkill(player, skill), 'prepara otra vez');
+    addEffect(player, { id: 'STUN', name: 'Aturdido', duration: 1, flags: ['stun'] });
+    updateHero(player, player.arena, 0.01);
+    check(!player.windup && !player.cooldowns[skill.id] && player.mana === player.maxMana, 'aturdido: se cortó y no gastó nada');
 });
 
 test('Clic derecho: el héroe camina hasta el destino; el teclado lo cancela', () => {

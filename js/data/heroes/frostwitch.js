@@ -21,7 +21,7 @@ registerHero({
     }
 }, {
     FROSTWITCH_BLAST: {
-        id: 'FROSTWITCH_BLAST', name: 'Explosión Helada', kind: 'active', pointTarget: true,
+        id: 'FROSTWITCH_BLAST', name: 'Explosión Helada', kind: 'active', pointTarget: true, windup: 0.7, // golpe anunciado (game.js)
         tags: ['MÁGICO', 'ÁREA', 'CONTROL'],
         values: { cooldown: [11, 10, 9, 8], manaCost: [40, 45, 50, 55], baseDmg: [60, 100, 140, 180], intRatio: 0.5, range: 5, radius: 2.5, stunDuration: [0.6, 0.8, 1.0, 1.2], speed: 11 }, // más corto tras medir
         description: 'Rompe el suelo donde apuntes (rango {range}): {baseDmg} + {intRatio%} de tu Inteligencia como daño mágico y aturde {stunDuration}s a los enemigos en radio {radius}. Proyectil real: si apuntás mal, no le pega a nadie.',

@@ -207,7 +207,24 @@ function drawArenaFx(arena) {
         } else drawSkillFx(f, t, px, py); // formas de habilidad (fxSkills.js)
     });
     ctx.globalAlpha = 1;
+    if (fxTextPass !== 'only') (arena.heroes || []).forEach(h => { if (h.windup && h.isAlive()) drawWindupMark(h); });
     if (fxTextPass !== 'skip') drawUltBanner(MAP_W / 2, MAP_H * 0.72);
+}
+
+// La marca de un golpe anunciado (game.js, startWindup): el área donde va a caer, que se llena mientras se prepara, y la
+// línea desde el que la tira. Rojo, el color del peligro (en el modo para daltónicos, azul).
+function drawWindupMark(h) {
+    const w = h.windup, k = Math.max(0, Math.min(1, (gameClock - w.at) / (w.until - w.at)));
+    const color = A11Y.colorblind ? '#3a86ff' : '#ff2a2a', c = v => v * TILE + TILE / 2;
+    const x = c(w.aimX), y = c(w.aimY), r = Math.max(0.5, w.r) * TILE;
+    ctx.save();
+    ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 2;
+    ctx.globalAlpha = 0.5; ctx.setLineDash([6, 5]);
+    ctx.beginPath(); ctx.moveTo(c(h.rx ?? h.x), c(h.ry ?? h.y)); ctx.lineTo(x, y); ctx.stroke(); ctx.setLineDash([]);
+    ctx.globalAlpha = 0.16; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha = 0.4; ctx.beginPath(); ctx.arc(x, y, r * k, 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha = 0.9; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.stroke();
+    ctx.restore();
 }
 
 // Posición dibujada de una unidad: se desliza hacia su casilla (movimiento suave) + el salto del golpe.

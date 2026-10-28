@@ -62,7 +62,7 @@ registerHero({
         }
     },
     ZEUS_BOLT: {
-        id: 'ZEUS_BOLT', name: 'Rayo Relámpago', kind: 'active', pointTarget: true,
+        id: 'ZEUS_BOLT', name: 'Rayo Relámpago', kind: 'active', pointTarget: true, windup: 0.7, // golpe anunciado (game.js)
         tags: ['MÁGICO', 'CONTROL'],
         values: { cooldown: [7, 6, 5, 4], manaCost: [85, 95, 105, 115], baseDmg: [100, 165, 230, 295], intRatio: 0.7, stun: [0.3, 0.4, 0.5, 0.6], range: 6, speed: 14, radius: 0.8 },
         description: 'Dispara un rayo hacia donde apuntes (rango {range}, radio {radius}): {baseDmg} + {intRatio%} de tu Inteligencia como daño mágico y aturde {stun}s a quien toque. Proyectil real: si apuntás mal y no hay nadie en el área, no le pega a nadie.',

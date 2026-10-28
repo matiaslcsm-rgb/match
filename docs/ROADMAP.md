@@ -34,8 +34,12 @@ Que todo lo que se juega se vea en 3D y que no quede nada de la Torre.
 ## Fase 2 — Duelos que se leen
 La base para que los competidores nuevos funcionen. Es el plan de `docs/MATCH.md` §5, medido con el banco de duelos
 (`index.html?banco=66`).
-- [ ] **Golpes fuertes anunciados:** el golpe tarda al menos 0,7 s en salir, con la marca roja en el piso, se puede
+- [x] **Golpes fuertes anunciados:** el golpe tarda al menos 0,7 s en salir, con la marca roja en el piso, se puede
   cortar aturdiendo y el que lo tiró queda expuesto un instante. Se prueba primero con 1 o 2 habilidades de hoy.
+  Hecho 2026-10-28 con el Rayo Relámpago (Zeus) y la Explosión Helada (Bruja del Hielo): `windup` en la habilidad
+  (game.js: startWindup/tickWindup; la marca, fx.js drawWindupMark; azul en el modo daltónico). Banco de 66 partidas,
+  antes → después: duelo mediano 5,2 → 6,0 s, cambios de quién gana 0,7 → 0,8, evitable 13 → 11%; Zeus gana 27 → 8%
+  (el rayo ahora puede fallar: revisar en el balance cuando la IA esquive).
 - [ ] **La IA lee los avisos:** camina fuera de las zonas y de la línea de los proyectiles y corta preparaciones, con
   tiempos de reacción de una persona.
 - [ ] **Panel del rival en el duelo:** sus habilidades con el enfriamiento (¿tiene el golpe listo?).
