@@ -9,7 +9,7 @@ const AUDIO = { volume: 0.35, minGap: { hit: 0.05, heroHit: 0.08, coin: 0.08, sw
 let audioCtx = null, masterGain = null, soundOn = true;
 const lastSfx = {};
 try { soundOn = localStorage.getItem('chc-sound') !== 'off'; } catch (e) { /* sin almacenamiento: queda prendido */ }
-// Volúmenes (0 a 1) y temblor de pantalla, ajustables en la pausa (se guardan). La música los lee en towerMusic.js.
+// Volúmenes (0 a 1) y temblor de pantalla, ajustables en la pausa (se guardan). La música los lee en music.js.
 const VOLUME = { master: 1, music: 1, sfx: 1, shake: 1 };
 try { Object.assign(VOLUME, JSON.parse(localStorage.getItem('chc-volume') || '{}')); } catch (e) { /* valores por defecto */ }
 function applyVolume() { if (masterGain) masterGain.gain.value = soundOn ? AUDIO.volume * VOLUME.master * VOLUME.sfx : 0; }

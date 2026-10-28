@@ -84,7 +84,7 @@ function blinkNextTo(unit, target) {
     unstickFromWall(unit, target);
 }
 
-// Si una unidad terminó sobre una pared (saltos y teletransportes en Infinite Tower), la lleva a la casilla libre más
+// Si una unidad terminó sobre una pared (saltos y teletransportes), la lleva a la casilla libre más
 // cercana (a `near` si se indica, si no a ella misma). En las arenas sin paredes no hace nada.
 function unstickFromWall(unit, near = unit) {
     const arena = unit.arena;
@@ -129,7 +129,7 @@ function dealDamage(source, target, amount, type = 'physical', opts = {}) {
     if (source && source.isHero && target.isHero && target.arena && target.arena.kind === 'duel') final *= 1 - DUEL_DAMAGE_REDUCTION;
     final = mitigate(target, final * (1 - effDmgReduction(target)), type);
     let takenPct = sumMod(target, 'dmgTakenPct'); // ej: Condenado
-    if (target.isHero && typeof suddenDeathBonus === 'function') takenPct += suddenDeathBonus(); // muerte súbita (roundEconomy.js; en la Torre es 0)
+    if (target.isHero && typeof suddenDeathBonus === 'function') takenPct += suddenDeathBonus(); // muerte súbita (roundEconomy.js)
     // La maldición (Condenado) solo amplifica el daño de creeps y de héroes sin maldición
     if (source && source.isHero && isCondemned(source)) takenPct -= (getEffect(target, 'CONDEMNED') || { mods: {} }).mods.dmgTakenPct || 0;
     final = Math.round(final * (1 + takenPct));
@@ -142,7 +142,7 @@ function dealDamage(source, target, amount, type = 'physical', opts = {}) {
     emit(target, 'onDamaged', { source, dealt: final, type });
     if (source && hpLost > 0) hitFlinch(source, target); // sacudida (fxSkills.js)
     if (hpLost > 0 && source && source.isHero && target.isHero && target.arena && target.arena.stats) { target.arena.stats.dmg += hpLost; if (dodgeableHit) target.arena.stats.avoidable += hpLost; }
-    if (hpLost > 0) target.lastHitAt = gameClock; // el campeón Regenerador se corta un rato (towerChampions.js)
+    if (hpLost > 0) target.lastHitAt = gameClock; // cuándo le pegaron por última vez
     if (source && hpLost > 0) emit(source, 'onDealDamage', { target, dealt: hpLost, type, isCrit: opts.isCrit, relic: opts.relic });
     if (!target.isAlive()) onUnitDeath(target, source);
     return { dealt: hpLost, evaded: false };
@@ -222,7 +222,7 @@ function fireSkillProjectile(attacker, opts) {
         dx: dx / dist, dy: dy / dist, dist, traveled: 0, speed: opts.speed, radius: opts.radius,
         dmg: opts.dmg, dmgType: opts.dmgType || 'magical', vfx: opts.vfx, skillName: opts.skillName,
         onHit: opts.onHit, onArrive: opts.onArrive, hitSet: new Set(), fxEl: fxCastingSkill ? skillVfx(fxCastingSkill).el : null,
-        stopOnHit: opts.stopOnHit, solid: opts.solid, arrow: opts.arrow, isCrit: opts.isCrit, quietMiss: opts.quietMiss, basic: opts.basic // (towerFeel.js, towerClickAttack.js)
+        stopOnHit: opts.stopOnHit, solid: opts.solid, arrow: opts.arrow, isCrit: opts.isCrit, quietMiss: opts.quietMiss, basic: opts.basic
     });
 }
 

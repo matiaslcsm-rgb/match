@@ -69,7 +69,7 @@ function fxUltBanner(skill, hero) { fxBanner = { text: skill.name, at: fxClock, 
 // --- Lanzar una habilidad: forma + elemento ---
 function fxSkill(hero, skill, from) {
     const arena = fxArena(hero);
-    if (!arena || skill.ownFx) return; // las que dibujan lo suyo (towerFeel.js)
+    if (!arena || skill.ownFx) return; // las que dibujan lo suyo
     const v = skillVfx(skill), el = ELEMENTS[v.el] || ELEMENTS.steel, k = v.el;
     const range = Math.max(effRange(hero) + 3, 5);
     const target = hero.aimPoint && skill.pointTarget ? hero.aimPoint : nearestEnemy(hero, range);

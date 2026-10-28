@@ -1,6 +1,6 @@
 // Custom Hero: pantalla de fin de partida (ROADMAP C1, 2026-10-18). Al terminar la partida, o al quedar eliminado, un
 // resumen claro: puesto, rondas, duelos, oro ganado, nivel, la build final (habilidades e ítems) y "▶ Otra partida".
-// Usa la misma ventana que el fin de run de la Torre (.run-summary en style.css).
+// La ventana es .run-summary (style.css).
 
 let matchSummaryOff = false; // el banco de balance juega partidas enteras sin mirar (tests.js)
 
@@ -32,7 +32,7 @@ function matchSummaryHtml(h) {
 }
 
 // --- HISTORIAL Y PERFIL (ROADMAP C1, 2026-10-18): partidas, victorias, top 3 y el mejor puesto con cada héroe ---
-// Clave propia, aparte de todo lo demás (como los récords de la Torre); en pruebas y demos queda en memoria.
+// Clave propia, aparte de todo lo demás; en pruebas y demos queda en memoria.
 const CH_PROFILE_KEY = 'chc-perfil-ch';
 let chProfilePersist = !/[?&](test|demo|banco)/.test(location.search), chProfileMemory = null;
 const chProfileEmpty = () => ({ games: 0, wins: 0, top3: 0, heroes: {} });

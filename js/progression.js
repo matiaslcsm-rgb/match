@@ -21,16 +21,9 @@ const ALL_SKILLS = Object.values(SKILL_INDEX);
 function maxSkillLevel(skill) { return skill.isUltimate ? 3 : 4; }
 function skillLevel(hero, skill) { return hero.skillLevels[skill.id] || 0; }
 
-// De dónde sale el valor de una clave: en la Torre, las ex-definitivas tienen números propios más chicos
-// (towerValues, ver el rebalanceo en cada heroes/*.js) para que anden como una activa común en vez de un botón
-// de una vez cada un rato largo; en Custom Hero no se toca nada. Solo hace falta definir en towerValues
-// las claves que cambian — el resto sigue saliendo de values.
-function skillValueSource(skill, key) {
-    return skill.values;
-}
 // Valor de una habilidad en un nivel dado. Con nivel 0 devuelve el de nivel 1.
 function valueAt(skill, key, level) {
-    const v = skillValueSource(skill, key)[key];
+    const v = skill.values[key];
     if (!Array.isArray(v)) return v;
     return v[Math.max(0, Math.min(v.length, level) - 1)];
 }
@@ -39,7 +32,7 @@ function val(skill, hero, key) { return valueAt(skill, key, skillLevel(hero, ski
 
 // Texto de un valor: "100/120/140/160%" con el nivel actual resaltado (level 0 = ninguno).
 function formatKey(skill, key, level, pct, mult = 1) {
-    const v = skill && skillValueSource(skill, key)[key];
+    const v = skill && skill.values[key];
     if (v === undefined) return null;
     const fmt = x => String(+((pct ? x * 100 : x) * mult).toFixed(2));
     const suffix = pct ? '%' : '';
@@ -73,7 +66,7 @@ function gainXp(hero, amount) {
         hero.level++;
         hero.skillPoints++;
         hero.gainLevelAttributes();
-        log(hero.towerStats ? `⬆️ ¡Nivel ${hero.level}! Apretá C y elegí 1 de 3 mejoras.` : `⬆️ ¡Nivel ${hero.level}! +1 punto de habilidad y atributos.`);
+        log(`⬆️ ¡Nivel ${hero.level}! +1 punto de habilidad y atributos.`);
         if (hero === player) sfx('levelup');
         fxText(hero, `¡NIVEL ${hero.level}!`, '#ffd166', 15, 1.4); fxRing(hero, '#ffd166', 1.5, 0.6);
     }
@@ -116,11 +109,6 @@ const PERMANENT_LABELS = {
     hpRegen: 'regen. de vida/s', manaRegen: 'regen. de maná/s', str: 'Fuerza', agi: 'Agilidad', int: 'Inteligencia'
 };
 
-// En la Torre, lo que suma cada habilidad "por baja" tiene un tope por run (2026-10-08). Medido: en una run se matan ~2400
-// bichos, y estas habilidades (pensadas para las rondas de Custom Hero) daban +240 de daño (Grieta del Vacío) o
-// +757% de crítico (Masacre): el poder dependía de la suerte de encontrar esa pieza. El escalado propio del Aventurero
-// (vida por bajas) no tiene tope: es igual para todos.
-const TOWER_PERM_CAP = { atk: 40, maxHp: 300, str: 15, agi: 15, int: 15, armor: 8, critChance: 15, atkSpeed: 20, lifesteal: 10, hpRegen: 10, manaRegen: 5 };
 // stat: armor | atk | atkSpeed (en %) | critChance | lifesteal | maxHp (bonus directo) o str | agi | int (suma al atributo).
 function grantPermanent(hero, stat, amount, sourceName) {
     if (stat === 'str' || stat === 'agi' || stat === 'int') hero[stat] += amount;

@@ -10,7 +10,7 @@ const DMG_COLORS = { physical: '#ff9f1c', magical: '#c77dff', pure: '#ffffff' };
 const SKILL_FX_COLORS = { 'MÁGICO': '#c77dff', 'FÍSICO': '#ff9f1c', 'PURO': '#ffffff', 'CURACIÓN': '#80ffdb' };
 
 let fxClock = 0, fxLastFrame = 0, shakeAmount = 0;
-let fxTextPass = null; // null: drawArenaFx dibuja todo · 'skip': todo menos los textos · 'only': solo los textos (efectos en pixel art, towerPixelFx.js)
+let fxTextPass = null; // null: drawArenaFx dibuja todo · 'skip': todo menos los textos · 'only': solo los textos (la arena 3D dibuja los textos aparte)
 
 // Arena donde dibujar el efecto de esta unidad (null si no es la que se está mirando).
 function fxArena(unit) {
@@ -102,7 +102,7 @@ function attackPose(u) {
     const frac = atkSpeed ? (u.attackTimer || 0) * atkSpeed : 0;
     const wind = frac > 0.6 && frac < 1 && inCombat() ? (frac - 0.6) / 0.4 : 0;
     const dir = a || { dx: u.facing || 1, dy: 0 };
-    if (u.windup && u.windup.until > u.windup.at) { // golpe anunciado (towerWindup.js): se echa atrás, se comprime y al final tiembla
+    if (u.windup && u.windup.until > u.windup.at) { // golpe anunciado: se echa atrás, se comprime y al final tiembla
         const w = u.windup, k = Math.max(0, Math.min(1, (gameClock - w.at) / (w.until - w.at)));
         const tx = (w.aimX ?? u.x + (u.facing || 1)) - u.x, ty = (w.aimY ?? u.y) - u.y, d = Math.hypot(tx, ty) || 1;
         pose.ox -= tx / d * 0.16 * k; pose.oy -= ty / d * 0.16 * k; pose.rot -= 0.18 * k; pose.sx += 0.1 * k; pose.sy -= 0.12 * k;
@@ -170,7 +170,7 @@ function drawArenaFx(arena) {
     (arena.fx || []).forEach(f => {
         const t = (fxClock - f.born) / f.life; // 0 → 1
         if (t < 0) return; // todavía no empezó (efecto con retardo)
-        if (fxTextPass && (f.kind === 'text') !== (fxTextPass === 'only')) return; // pixel art: los textos van aparte (towerPixelFx.js)
+        if (fxTextPass && (f.kind === 'text') !== (fxTextPass === 'only')) return; // los textos van aparte (fxTextPass)
         const px = f.x * TILE + TILE / 2, py = f.y * TILE + TILE / 2;
         ctx.globalAlpha = Math.max(0, 1 - t * t);
         if (f.kind === 'text' && pxNumberText(f.text)) { // número con la fuente de píxeles (pixelFx.js) // número de daño con la fuente de píxeles

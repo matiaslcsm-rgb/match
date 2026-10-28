@@ -24,8 +24,10 @@ Que todo lo que se juega se vea en 3D y que no quede nada de la Torre.
   que brillan y piezas que dicen qué hacen (la Prensa con puños, la Reina con panales, el Dragón con alas y cola, el Abismo
   con cuernos y reactor, la Hidra con tres cabezas, el Liche con corona y capa, el Titán con hojas y tanques, el Espectro
   con jirones).
-- [ ] **Limpieza:** sacar de `style.css` lo de la Torre (tema de pergamino, inventario, forja, herrero, bitácora) y los
-  comentarios que todavía hablan de la Torre.
+- [x] **Limpieza:** sacar de `style.css` lo de la Torre (tema de pergamino, inventario, forja, herrero, bitácora) y los
+  comentarios que todavía hablan de la Torre. Hecho 2026-10-28: `style.css` de 1054 a 620 líneas (369 reglas sin uso),
+  y del código, los `towerValues` de los héroes, el tope por run, el estado 'TOWER', el agua profunda, el multiplicador
+  de peligro y los comentarios que nombraban archivos de la Torre. Las paredes quedan (las van a usar las columnas).
 
 **Cierra cuando:** una partida entera se ve en 3D (menú y tienda aparte) y las pruebas pasan.
 

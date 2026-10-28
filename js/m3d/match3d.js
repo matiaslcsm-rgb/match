@@ -37,7 +37,7 @@ const HERO_BUILDS = {
     ALCHEMIST: { legs: 'oruga', core: 'estandar', head: 'sensor', armL: 'ametralladora', armR: 'pinza' },
     ZEUS: { legs: 'bipedo', core: 'pesado', head: 'camara', armL: 'canon', armR: 'ametralladora' }
 };
-// Creeps: por su forma de pelear (la misma que usa la Torre para elegir figura)
+// Creeps: por su forma de pelear
 const CREEP_BUILDS = {
     footman: { legs: 'bipedo', core: 'liviano', head: 'sensor', armL: 'pinza', armR: 'pinza' },
     archer: { legs: 'bipedo', core: 'liviano', head: 'sensor', armL: 'pinza', armR: 'ametralladora' },

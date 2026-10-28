@@ -20,7 +20,7 @@ const DUEL_CURSE_ALIVE = 3; // con 3 héroes en juego o menos, perder un duelo s
 const DUEL_DEATH_ALIVE = 2; // con 2, perder el duelo además cuesta una vida
 const DUEL_STARTS = [{ x: 3, y: 6 }, { x: 16, y: 6 }];
 
-function inCombat() { return gameState === 'WAVE' || gameState === 'DUEL' || gameState === 'BOSS' || gameState === 'TOWER'; }
+function inCombat() { return gameState === 'WAVE' || gameState === 'DUEL' || gameState === 'BOSS'; }
 
 
 // plan: parejas ya sorteadas en la previa de apuestas (ver bets.js).

@@ -74,9 +74,6 @@ registerHero({
         id: 'NECROMANCER_SHROUD', name: 'Manto Fantasma', kind: 'active',
         tags: ['MEJORA', 'CONTROL'],
         values: { cooldown: [26, 22, 18, 14], manaCost: [60, 65, 70, 75], duration: [3, 3.5, 4, 4.5], slowRadius: 4, slowPct: 0.3, magicResistPenalty: 40, healingBonusPct: 0.5 },
-        // Rebalanceo para la Torre (fase 3, "armar y balancear lo que tenemos"): el enfriamiento/maná quedaban
-        // el doble que cualquier otra activa de guantes (la siguiente más cara: 15s/45 maná); la bajamos a la par.
-        towerValues: { cooldown: [16, 14, 12], manaCost: [45, 50, 55] },
         description: 'Te volvés espectral por {duration}s: inmune a daño físico (pero no podés atacar), con {magicResistPenalty} puntos menos de resistencia mágica y {healingBonusPct%} más de curación recibida. Al activarse, ralentiza {slowPct%} a los enemigos en radio {slowRadius}.',
         cast(caster) {
             const duration = val(this, caster, 'duration');
@@ -103,9 +100,6 @@ registerHero({
         id: 'NECROMANCER_REAP', name: 'Guadaña del Segador', kind: 'active', isUltimate: true,
         tags: ['PURO', 'CONTROL', 'AL_MATAR'],
         values: { cooldown: [75, 65, 55], manaCost: [130, 150, 170], range: 6, stunDuration: 1.5, missingHpRatio: [0.7, 0.8, 0.9], hpRegenPerKill: [2, 4, 6], manaRegenPerKill: [1, 2, 3] },
-        // Rebalanceo para la Torre (REWORK.md §2, fase 3): el umbral de ejecución baja (si no, con este
-        // enfriamiento sería un botón de "matalo" casi siempre disponible) y números más chicos en general.
-        towerValues: { cooldown: [13, 11, 9], manaCost: [55, 65, 75], stunDuration: 1.0, missingHpRatio: [0.45, 0.55, 0.65], hpRegenPerKill: [1, 2, 3], manaRegenPerKill: [0.5, 1, 1.5] },
         description: 'DEFINITIVA. Aturde al enemigo objetivo (rango {range}) por {stunDuration}s; al terminar, le hace daño puro igual al {missingHpRatio%} de la vida que le falta — si alcanza, muere. Si lo mata, ganás para siempre +{hpRegenPerKill} de regen. de vida/s y +{manaRegenPerKill} de regen. de maná/s.',
         cast(caster) {
             const target = nearestEnemy(caster, val(this, caster, 'range'));
