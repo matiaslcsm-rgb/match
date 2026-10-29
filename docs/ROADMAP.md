@@ -51,7 +51,9 @@ La base para que los competidores nuevos funcionen. Es el plan de `docs/MATCH.md
 - [x] **Arena de duelo con 2 a 4 columnas** que frenan proyectiles, para cubrirse. Hecho 2026-10-28: 4 columnas
   (`DUEL_COLUMNS`, duels.js) que no se pisan y frenan los ataques y las habilidades; a distancia hay que ver al rival
   (`lineOfSight`, bodies.js) y la IA rodea las columnas para buscarlo; pilares en 3D. Banco de 66: duelo mediano 5,8 s
-  (dentro del ruido), 4% por tiempo (nadie se traba). Falta que la IA las use para cubrirse.
+  (dentro del ruido), 4% por tiempo (nadie se traba). Probado y descartado (2026-10-28): que la IA se cubra con
+  una columna cuando va perdiendo contra uno de distancia; no alargó los duelos (7,9 s), subió los que terminan por
+  tiempo (5 → 7%) y bajaron los cambios de quién gana (0,8 → 0,7).
 
 **Cierra cuando:** los duelos duran 15 a 30 s (hoy 5 s), quien va ganando cambia más de una vez por duelo (hoy 0,7) y
 la IA evita entre el 30% y el 70% de los golpes anunciados.
