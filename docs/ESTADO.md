@@ -2,7 +2,7 @@
 
 Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas del juego están en [`DISEÑO.md`](../DISEÑO.md).
 
-- **Jugar online:** https://matiaslcsm-rgb.github.io/match/ (GitHub Pages, se actualiza con cada push a `main`)
+- **Jugar online:** https://matiaslcsm-rgb.github.io/match/ (GitHub Pages, se actualiza con cada push a `master`)
 - **Repositorio:** https://github.com/matiaslcsm-rgb/match
 - **Carpeta local:** `Desktop\mattbox\match`
 
@@ -20,13 +20,20 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
   `js/m3d/`), look PS1 industrial. Esto **reactiva el RTS de MATCH** que estaba en pausa. Hecho: la arena en 3D jugable
   y los efectos de habilidades en 3D (tajos, áreas y mira en el piso; rayos, trazadoras, meteoros y chispas en el aire;
   los robots se caen al morir) y el descanso en 3D: los boxes del show, y los 8 jefes de ronda con su robot propio.
+  **Fase 1 del roadmap cerrada** (también la limpieza de lo que quedaba de la Torre).
 - **Roadmap nuevo (2026-10-28):** `docs/ROADMAP.md`, corto y en orden: terminar el 3D → duelos que se leen → los
   competidores de MATCH (Rec primero) → el show "En Vivo" → balance y 1.0. **El garaje / creador de competidor para el
   jugador queda descartado por ahora (decisión del usuario: "no es algo que sume por ahora").**
-- **MATCH:** foco en la creación de los competidores del show y los menús.
-  Estética nueva para todo MATCH: ciencia ficción industrial (2026-10-26). Primer competidor aprobado: **Rec**
-  (`docs/competidores/rec.md`), reemplaza al Sniper; falta programarlo.
-- **MATCH: el RTS en pausa** (duelos, controles estilo Dota, IA de rivales, banco de duelos).
+- **Duelos que se leen (fase 2, 2026-10-28):** golpes anunciados (`windup`: el Rayo Relámpago, la Explosión Helada y los
+  de Rec) con la marca roja en el piso, que se cortan aturdiendo; la IA los lee con tiempos de persona (esquiva ~30-38%);
+  4 columnas en la arena de duelo que frenan proyectiles; el panel del rival con sus habilidades. Falta la meta de
+  cierre: los duelos duran ~8 s de mediana (meta 15-30 s); queda para decidir con el usuario (ver ROADMAP).
+- **Rec, el primer competidor de MATCH (2026-10-28):** jugable (`js/data/heroes/rec.js`, ficha `docs/competidores/rec.md`)
+  y **el Sniper se retiró**. Banco sin el Sniper: el que más gana, 25% (antes 75%); Rec, puesto 4,7 y 55% de duelos.
+  Piezas nuevas del motor: silencio, canalización, disparo propio del innato, `aiMinDist`, etiqueta ESCAPE.
+- Estética de todo MATCH: ciencia ficción industrial (2026-10-26).
+- **Para medir:** `docs/correr-pruebas.py`; el banco (`index.html?banco=66`) ahora también da la ronda en que queda
+  afuera cada uno, sus duelos ganados y los golpes anunciados esquivados.
 
 ## Qué está hecho
 | Fase | Estado |

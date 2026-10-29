@@ -1,7 +1,7 @@
 # MATCH
 
 Juego web en JavaScript puro con `<script>` clásicos (el orden está en `index.html`), sin build; la arena en 3D es un
-módulo con three.js (`js/m3d/`). Se publica en GitHub Pages con cada push a `main`: https://matiaslcsm-rgb.github.io/match/
+módulo con three.js (`js/m3d/`). Se publica en GitHub Pages con cada push a `master`: https://matiaslcsm-rgb.github.io/match/
 
 **MATCH es un juego propio desde el 2026-10-28 (decisión del usuario):** las mecánicas de Custom Hero (rondas, creeps,
 draft, tienda, un duelo por ronda, apuestas, jefes) con competidores y creeps como robots en 3D. Se separó del repo
