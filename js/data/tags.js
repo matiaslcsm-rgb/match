@@ -16,6 +16,7 @@ const TAGS = {
     'CURACIÓN': 'Recupera vida (regeneración, curaciones directas)',
     'CONTROL': 'Aturde, ralentiza o provoca',
     'MOVILIDAD': 'Desplaza al héroe',
+    'ESCAPE': 'Lo aleja del enemigo (la IA la usa cuando la alcanzan)',
     'ÁREA': 'Afecta a varios enemigos a la vez',
     'DAÑO_EN_EL_TIEMPO': 'Daño repartido a lo largo de varios segundos',
     'MEJORA': 'Aplica un efecto temporal positivo (se puede disipar)',

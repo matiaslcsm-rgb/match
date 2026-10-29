@@ -121,6 +121,8 @@ function retreatStep(hero, enemies) {
 function aiWantsToCast(hero, skill, nearCount, bossNear, nearestDist = Infinity, nearest = null) {
     // Cuerpo a cuerpo: los saltos y teletransportes se guardan para cuando el enemigo está fuera de su alcance
     // (antes los usaba apenas estaban listos, aunque ya estuviera pegado, y después no podía alcanzar a los que se alejaban).
+    if (skill.aiMinDist && nearestDist < skill.aiMinDist) return false; // no con el enemigo encima (ej: canalizar)
+    if (skill.tags.includes('ESCAPE')) return nearestDist <= 2.5; // para alejarse (Travelling de Rec): cuando lo alcanzan
     if (skill.tags.includes('MOVILIDAD') && !isRanged(hero)) return nearestDist > hero.attackRange + 0.5 && nearestDist <= 8;
     // En un duelo (o contra el jefe de ronda) hay un enemigo principal: definitiva y área apenas lo tiene cerca
     if (hero.arena && hero.arena.kind !== 'wave') {

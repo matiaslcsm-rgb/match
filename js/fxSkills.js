@@ -157,7 +157,7 @@ function fxSkill(hero, skill, from) {
 const WEAPON_FX = {
     AXE: { el: 'steel', kind: 'heavy' }, VAMPIRE: { el: 'blood', kind: 'slash' }, SNIPER: { el: 'steel', kind: 'shot' }, ASSASSIN: { el: 'shadow', kind: 'twin' },
     DANCER: { el: 'steel', kind: 'twin' }, ARCANIST: { el: 'arcane', kind: 'orb' }, FROSTWITCH: { el: 'ice', kind: 'orb' }, NECROMANCER: { el: 'shadow', kind: 'scythe' },
-    VOIDSAGE: { el: 'void', kind: 'orb' }, ALCHEMIST: { el: 'poison', kind: 'orb' }, ZEUS: { el: 'lightning', kind: 'zap' }, FISTS: { el: 'steel', kind: 'punch' }
+    VOIDSAGE: { el: 'void', kind: 'orb' }, ALCHEMIST: { el: 'poison', kind: 'orb' }, ZEUS: { el: 'lightning', kind: 'zap' }, REC: { el: 'steel', kind: 'shot' }, FISTS: { el: 'steel', kind: 'punch' }
 };
 function weaponFx(hero) {
     return WEAPON_FX[hero.key] || WEAPON_FX.FISTS;

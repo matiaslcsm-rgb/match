@@ -262,7 +262,8 @@ function updateProjectiles(arena, dt) {
         const step = p.speed * dt;
         if (dist < 0.35 || step >= dist) {
             fxProjectileHit(p, p.target.x, p.target.y);
-            resolveBasicHit(p.attacker, p.target, p.dmg, p.isCrit);
+            if (p.dmgType) { const { dealt } = dealDamage(p.attacker, p.target, p.dmg, p.dmgType); if (p.onHit) p.onHit(p.target, dealt); } // otro tipo de daño (los drones de Rec, data/heroes/rec.js)
+            else resolveBasicHit(p.attacker, p.target, p.dmg, p.isCrit);
             projectiles.splice(i, 1);
             continue;
         }

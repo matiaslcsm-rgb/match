@@ -1983,6 +1983,49 @@ test('Panel del rival en el duelo: muestra al otro (no a vos) y se dibuja tambi�
     checkEq(rivalOf(makeArena('wave', [player])), null, 'fuera del duelo, no hay panel');
 });
 
+test('Rec: pegan sus 3 drones en orden (físico, mágico, puro que quema), cada uno con su velocidad; callado, solo el aéreo', () => {
+    newGame('REC');
+    const c = dummy({ hp: 9999, maxHp: 9999 }); c.x = player.x + 3; c.y = player.y;
+    creeps.forEach(o => { if (o !== c) o.hp = 0; });
+    player.innate.fireBasic(player, c, 20, false);
+    const ps = player.arena.projectiles;
+    checkEq(ps.map(p => p.drone).join(','), 'aereo,sonido,luz', 'salen los tres');
+    checkEq(ps.map(p => p.dmgType || 'basico').join(','), 'basico,magical,pure', 'el aéreo es el golpe básico; los otros, mágico y puro');
+    check(ps[0].speed > ps[1].speed && ps[1].speed > ps[2].speed, 'el aéreo es el más rápido y el de luz el más lento');
+    const order = [];
+    for (let i = 0; i < 60 && ps.length; i++) { const before = ps.map(p => p.drone); updateProjectiles(player.arena, 0.02); before.forEach(k => { if (!ps.some(p => p.drone === k)) order.push(k); }); }
+    checkEq(order.join(','), 'aereo,sonido,luz', 'llegan en orden');
+    check(getEffect(c, 'REC_BURN'), 'el de luz lo deja quemándose');
+    addEffect(player, { id: 'SILENCE', name: 'Callado', duration: 2, flags: ['silence'] });
+    player.innate.fireBasic(player, c, 20, false);
+    checkEq(ps.map(p => p.drone).join(','), 'aereo', 'callado: solo el aéreo');
+    check(!tryCastSkill(player, learn('REC_TRAVELLING', 1)), 'callado: no tira habilidades');
+});
+
+test('Rec: Travelling rueda alejándose y da rango; Cámara Fija canaliza (quieto), pega con los 3 drones y aturdirlo la corta', () => {
+    newGame('REC');
+    const c = dummy({ hp: 9999, maxHp: 9999 }); c.x = player.x + 1; c.y = player.y;
+    creeps.forEach(o => { if (o !== c) o.hp = 0; });
+    const trav = learn('REC_TRAVELLING', 1), r0 = effRange(player), x0 = player.x;
+    player.mana = player.maxMana;
+    check(tryCastSkill(player, trav), 'rueda');
+    checkEq(player.x, x0 - 3, 'tres casillas, alejándose del enemigo');
+    check(effRange(player) > r0, 'más rango');
+    check(aiWantsToCast(player, trav, 1, false, 2, c) && !aiWantsToCast(player, trav, 0, false, 6, c), 'la IA la usa cuando la alcanzan, no para acercarse');
+    const ult = learn('REC_CAMARA_FIJA', 1);
+    player.cooldowns = {}; player.mana = player.maxMana; c.x = player.x + 3; c.y = player.y;
+    check(tryCastSkill(player, ult), 'encuadra (golpe anunciado)');
+    gameClock += ult.windup; updateHero(player, player.arena, 0.01);
+    check(player.channel && getEffect(c, 'REC_FIJADO'), 'canaliza y el objetivo queda lento');
+    const x1 = player.x; player.moveTarget = { x: 0, y: player.y, arena: player.arena };
+    updateHero(player, player.arena, 0.3);
+    checkEq(player.x, x1, 'canalizando no camina');
+    check(player.arena.projectiles.filter(p => p.drone).length >= 3, 'los tres drones salen a pegar');
+    addEffect(player, { id: 'STUN', name: 'Aturdido', duration: 1, flags: ['stun'] });
+    updateHero(player, player.arena, 0.01);
+    check(!player.channel && !getEffect(c, 'REC_FIJADO'), 'aturdido: se cortó y el objetivo ya no está lento');
+});
+
 test('Clic derecho: el héroe camina hasta el destino; el teclado lo cancela', () => {
     newGame('AXE');
     creeps.forEach(c => { c.hp = 0; });

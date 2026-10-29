@@ -60,6 +60,13 @@ la IA evita entre el 30% y el 70% de los golpes anunciados.
 De a uno: ficha aprobada por el usuario → programado con su robot 3D → medido en duelos. Cada uno reemplaza a un héroe
 copiado de Dota.
 - [ ] **Rec**, el camarógrafo robot (ficha en `docs/competidores/rec.md`). Reemplaza al Sniper.
+  - [x] Jugable (2026-10-28, `js/data/heroes/rec.js`): drones en orden (físico, mágico, puro que quema) con su velocidad,
+    Acople (silencio, golpe anunciado), Travelling (escape), Trípode (pasiva) y Cámara Fija (canalizada, anunciada).
+    Piezas nuevas del motor: silencio, canalización (`startChannel`), disparo propio del innato (`fireBasic`), proyectiles
+    con otro tipo de daño, `aiMinDist` y la etiqueta ESCAPE. Los drones son proyectiles (todavía no se frenan de a uno).
+    Medido (nivel máximo, 20 duelos por cruce): gana 44% en promedio; 100% contra Arcanista y Bruja, 90-95% contra Zeus y
+    Vampiro, 50% contra Asesino, 0% contra Axe, Nigromante y Alquimista. Banco de 66: puesto 6, 36% de duelos.
+  - [ ] Retirar al Sniper (pasar sus ~20 pruebas a otros héroes) y ajustar a Rec con el banco sin el Sniper.
 - [ ] Los otros siete del show (borrador en `docs/MATCH.md` §4): Grúa, Eco, Flash, Kilo, Parche, Vector, Viral, Glitch.
   Antes de cada uno, su ficha para aprobar.
 - [ ] El Danzante, el Arcanista y el Sabio del Vacío pasados al estilo nuevo (su lectura y su respuesta).

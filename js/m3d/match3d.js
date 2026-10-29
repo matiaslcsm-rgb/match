@@ -28,6 +28,7 @@ const HERO_BUILDS = {
     AXE: { legs: 'oruga', core: 'pesado', head: 'domo', armL: 'pinza', armR: 'pinza' },
     VAMPIRE: { legs: 'bipedo', core: 'pesado', head: 'sensor', armL: 'pinza', armR: 'pinza' },
     SNIPER: { legs: 'ruedas', core: 'liviano', head: 'camara', armL: 'pinza', armR: 'canon' },
+    REC: { legs: 'ruedas', core: 'estandar', head: 'camara', armL: 'pinza', armR: 'pinza' }, // el camarógrafo: cabeza de cámara, trípode de ruedas, brazo de herramientas
     ASSASSIN: { legs: 'bipedo', core: 'liviano', head: 'domo', armL: 'pinza', armR: 'ametralladora' },
     DANCER: { legs: 'ruedas', core: 'liviano', head: 'sensor', armL: 'pinza', armR: 'pinza' },
     ARCANIST: { legs: 'bipedo', core: 'estandar', head: 'camara', armL: 'canon', armR: 'canon' },

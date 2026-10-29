@@ -368,8 +368,30 @@ function tickWindup(hero) {
     return !!hero.windup || gameClock < (hero.exposedUntil || 0);
 }
 
+// --- CANALIZACIÓN (MATCH: pieza general; la primera es la Cámara Fija de Rec) ---
+// Mientras dura, el que canaliza se queda quieto y no ataca ni tira otra cosa; se corta si lo aturden.
+// ch: { name, duration, tick(hero) → false para terminar antes, end(hero, cortada) }
+function startChannel(hero, ch) {
+    hero.channel = Object.assign(ch, { until: gameClock + ch.duration });
+    hero.moveTarget = null;
+}
+function tickChannel(hero) {
+    const ch = hero.channel;
+    if (!ch) return false;
+    const cut = hasFlag(hero, 'stun') || !hero.isAlive();
+    if (cut || gameClock >= ch.until || ch.tick(hero) === false) {
+        hero.channel = null;
+        if (ch.end) ch.end(hero, cut);
+        if (cut && hero.isAlive()) { fxText(hero, '¡Cortado!', '#ffd166', 12); log(`✋ ¡Le cortaron ${ch.name} a ${hero.displayName || hero.name}!`); }
+        return false;
+    }
+    return true;
+}
+
 function tryCastSkill(hero, skill, opts = {}) {
     if (!hero.isAlive() || skillLevel(hero, skill) === 0 || (hero.cooldowns[skill.id] || 0) > 0) return false;
+    if (hero.channel) return false; // canalizando
+    if (hasFlag(hero, 'silence')) { if (!opts.quiet) log('🔇 Estás callado: no podés tirar habilidades.'); return false; }
     if (!opts.released && (hero.windup || gameClock < (hero.exposedUntil || 0))) return false; // preparando otro golpe o expuesto
     if (hasFlag(hero, 'stun')) { if (!opts.quiet) log('💫 Estás aturdido.'); return false; }
     const manaCost = hasFlag(hero, 'freeCast') ? 0 : (val(skill, hero, 'manaCost') || 0);
@@ -442,7 +464,7 @@ function updateHero(hero, arena, dt) {
         if (!tryRespawn(hero)) { tickCooldowns(hero, dt); return; }
     }
     const aiControlled = hero !== player || autopilot;
-    const busy = tickWindup(hero); // preparando un golpe anunciado o expuesto después de tirarlo: quieto
+    const busy = tickWindup(hero) | tickChannel(hero); // preparando un golpe anunciado, expuesto o canalizando: quieto
     if (busy) {
         // no piensa, no camina, no ataca
     } else if (aiControlled && everyInterval(hero, 'AI_THINK', dt, AI.thinkInterval)) {
@@ -501,7 +523,8 @@ function updateHero(hero, arena, dt) {
         if (hero.attackTimer >= 1 / effAtkSpeed(hero)) {
             hero.attackTimer = 0;
             const { dmg, isCrit } = rollAttackDamage(hero, target);
-            if (hero.projectileSpeed > 0) { fxAttack(hero, target, 'ranged', heroColor(hero)); fxHeroShot(hero, target); fireProjectile(hero, target, dmg, isCrit); }
+            if (hero.innate && hero.innate.fireBasic) { fxAttack(hero, target, 'ranged', heroColor(hero)); hero.innate.fireBasic(hero, target, dmg, isCrit); } // su propio disparo (los drones de Rec)
+            else if (hero.projectileSpeed > 0) { fxAttack(hero, target, 'ranged', heroColor(hero)); fxHeroShot(hero, target); fireProjectile(hero, target, dmg, isCrit); }
             else { fxAttack(hero, target, 'melee'); fxHeroAttack(hero, target, isCrit); resolveBasicHit(hero, target, dmg, isCrit); } // según el arma (fxSkills.js)
         }
     } else {

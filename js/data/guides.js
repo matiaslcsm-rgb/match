@@ -12,6 +12,10 @@ const BUILD_GUIDES = {
         why: 'Daño a distancia: velocidad de ataque y crítico, con Hoja Certera para que no le esquiven.',
         early: ['BLADE', 'QUICK_GLOVES'], core: ['TRUESTRIKE', 'SWIFT_BLADE', 'GLOVES'], late: ['HAMMER', 'SKADI']
     },
+    REC: {
+        why: 'Sus drones pegan en cada ataque: velocidad de ataque y daño (el aéreo es su golpe básico); maná para Acople y Cámara Fija.',
+        early: ['QUICK_GLOVES', 'BLADE'], core: ['SWIFT_BLADE', 'GLOVES', 'MANA_CRYSTAL'], late: ['HAMMER', 'SKADI']
+    },
     ASSASSIN: {
         why: 'Críticos enormes cuerpo a cuerpo: más crítico y velocidad, y robo de vida para sostenerse.',
         early: ['FANG', 'BLADE'], core: ['SWIFT_BLADE', 'CRIMSON', 'TRUESTRIKE'], late: ['HAMMER', 'BOOTS']
