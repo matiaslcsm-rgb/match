@@ -2007,6 +2007,11 @@ test('Rec: Travelling rueda alejándose y da rango; Cámara Fija canaliza (quiet
     check(!player.channel && !getEffect(c, 'REC_FIJADO'), 'aturdido: se cortó y el objetivo ya no está lento');
 });
 
+test('Los mensajes nombran a los competidores (no "undefined")', () => {
+    newGame('AXE');
+    checkEq(player.label, player.displayName, 'un competidor se llama por su nombre de jugador');
+});
+
 test('Clic derecho: el héroe camina hasta el destino; el teclado lo cancela', () => {
     newGame('AXE');
     creeps.forEach(c => { c.hp = 0; });

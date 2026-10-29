@@ -21,6 +21,8 @@ const ATTRIBUTE_RULES = {
 const SKILL_KEYS = ['e', 'r', 't', 'f', 'q', 'v']; // 4 al empezar, 5 desde la ronda de la quinta (progression.js)
 
 class Hero {
+    // Cómo lo nombran los mensajes de las habilidades (los creeps tienen su label; los competidores, su nombre de jugador)
+    get label() { return this.displayName || this.name; }
     constructor(template) {
         this.isHero = true;
         this.key = template.key; this.name = template.name; this.symbol = template.symbol; this.primaryAttr = template.primaryAttr;
