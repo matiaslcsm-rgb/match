@@ -245,6 +245,35 @@ function unitObj(u) {
     return o;
 }
 
+// LOS DRONES DE REC (data/heroes/rec.js): tres drones chiquitos (cuerpo, dos rotores y la luz de su tipo) que flotan
+// alrededor de Rec; cuando uno sale a pegar (un proyectil con .drone), vuela ese y falta de su lugar.
+const DRONE_LOOK = { aereo: '#a2a8ad', sonido: '#ff3ea5', luz: '#ffd23f' };
+const rotorMat = new THREE.MeshBasicMaterial({ color: '#d8dde2', transparent: true, opacity: 0.45, depthWrite: false });
+function droneMesh(kind) {
+    const g = new THREE.Group(), c = DRONE_LOOK[kind] || '#ffffff';
+    const body = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.09, 0.2), mat(kind === 'luz' ? 'gris' : kind === 'sonido' ? 'carbon' : 'oliva'));
+    const lamp = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.06, 0.04), new THREE.MeshBasicMaterial({ color: c })); lamp.position.set(0, -0.02, 0.11);
+    g.add(body, lamp);
+    for (const x of [-0.17, 0.17]) { const r = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.01, 10), rotorMat); r.position.set(x, 0.07, 0); g.add(r); }
+    g.scale.setScalar(2); // que se lean desde la cámara de arriba
+    scene.add(g); return g;
+}
+const flying = []; let nFly = 0;
+function flyingDrone(kind) {
+    let m = flying[nFly]; if (!m || m.userData.kind !== kind) { if (m) scene.remove(m); m = flying[nFly] = droneMesh(kind); m.userData.kind = kind; }
+    nFly++; m.visible = true; return m;
+}
+function hoverDrones(o, u, arena, t) {
+    if (!o.drones) o.drones = Object.keys(DRONE_LOOK).map(k => droneMesh(k));
+    const out = new Set(arena.projectiles.filter(p => p.drone && p.attacker === u).map(p => p.drone));
+    Object.keys(DRONE_LOOK).forEach((k, i) => {
+        const d = o.drones[i], a = t * 1.2 + i * 2.09;
+        d.visible = o.g.visible && !out.has(k);
+        d.position.set(o.g.position.x + Math.cos(a) * 0.9, sizeOf(u) * 1.05 + Math.sin(t * 3 + i) * 0.08, o.g.position.z + Math.sin(a) * 0.9);
+        d.rotation.y = -a;
+    });
+}
+
 // Proyectiles: esferitas que brillan, del color de quien dispara
 const shots = [];
 const shotGeo = new THREE.SphereGeometry(0.12, 8, 6);
@@ -439,15 +468,25 @@ function frame(arena, dt) {
     }
     drawAirFx(arena);
 
-    // Proyectiles
-    let n = 0;
+    // Los drones de Rec, flotando a su alrededor
+    const tNow = performance.now() / 1000;
+    for (const [u, o] of units) if (u.key === 'REC') { if (o.seen === frameNo) hoverDrones(o, u, arena, tNow); else if (o.drones) o.drones.forEach(d => { d.visible = false; }); }
+    // Proyectiles (los de los drones de Rec, como drones que vuelan)
+    let n = 0; nFly = 0;
     for (const pr of arena.projectiles) {
         const color = (pr.vfx && pr.vfx.color) || (pr.attacker.isHero ? heroColor(pr.attacker) : pr.attacker.color || '#fefae0');
+        if (pr.drone) {
+            const d = flyingDrone(pr.drone), tx = pr.target ? pr.target.x : pr.x, ty = pr.target ? pr.target.y : pr.y;
+            d.position.set((pr.x + 0.5) * U, 1.1, (pr.y + 0.5) * U); d.rotation.y = Math.atan2(tx - pr.x, ty - pr.y);
+            projectileTrail(pr, d.position, color);
+            continue;
+        }
         const s = shotMesh(n++, pr.isCrit ? '#ffd166' : color, !!pr.radius);
         s.position.set((pr.x + 0.5) * U, 0.8, (pr.y + 0.5) * U);
         projectileTrail(pr, s.position, color);
     }
     for (let i = n; i < shots.length; i++) shots[i].visible = false;
+    for (let i = nFly; i < flying.length; i++) flying[i].visible = false;
 
     // El aro de rango; la cruz de a dónde caminás, el objetivo marcado y la mira van en el piso (drawDecal)
     const me = typeof player !== 'undefined' ? player : null;
