@@ -56,6 +56,15 @@ La base para que los competidores nuevos funcionen. Es el plan de `docs/MATCH.md
 **Cierra cuando:** los duelos duran 15 a 30 s (hoy 5 s), quien va ganando cambia más de una vez por duelo (hoy 0,7) y
 la IA evita entre el 30% y el 70% de los golpes anunciados.
 
+**(decisión) Cómo llegar a duelos de 15-30 s** (medido el 2026-10-28, banco de 66 sin el Sniper; hoy, con los 4 puntos
+hechos: 7,9 s de mediana, 5% por tiempo, 0,8 cambios de quién gana, la IA esquiva ~32%). Cuánto menos daño se hacen los
+competidores entre sí en duelo (`DUEL_DAMAGE_REDUCTION`): 60% (hoy) → 7,9 s y 5% por tiempo; 70% → 8,6 s y 8%;
+80% → 15,9 s y **20% por tiempo** (la meta es menos del 10%).
+- **a) 80% menos de daño y el duelo de 45 a 70 s (recomendada):** llega a la duración y el tiempo extra baja los que se
+  cortan por tiempo. Hay que medirlo.
+- b) 75% menos de daño y dejar el tiempo: algo intermedio (~11-12 s, a medir).
+- c) No tocar el daño y alargar los duelos con más golpes anunciados (más habilidades con `windup`) y competidores nuevos.
+
 ## Fase 3 — Los competidores de MATCH
 De a uno: ficha aprobada por el usuario → programado con su robot 3D → medido en duelos. Cada uno reemplaza a un héroe
 copiado de Dota.
