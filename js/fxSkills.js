@@ -22,7 +22,7 @@ const SKILL_VFX = {
     DANCER_CUT: { el: 'steel', shape: 'dash' }, DANCER_GHOSTSTEP: { el: 'shadow', shape: 'blink' }, DANCER_STORM: { el: 'steel', shape: 'whirl' },
     FROSTWITCH_BLAST: { el: 'ice', shape: 'proj' }, FROSTWITCH_ARMOR: { el: 'ice', shape: 'shield' }, FROSTWITCH_ZERO: { el: 'ice', shape: 'nova' },
     NECROMANCER_PULSE: { el: 'shadow', shape: 'nova' }, NECROMANCER_SHROUD: { el: 'shadow', shape: 'aura' }, NECROMANCER_REAP: { el: 'shadow', shape: 'reap' },
-    SNIPER_POTENTE: { el: 'steel', shape: 'shot' }, SNIPER_CONGELANTE: { el: 'ice', shape: 'shot' }, SNIPER_MORTAL: { el: 'blood', shape: 'shot' },
+    REC_ACOPLE: { el: 'arcane', shape: 'shot' }, REC_CAMARA_FIJA: { el: 'steel', shape: 'shot' },
     VAMP_CLAW: { el: 'blood', shape: 'claw' }, VAMP_LEAP: { el: 'blood', shape: 'dash' }, VAMP_IMMORTAL: { el: 'blood', shape: 'aura' },
     VOIDSAGE_BLINK: { el: 'void', shape: 'blink' }, VOIDSAGE_PULSE: { el: 'void', shape: 'nova' }, VOIDSAGE_RIFT: { el: 'void', shape: 'zone' },
     ZEUS_ARC: { el: 'lightning', shape: 'chain' }, ZEUS_BOLT: { el: 'lightning', shape: 'proj' }, ZEUS_NIMBUS: { el: 'lightning', shape: 'zone' }, ZEUS_WRATH: { el: 'lightning', shape: 'sky' }
@@ -155,7 +155,7 @@ function fxSkill(hero, skill, from) {
 
 // --- Ataque básico según el arma de cada competidor ---
 const WEAPON_FX = {
-    AXE: { el: 'steel', kind: 'heavy' }, VAMPIRE: { el: 'blood', kind: 'slash' }, SNIPER: { el: 'steel', kind: 'shot' }, ASSASSIN: { el: 'shadow', kind: 'twin' },
+    AXE: { el: 'steel', kind: 'heavy' }, VAMPIRE: { el: 'blood', kind: 'slash' }, ASSASSIN: { el: 'shadow', kind: 'twin' },
     DANCER: { el: 'steel', kind: 'twin' }, ARCANIST: { el: 'arcane', kind: 'orb' }, FROSTWITCH: { el: 'ice', kind: 'orb' }, NECROMANCER: { el: 'shadow', kind: 'scythe' },
     VOIDSAGE: { el: 'void', kind: 'orb' }, ALCHEMIST: { el: 'poison', kind: 'orb' }, ZEUS: { el: 'lightning', kind: 'zap' }, REC: { el: 'steel', kind: 'shot' }, FISTS: { el: 'steel', kind: 'punch' }
 };

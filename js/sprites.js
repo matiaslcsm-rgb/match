@@ -79,7 +79,6 @@ function paletteFrom(color, extra = {}) {
 
 const HERO_SPRITES = {
     AXE: ['humanoid', { h: '#8d0801', s: '#e5989b', e: '#111', b: '#6a040f', a: '#ffba08', l: '#3d0c02', d: '#1b1b1b', w: '#dee2e6' }],
-    SNIPER: ['humanoid', { h: '#606c38', s: '#f1c27d', e: '#111', b: '#283618', a: '#dda15e', l: '#3a3a3a', d: '#1b1b1b', w: '#7f5539' }],
     REC: ['humanoid', { h: '#d2cdbb', s: '#7d8386', e: '#3cd8f0', b: '#6c7448', a: '#f2c21a', l: '#3a3e43', d: '#1b1b1b', w: '#a2a8ad' }],
     ASSASSIN: ['humanoid', { h: '#2b2d42', s: '#d4a373', e: '#e63946', b: '#1d1d1d', a: '#8d99ae', l: '#2b2d42', d: '#111', w: '#e0e1dd' }],
     VAMPIRE: ['humanoid', { h: '#111111', s: '#f1f3f5', e: '#d00000', b: '#6a040f', a: '#ffd166', l: '#1b1b1b', d: '#111', w: '#9d0208' }],

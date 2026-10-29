@@ -102,7 +102,7 @@ function tsFrame(now) {
     tsDrawWord(g, 'MATCH', sc.x + sc.w / 2, sc.y + sc.h / 2, Math.max(1, Math.floor(sc.h / 9)), '#00f5d4');
     if (Math.floor(tsT * 1.6) % 2) { g.fillStyle = '#ff2a2a'; g.fillRect(sc.x + 2, sc.y + 2, 2, 2); }
     // Los competidores, adelante, mirando al estadio
-    const heroes = ['AXE', 'ZEUS', 'SNIPER', 'FROSTWITCH', 'ASSASSIN'].map(k => spriteFor({ isHero: true, key: k })).filter(Boolean);
+    const heroes = ['AXE', 'ZEUS', 'REC', 'FROSTWITCH', 'ASSASSIN'].map(k => spriteFor({ isHero: true, key: k })).filter(Boolean);
     const gy = S.base + Math.round((h - S.base) * 0.55), step = Math.round(w * 0.07);
     heroes.forEach((sp, i) => {
         const x = Math.round(w / 2 + (i - (heroes.length - 1) / 2) * step), bob = Math.round(Math.sin(tsT * 3 + i) * 0.6), im = sp.img;
@@ -134,7 +134,7 @@ const TS_LOBBY = {
     normal: { title: '⚔ MATCH', tag: 'arena · 11 competidores', cls: '',
         desc: 'Sos uno de 8 competidores en el show. Armás tu kit mezclando habilidades de cualquiera, peleás oleadas de robots, duelos y jefes, y gana el último en pie.',
         facts: () => ['🎲 Elegís entre 3 competidores (o cualquiera, arrancando sin oro)', '🃏 Rondas 1 a 4: draft de habilidad, tienda y oleada', '⚔ Desde la ronda 5: un duelo por ronda, con apuestas', '👑 Rondas 5, 10, 15 y 20: un jefe para cada uno', '♥ 2 vidas: se pierden contra creeps y jefes'],
-        art: () => ['AXE', 'VAMPIRE', 'SNIPER', 'ZEUS', 'NECROMANCER'].map(k => spriteFor({ isHero: true, key: k })).filter(Boolean).map(s => tsImg(s.img, 2.2)).join(''),
+        art: () => ['AXE', 'VAMPIRE', 'REC', 'ZEUS', 'NECROMANCER'].map(k => spriteFor({ isHero: true, key: k })).filter(Boolean).map(s => tsImg(s.img, 2.2)).join(''),
         extra: () => [['🦸 Héroes', () => openGlossary('heroes')], ['👹 Creeps y jefes', () => openGlossary('creeps')], ['🎒 Ítems', () => openGlossary('items')]] }
 };
 let tsLobbyMode = null;

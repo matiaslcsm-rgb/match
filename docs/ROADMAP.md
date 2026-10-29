@@ -66,7 +66,9 @@ copiado de Dota.
     con otro tipo de daño, `aiMinDist` y la etiqueta ESCAPE. Los drones son proyectiles (todavía no se frenan de a uno).
     Medido (nivel máximo, 20 duelos por cruce): gana 44% en promedio; 100% contra Arcanista y Bruja, 90-95% contra Zeus y
     Vampiro, 50% contra Asesino, 0% contra Axe, Nigromante y Alquimista. Banco de 66: puesto 6, 36% de duelos.
-  - [ ] Retirar al Sniper (pasar sus ~20 pruebas a otros héroes) y ajustar a Rec con el banco sin el Sniper.
+  - [x] Retirar al Sniper (2026-10-28): sus pruebas pasaron a Rec, Zeus y el Vampiro; las de su innato y su definitiva
+    se fueron con él. Banco de 66 sin el Sniper: el que más gana, 25% (antes el Sniper, 75%); duelo mediano 6,4 → 7,7 s.
+  - [ ] Ajustar a Rec: gana el 44% de sus duelos, pero queda en el puesto 5,7 y gana el 2% de las partidas.
 - [ ] Los otros siete del show (borrador en `docs/MATCH.md` §4): Grúa, Eco, Flash, Kilo, Parche, Vector, Viral, Glitch.
   Antes de cada uno, su ficha para aprobar.
 - [ ] El Danzante, el Arcanista y el Sabio del Vacío pasados al estilo nuevo (su lectura y su respuesta).

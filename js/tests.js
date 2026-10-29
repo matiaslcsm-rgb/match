@@ -91,12 +91,12 @@ test('Atributos de nivel 1 salen de la plantilla del héroe', () => {
 });
 
 test('Subir de nivel suma atributos (más en el principal)', () => {
-    newGame('SNIPER');
+    newGame('REC');
     const agi0 = player.agi, str0 = player.str;
     gainXp(player, xpToNext(1));
     checkEq(player.level, 2, 'nivel');
     checkNear(player.agi - agi0, 3.0, 'Agilidad ganada (principal)');
-    checkNear(player.str - str0, 1.8, 'Fuerza ganada');
+    checkNear(player.str - str0, 2.0, 'Fuerza ganada');
 });
 
 // ============================================================ DAÑO
@@ -154,8 +154,8 @@ test('Habilidad en nivel 0 no se lanza; en nivel 1 cobra maná y enfriamiento', 
 });
 
 test('Sin objetivo en rango no se cobra maná ni enfriamiento', () => {
-    newGame('SNIPER');
-    const s = learn('SNIPER_POTENTE', 1);
+    newGame('VAMPIRE');
+    const s = learn('VAMP_LEAP', 1);
     const mana = player.mana;
     handleSkillKeypress('e');
     checkEq(player.mana, mana, 'maná');
@@ -164,8 +164,8 @@ test('Sin objetivo en rango no se cobra maná ni enfriamiento', () => {
 
 test('Teclas por orden de aprendizaje (E, R, T, F)', () => {
     newGame('AXE');
-    ['VAMP_CLAW', 'AXE_FURIA', 'SNIPER_POTENTE', 'AXE_GIRO'].forEach(id => learn(id, 0));
-    checkEq(['VAMP_CLAW', 'AXE_FURIA', 'SNIPER_POTENTE', 'AXE_GIRO'].map(id => player.keyBindings[id]).join(''), 'ertf', 'teclas');
+    ['VAMP_CLAW', 'AXE_FURIA', 'ZEUS_ARC', 'AXE_GIRO'].forEach(id => learn(id, 0));
+    checkEq(['VAMP_CLAW', 'AXE_FURIA', 'ZEUS_ARC', 'AXE_GIRO'].map(id => player.keyBindings[id]).join(''), 'ertf', 'teclas');
 });
 
 test('Definitiva: niveles 1/2/3 recién en los niveles 6/12/18 del héroe', () => {
@@ -212,17 +212,17 @@ test('Draft: 3 opciones distintas y siempre al menos 1 natural', () => {
 }, { random: true });
 
 test('Fragmento del Destino: quita una, devuelve puntos, ofrece 4 sin la quitada', () => {
-    newGame('SNIPER');
-    learn('SNIPER_POTENTE', 2); learn('SNIPER_CONGELANTE', 1);
+    newGame('ZEUS');
+    learn('ZEUS_ARC', 2); learn('ZEUS_NIMBUS', 1);
     player.skillPoints = 0; player.destiny.fragments = 1;
     gameState = 'PREP';
-    withRandom(0, () => useFragment()); // quita la primera: Disparo Potente (nivel 2)
+    withRandom(0, () => useFragment()); // quita la primera: Rayo Arco (nivel 2)
     checkEq(gameState, 'DRAFT', 'abre el draft');
     checkEq(player.skillPoints, 2, 'puntos devueltos');
-    check(!player.hasSkill('SNIPER_POTENTE'), 'la habilidad fue quitada');
+    check(!player.hasSkill('ZEUS_ARC'), 'la habilidad fue quitada');
     const names = [...document.querySelectorAll('#draft-options .skill-card h4')].map(h => h.textContent);
     checkEq(names.length, 4, 'opciones');
-    check(!names.includes('Disparo Potente'), 'no ofrece la quitada');
+    check(!names.includes('Rayo Arco'), 'no ofrece la quitada');
     document.querySelector('#draft-options .skill-card').click();
     checkEq(player.keyBindings[player.skills[1].id], 'e', 'la nueva toma la tecla liberada');
 });
@@ -239,12 +239,12 @@ test('El botón "Comenzar oleada" de la tienda arranca la oleada', () => {
 });
 
 test('Libro del Destino: elegís cuál cambiar y ofrece 6', () => {
-    newGame('SNIPER');
-    learn('SNIPER_POTENTE', 1); learn('SNIPER_CONGELANTE', 3);
+    newGame('ZEUS');
+    learn('ZEUS_ARC', 1); learn('ZEUS_NIMBUS', 3);
     player.skillPoints = 0; player.destiny.books = 1;
     gameState = 'PREP';
     useBook();
-    document.querySelectorAll('#draft-options .skill-card')[1].click(); // cambia Disparo Congelante
+    document.querySelectorAll('#draft-options .skill-card')[1].click(); // cambia Nimbo de Tormenta
     checkEq(player.skillPoints, 3, 'puntos devueltos');
     checkEq(document.querySelectorAll('#draft-options .skill-card').length, 6, 'opciones');
 });
@@ -267,15 +267,6 @@ test('Contraataque: 20% base, +20% provocando', () => {
     learn('AXE_PROVOCACION', 1).cast(player);
     withRandom(0.3, () => dealDamage(c, player, 5, 'physical'));
     checkEq(9999 - c.hp, player.atk, 'provocando (30% < 40%) contraataca con 100% del daño');
-});
-
-test('Puntería Perfecta: más daño cuanto más lejos', () => {
-    newGame('SNIPER');
-    const c = dummy();
-    const at = x => { c.x = player.x + x; return rollAttackDamage(player, c).dmg; };
-    checkEq(at(1), player.atk, 'cerca');
-    checkEq(at(3), Math.round(player.atk * 1.15), 'media distancia');
-    checkEq(at(5), Math.round(player.atk * 1.35), 'distancia máxima');
 });
 
 test('Hambre + Sangre Oscura multiplican el robo de vida', () => {
@@ -317,17 +308,6 @@ test('Furia: +2 de daño por golpe recibido hasta el tope, y armadura por baja',
     const armor = player.armor;
     dealDamage(player, dummy(), 99999, 'pure');
     checkNear(player.armor - armor, valueAt(ult, 'armorPerKill', 2), 'armadura permanente por baja');
-});
-
-test('Disparo Mortal: +daño permanente solo si mata', () => {
-    newGame('SNIPER');
-    const ult = learn('SNIPER_MORTAL', 1);
-    let atk = player.atk;
-    dummy({ hp: 99999, maxHp: 99999 }); ult.cast(player);
-    checkEq(player.atk, atk, 'no mató');
-    creeps.forEach(k => { if (k.x !== 19) k.x = 19; });
-    dummy({ hp: 1, maxHp: 100 }); ult.cast(player);
-    checkEq(player.atk - atk, valueAt(ult, 'atkPerKill', 1), 'mató');
 });
 
 test('Masacre: cada baja extiende la duración y da crítico permanente', () => {
@@ -1057,7 +1037,7 @@ test('Cuerpos físicos: un creep bloqueado prueba el otro camino si está libre'
     checkEq([b.x, b.y].join(), '11,4', 'rodea por y');
 });
 
-test('Pasivas nuevas: Golpe de Hacha, Visión de Cazador, Golpe Crítico y Sangre Oscura', () => {
+test('Pasivas nuevas: Golpe de Hacha, Trípode, Golpe Crítico y Sangre Oscura', () => {
     newGame('AXE');
     const hacha = learn('AXE_HACHAZO', 1);
     const c = dummy({ hp: 5000, maxHp: 5000 });
@@ -1065,13 +1045,14 @@ test('Pasivas nuevas: Golpe de Hacha, Visión de Cazador, Golpe Crítico y Sangr
     checkEq(c.hp, 5000 - 30, 'tres golpes normales');
     resolveBasicHit(player, c, 10, false);
     checkEq(c.hp, 5000 - 40 - Math.round(player.atk * val(hacha, player, 'dmgMult')), 'el cuarto suma el hachazo');
-    newGame('SNIPER');
-    const vision = learn('SNIPER_VISION', 2), range = effRange(player);
+    newGame('REC');
+    const tri = learn('REC_TRIPODE', 2), as0 = effAtkSpeed(player);
+    gameClock += 2; // quieto hace más de 1 s
     updateArena(player.arena, 0.016);
-    checkNear(effRange(player), range * (1 + val(vision, player, 'rangePct')), '+rango fijo');
-    player.skillLevels.SNIPER_VISION = 0; player.skills = player.skills.filter(s => s !== vision);
+    check(effAtkSpeed(player) > as0, 'quieto: +velocidad de ataque');
+    player.skillLevels.REC_TRIPODE = 0; player.skills = player.skills.filter(s => s !== tri);
     updateArena(player.arena, 0.016);
-    checkNear(effRange(player), range, 'si deja el kit, se va el bonus');
+    checkNear(effAtkSpeed(player), as0, 'si deja el kit, se va el bonus');
     newGame('ASSASSIN');
     learn('ASSASSIN_CRITSTRIKE', 4);
     updateArena(player.arena, 0.016);
@@ -1242,7 +1223,7 @@ test('IA: arma los contras de la próxima oleada (de a componentes si no le alca
 });
 
 test('Prioridad: el ataque automático va primero por el Sanador si está a tiro', () => {
-    newGame('SNIPER');
+    newGame('REC');
     const grunt = spawnType('GRUNT');
     const healer = spawnType('HEALER', { x: player.x + 4 });
     checkEq(pickAttackTarget(player, effRange(player)), healer, 'elige al Sanador aunque el Grunt esté más cerca');
@@ -1252,7 +1233,7 @@ test('Prioridad: el ataque automático va primero por el Sanador si está a tiro
 
 // ============================================================ IA
 test('IA a distancia: avanza si no hay nadie a tiro y retrocede si se le acercan', () => {
-    newGame('SNIPER');
+    newGame('REC');
     const c = dummy({ x: 15, y: 5 });
     checkEq(aiMoveDirection(player).dx, 1, 'avanza hacia el enemigo lejano');
     c.x = 6;
@@ -1301,7 +1282,7 @@ test('IA: definitiva primero al repartir puntos y prefiere habilidades naturales
     aiSpendPoints(player);
     checkEq(skillLevel(player, ult), 1, 'definitiva');
     checkEq(skillLevel(player, giro), 1, 'y el resto');
-    const pick = aiPickDraft(player, [SKILL_INDEX.SNIPER_VISION, SKILL_INDEX.AXE_HACHAZO, SKILL_INDEX.VAMP_CLAW]);
+    const pick = aiPickDraft(player, [SKILL_INDEX.REC_TRIPODE, SKILL_INDEX.AXE_HACHAZO, SKILL_INDEX.VAMP_CLAW]);
     checkEq(pick.id, 'AXE_HACHAZO', 'natural');
 });
 
@@ -1322,7 +1303,7 @@ test('Partida de 8: el jugador + 7 rivales con otros héroes, cada uno en su are
 
 test('Las arenas se juegan en paralelo; al terminar todas, la ronda suma puntos y sigue', () => {
     resetGame();
-    selectHero(HERO_TEMPLATES.SNIPER);
+    selectHero(HERO_TEMPLATES.REC);
     learnSkill(currentDraft.options[0]);
     waveNumber = DUEL_START_ROUND + 1;
     startWave();
@@ -1652,7 +1633,7 @@ test('Premios: la mitad de abajo de los que siguen en juego recibe un Fragmento;
 test('IA: usa el Libro en una habilidad que no es natural y vende el Fragmento si su kit es casi todo natural', () => {
     const h = new Hero(HERO_TEMPLATES.AXE);
     const natural = Object.values(HERO_SKILLS.AXE).filter(s => !s.isUltimate);
-    const foreign = Object.values(HERO_SKILLS.SNIPER).find(s => !s.isUltimate);
+    const foreign = Object.values(HERO_SKILLS.REC).find(s => !s.isUltimate);
     natural.forEach(s => h.addSkill(s));
     h.addSkill(foreign);
     h.destiny.books = 1; h.destiny.fragments = 1;
@@ -1872,8 +1853,8 @@ test('Habilidades automáticas: con H prendido el jugador lanza sus habilidades 
 });
 
 test('Apuntar con el mouse: la habilidad va al enemigo más cercano al cursor (dentro de su alcance)', () => {
-    newGame('SNIPER');
-    const skill = learn('SNIPER_POTENTE', 1);
+    newGame('VAMPIRE');
+    const skill = learn('VAMP_LEAP', 1);
     check(isAimedSkill(skill), 'se apunta');
     check(!isAimedSkill(SKILL_INDEX.AXE_GIRO), 'el Giro (área alrededor) no se apunta');
     const near = dummy(), far = dummy();
@@ -1953,7 +1934,7 @@ test('La IA lee los golpes anunciados: con tiempo de persona sale de la marca; s
 });
 
 test('Arena de duelo con columnas: no se pisan, frenan los proyectiles, sin verlo no se le tira y la IA rodea para verlo', () => {
-    newGame('SNIPER');
+    newGame('REC');
     const rival = new Hero(HERO_TEMPLATES.AXE);
     gameState = 'DUEL'; arenas = makeDuelArenas({ pairs: [[player, rival]] });
     const a = player.arena, [cx, cy] = DUEL_COLUMNS[0];
@@ -2090,7 +2071,7 @@ test('Guía de ítems: cada héroe tiene la suya y la tienda la muestra primero'
 });
 
 test('Estadísticas debajo del ranking', () => {
-    newGame('SNIPER');
+    newGame('REC');
     updateHud();
     checkEq(document.getElementById('hero-stats-panel').style.display, 'block', 'visible');
     check(document.getElementById('hero-stats').textContent.includes('Agilidad ★'), 'marca el atributo principal');
@@ -2130,7 +2111,7 @@ test('Sprites: plantillas de 12×12 y un sprite para cada héroe, creep y jefe',
 });
 
 test('Objetivo marcado con clic: el ataque lo prioriza aunque haya otro más cerca, y se camina hasta tenerlo a tiro', () => {
-    newGame('SNIPER');
+    newGame('REC');
     const near = dummy(), far = dummy();
     creeps.forEach(c => { if (c !== near && c !== far) c.hp = 0; });
     near.x = player.x + 1; near.y = player.y;
@@ -2150,7 +2131,7 @@ test('Ataque al moverse: libre por defecto; con la regla "reset", moverse reinic
     try {
         for (const rule of ['free', 'reset']) {
             MOVE_ATTACK_RULE = rule;
-            newGame('SNIPER');
+            newGame('REC');
             dummy({ x: player.x + 3 });
             player.attackTimer = 0.5; player.moveTimer = 99;
             keys = { a: true };
@@ -2287,7 +2268,7 @@ Object.keys(HERO_TEMPLATES).forEach((key, i) => {
 
 test('Custom Hero: pantalla de fin de partida — puesto, rondas, duelos, oro, build y otra partida', () => {
     chProfileMemory = null; check(!chProfilePersist, 'en las pruebas el perfil no toca lo guardado');
-    const r = simulateGame(1, true, 3); // el Sniper, con dios: llega al final de la ronda 3
+    const r = simulateGame(1, true, 3); // el héroe 1, con dios: llega al final de la ronda 3
     checkEq(r.state, 'ENDED', 'la partida termina');
     const box = document.getElementById('match-summary');
     check(box && box.style.display === 'block', 'se ve el resumen');
@@ -2308,8 +2289,8 @@ test('Custom Hero: pantalla de fin de partida — puesto, rondas, duelos, oro, b
     box.querySelector('#ms-watch').click();
     check(box.style.display === 'none', 'seguir mirando lo cierra');
     endGame(); // la partida termina después: no se cuenta dos veces
-    // el perfil: 2 partidas, una con el Sniper y otra con Axe (eliminado), sin contar dos veces
-    const p = chProfile(), k0 = 'SNIPER';
+    // el perfil: 2 partidas, una con el héroe 1 y otra con Axe (eliminado), sin contar dos veces
+    const p = chProfile(), k0 = Object.keys(HERO_TEMPLATES)[1];
     checkEq(p.games, 2, 'el perfil cuenta las 2 partidas');
     checkEq(p.heroes.AXE.games, 1, 'Axe, una sola vez aunque después terminó la partida');
     check(p.heroes[k0].best >= 1 && p.heroes[k0].best <= 8, 'guarda el mejor puesto con cada héroe');

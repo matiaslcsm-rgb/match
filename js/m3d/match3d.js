@@ -22,12 +22,10 @@ const PIXEL = 2;              // cada píxel del 3D ocupa 2 píxeles de la panta
 const COLS = 20, ROWS = 12;   // = VIEW_COLS, VIEW_ROWS (game.js)
 
 // --- QUÉ ROBOT ES CADA UNO ---
-// Competidores: piernas, núcleo, cabeza y los dos brazos según su forma de pelear. Rec (el Sniper de hoy, a reemplazar)
-// ya va con su cabeza de cámara y las ruedas.
+// Competidores: piernas, núcleo, cabeza y los dos brazos según su forma de pelear (Rec, con su cabeza de cámara y ruedas).
 const HERO_BUILDS = {
     AXE: { legs: 'oruga', core: 'pesado', head: 'domo', armL: 'pinza', armR: 'pinza' },
     VAMPIRE: { legs: 'bipedo', core: 'pesado', head: 'sensor', armL: 'pinza', armR: 'pinza' },
-    SNIPER: { legs: 'ruedas', core: 'liviano', head: 'camara', armL: 'pinza', armR: 'canon' },
     REC: { legs: 'ruedas', core: 'estandar', head: 'camara', armL: 'pinza', armR: 'pinza' }, // el camarógrafo: cabeza de cámara, trípode de ruedas, brazo de herramientas
     ASSASSIN: { legs: 'bipedo', core: 'liviano', head: 'domo', armL: 'pinza', armR: 'ametralladora' },
     DANCER: { legs: 'ruedas', core: 'liviano', head: 'sensor', armL: 'pinza', armR: 'pinza' },

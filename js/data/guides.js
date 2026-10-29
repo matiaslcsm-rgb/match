@@ -8,10 +8,6 @@ const BUILD_GUIDES = {
         why: 'Tanque que pega cuando lo golpean: vida y armadura para aguantar y devolver daño con Contraataque y Espinas.',
         early: ['CHAINMAIL', 'VITALITY'], core: ['THORNS', 'HEART', 'BOOTS'], late: ['AEGIS', 'CRIMSON']
     },
-    SNIPER: {
-        why: 'Daño a distancia: velocidad de ataque y crítico, con Hoja Certera para que no le esquiven.',
-        early: ['BLADE', 'QUICK_GLOVES'], core: ['TRUESTRIKE', 'SWIFT_BLADE', 'GLOVES'], late: ['HAMMER', 'SKADI']
-    },
     REC: {
         why: 'Sus drones pegan en cada ataque: velocidad de ataque y daño (el aéreo es su golpe básico); maná para Acople y Cámara Fija.',
         early: ['QUICK_GLOVES', 'BLADE'], core: ['SWIFT_BLADE', 'GLOVES', 'MANA_CRYSTAL'], late: ['HAMMER', 'SKADI']
