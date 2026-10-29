@@ -199,6 +199,47 @@ function placePillars(arena) {
     }));
 }
 
+// EL PÚBLICO (roadmap fase 4, "el público reacciona"): tribunas de hormigón atrás y a los costados de la arena, con
+// espectadores (cuerpo y cabeza) que se mueven solos y saltan cuando cae alguien (un competidor, más; un creep, un poco)
+const CROWD_COLORS = ['#c8402e', '#f2c21a', '#3f78c8', '#6c7448', '#d2cdbb', '#f27a1a', '#8a6fb0', '#2dc6a0'];
+const crowd = { n: 0, base: [], phase: [], cheer: 0 };
+const crowdMesh = (() => {
+    const spots = [];
+    for (let tier = 0; tier < 4; tier++) {
+        const h = 0.35 + tier * 0.55, back = -1.9 - tier * 0.8, side = 1.9 + tier * 0.8;
+        for (let x = -2; x <= COLS + 2; x += 0.7) spots.push([x, h, back]);                              // atrás
+        for (let z = 0.5; z <= ROWS; z += 0.8) { spots.push([-side, h, z]); spots.push([COLS + side, h, z]); } // costados
+        const step = (w, d, x, z) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat('gris')); m.position.set(x, h / 2, z); arenaGroup.add(m); };
+        step(COLS + 6, 0.8, COLS / 2, back); step(0.8, ROWS + 2, -side, ROWS / 2); step(0.8, ROWS + 2, COLS + side, ROWS / 2);
+    }
+    const geo = new THREE.BoxGeometry(0.34, 0.5, 0.26); geo.translate(0, 0.25, 0);
+    const head = new THREE.BoxGeometry(0.22, 0.2, 0.2); head.translate(0, 0.62, 0);
+    const merged = new THREE.BufferGeometry(); // cuerpo y cabeza en una sola forma (un dibujo por espectador)
+    const pos = [...geo.attributes.position.array, ...head.attributes.position.array], nor = [...geo.attributes.normal.array, ...head.attributes.normal.array];
+    const idx = [...geo.index.array, ...head.index.array.map(i => i + geo.attributes.position.count)];
+    merged.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); merged.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3)); merged.setIndex(idx);
+    const m = new THREE.InstancedMesh(merged, new THREE.MeshLambertMaterial({ color: '#ffffff' }), spots.length);
+    const c = new THREE.Color(), mtx = new THREE.Matrix4();
+    spots.forEach((p, i) => {
+        crowd.base.push(p); crowd.phase.push(Math.random() * Math.PI * 2);
+        mtx.makeTranslation(p[0], p[1], p[2]); m.setMatrixAt(i, mtx);
+        m.setColorAt(i, c.set(CROWD_COLORS[(Math.random() * CROWD_COLORS.length) | 0]).multiplyScalar(0.75 + Math.random() * 0.25));
+    });
+    crowd.n = spots.length; arenaGroup.add(m); return m;
+})();
+const crowdMtx = new THREE.Matrix4();
+function cheer(k) { crowd.cheer = Math.min(1.5, crowd.cheer + k); if (k >= 0.5 && typeof sfx === 'function') sfx('crowd'); }
+function animateCrowd(dt, t) {
+    crowd.cheer = Math.max(0, crowd.cheer - dt * 0.6);
+    const amp = 0.04 + crowd.cheer * 0.35;
+    for (let i = 0; i < crowd.n; i++) {
+        const b = crowd.base[i], ph = crowd.phase[i];
+        crowdMtx.makeTranslation(b[0], b[1] + Math.abs(Math.sin(t * (3 + crowd.cheer * 4) + ph)) * amp, b[2]);
+        crowdMesh.setMatrixAt(i, crowdMtx);
+    }
+    crowdMesh.instanceMatrix.needsUpdate = true;
+}
+
 // Marca en el piso: el aro de los competidores (celeste vos, naranja los rivales) y el aro de rango del jugador
 function ringMesh(r0, r1, color, opacity) {
     const m = new THREE.Mesh(new THREE.RingGeometry(r0, r1, 32), new THREE.MeshBasicMaterial({ color, transparent: true, opacity, depthWrite: false }));
@@ -455,6 +496,7 @@ function frame(arena, dt) {
         if (o.seen === frameNo) continue;
         if (o.dieT === undefined && o.seen === frameNo - 1 && !u.isAlive()) {
             o.dieT = 0;
+            cheer(u.isHero || u.isRoundBoss ? 1 : 0.12); // la tribuna grita
             fxParticles(arena, o.g.position.x / U - 0.5, o.g.position.z / U - 0.5, 'lightning', 10, 3, { style: 'spark' });
             fxParticles(arena, o.g.position.x / U - 0.5, o.g.position.z / U - 0.5, 'steel', 6, 1.5, { style: 'smoke', size: 5, life: 0.8 });
         }
@@ -467,6 +509,7 @@ function frame(arena, dt) {
         if (frameNo - o.seen > 600) { scene.remove(o.g); units.delete(u); }
     }
     drawAirFx(arena);
+    if (!rest) animateCrowd(dt, performance.now() / 1000);
 
     // Los drones de Rec, flotando a su alrededor
     const tNow = performance.now() / 1000;

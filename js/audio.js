@@ -5,7 +5,7 @@
 //   El navegador solo deja arrancar el audio después de un clic o una tecla: se activa solo en la primera interacción.
 //   Se silencia con el botón 🔊 de la barra superior (queda guardado).
 
-const AUDIO = { volume: 0.35, minGap: { hit: 0.05, heroHit: 0.08, coin: 0.08, swing: 0.06, pop: 0.05, shoot: 0.06, heal: 0.2, boom: 0.25 } };
+const AUDIO = { volume: 0.35, minGap: { hit: 0.05, heroHit: 0.08, coin: 0.08, swing: 0.06, pop: 0.05, shoot: 0.06, heal: 0.2, boom: 0.25, crowd: 1.2 } };
 let audioCtx = null, masterGain = null, soundOn = true;
 const lastSfx = {};
 try { soundOn = localStorage.getItem('chc-sound') !== 'off'; } catch (e) { /* sin almacenamiento: queda prendido */ }
@@ -92,6 +92,7 @@ const SFX = {
     coin: () => { tone(1300, 1300, 0.06, 'square', 0.07); tone(1750, 1750, 0.1, 'square', 0.07, 0.05); },
     levelup: () => [523, 659, 784, 1047].forEach((f, i) => tone(f, f, 0.14, 'square', 0.1, i * 0.08)),
     boom: () => { noise(0.5, 400, 0.4); tone(120, 40, 0.5, 'sine', 0.3); },
+    crowd: () => { noise(1.3, 800, 0.16, 0, 'bandpass'); noise(1.0, 1900, 0.07, 0.08, 'bandpass'); noise(0.7, 500, 0.08, 0.2, 'bandpass'); }, // la tribuna grita (match3d.js)
     click: () => tone(900, 700, 0.04, 'square', 0.06),
     wave: () => [392, 523, 659].forEach((f, i) => tone(f, f, 0.18, 'sawtooth', 0.09, i * 0.1)),
     duel: () => { tone(260, 260, 0.2, 'sawtooth', 0.12); tone(390, 390, 0.3, 'sawtooth', 0.12, 0.15); },
