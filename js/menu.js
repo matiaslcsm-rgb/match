@@ -139,7 +139,7 @@ const TUTORIAL_PAGES = [
     { icon: '🖱️', color: '#c77dff', title: 'Mouse', body: `
         <div class="tut-cards">
             ${tutCard('🗡️', 'Ataque automático', 'Tu héroe le pega solo al enemigo más cercano que tenga a tiro (el círculo punteado es tu alcance).')}
-            ${tutCard('👣', 'Clic derecho en el mapa', 'Caminás hasta ahí, como en Dota. También en la sala de espera.')}
+            ${tutCard('👣', 'Clic derecho en el mapa', 'Caminás hasta ahí, como en Dota. También en los boxes, entre ronda y ronda.')}
             ${tutCard('⚔️', 'Clic derecho en un rival', 'Lo atacás: tu héroe va hasta tenerlo a tiro y le pega. Caminar a otro lado cancela la orden.')}
             ${tutCard('🎯', 'Clic izquierdo en un enemigo', 'Lo marcás como objetivo: tu ataque y tus habilidades lo priorizan.')}
             ${tutCard('✨', 'Apuntar una habilidad', 'Tocá su tecla, se ve el alcance y el enemigo marcado; clic izquierdo la lanza, clic derecho cancela. Con "lanzamiento rápido" (Opciones) sale al apretar la tecla.')}
@@ -170,6 +170,8 @@ const TUTORIAL_PAGES = [
             ${tutCard('☠', 'Perder', 'Con 4 o más en juego no pasa nada. Con 3, suma una instancia de maldición. Con 2 (el mano a mano final), cuesta una vida y suma una instancia.')}
             ${tutCard('🎲', 'Pozo de apuestas', 'Todos los que no pelean apuestan (hasta la mitad de su oro). Los que aciertan recuperan lo suyo y se reparten lo apostado al perdedor: apostar a la sorpresa paga más.')}
             ${tutCard('🤝', 'Respaldo', 'El que gana el duelo cobra además el 25% de lo que le apostaron.')}
+            ${tutCard('⚠️', 'Golpes anunciados', 'Algunas habilidades fuertes avisan: el que la tira se queda quieto un instante y aparece una marca roja en el piso. Salí de la marca caminando, o aturdilo para cortársela. Arriba a la derecha ves las habilidades de tu rival: si tiene el golpe listo y si lo está preparando.')}
+            ${tutCard('🏛️', 'Columnas', 'La arena de duelo tiene 4 columnas: frenan los disparos y no se pueden pisar. A distancia, si no lo ves, no le podés tirar: usalas para cubrirte.')}
         </div>` },
     { icon: '👹', color: '#9d0208', title: 'Jefes y ayudas', body: `
         <div class="tut-cards">
