@@ -8,9 +8,9 @@
 // Rec atrás, los drones pegan: AL_GOLPEAR le pasa al aéreo (es el ataque básico); el de sonido y el de luz son aparte.
 
 const REC_DRONES = [
-    { key: 'aereo', name: 'Aéreo', type: 'physical', share: 0.55, speed: 9, color: '#a2a8ad' },
-    { key: 'sonido', name: 'Sonido', type: 'magical', share: 0.4, speed: 7, color: '#ff3ea5' },
-    { key: 'luz', name: 'Luz', type: 'pure', share: 0.2, speed: 5.5, color: '#ffd23f', burn: true }
+    { key: 'aereo', name: 'Aéreo', type: 'physical', share: 0.6, speed: 9, color: '#a2a8ad' },
+    { key: 'sonido', name: 'Sonido', type: 'magical', share: 0.45, speed: 7, color: '#ff3ea5' },
+    { key: 'luz', name: 'Luz', type: 'pure', share: 0.25, speed: 5.5, color: '#ffd23f', burn: true }
 ];
 const REC_BURN = { dps: 2, duration: 2 };
 
@@ -44,7 +44,7 @@ registerHero({
     innate: {
         id: 'REC_EQUIPO', name: 'Equipo de Grabación',
         tags: ['FÍSICO', 'MÁGICO', 'PURO', 'AL_GOLPEAR'],
-        description: 'Innato: no pega él, pegan sus 3 drones, en orden: el aéreo (55% de tu daño, físico), el de sonido (40%, mágico) y el de luz (20%, puro, y quema 2 por segundo 2 s). Cada uno vuela con su velocidad: si el rival corre, los lentos llegan tarde. Aturdido no vuela ninguno; callado, solo el aéreo.',
+        description: 'Innato: no pega él, pegan sus 3 drones, en orden: el aéreo (60% de tu daño, físico), el de sonido (45%, mágico) y el de luz (25%, puro, y quema 2 por segundo 2 s). Cada uno vuela con su velocidad: si el rival corre, los lentos llegan tarde. Aturdido no vuela ninguno; callado, solo el aéreo.',
         // Lo llama el ataque básico (game.js, updateHero) en vez de disparar un proyectil común
         fireBasic(owner, target, dmg, isCrit) {
             const fast = recFast(owner), silenced = hasFlag(owner, 'silence'), base = effAttack(owner);

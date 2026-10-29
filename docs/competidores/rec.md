@@ -187,6 +187,13 @@ lentos lleguen tarde.
 - El piloto evita entre el **30% y el 70%** de sus Destellos y Cámaras Fijas (saliéndose en el aviso o cortándolas).
 - Ningún cruce 80 a 20.
 
+## Números jugables (medidos el 2026-10-28)
+La ficha tenía números propuestos sin medir. Programado y medido con el banco: Reflejos 22 (+3 por nivel), daño base 8,
+rango 5, velocidad 2,3; los drones suman 130% del daño (aéreo 60% físico, sonido 45% mágico, luz 25% puro); la Cámara
+Fija pega 10/15/20 + 50% de su daño por dron cada segundo; la IA no tira el Acople ni la Cámara Fija con el rival a
+menos de 2,5-3 casillas. Resultado: puesto 4,7 en el banco y 55% de sus duelos. Los drones todavía son proyectiles: no
+se los puede frenar de a uno con habilidades apuntadas (pendiente).
+
 ## Decisiones
 **Ficha aprobada por el usuario el 2026-10-26.**
 - Se llama **Rec**; con sus drones son el **Equipo de Grabación**.

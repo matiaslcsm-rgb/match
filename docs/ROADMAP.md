@@ -68,7 +68,9 @@ copiado de Dota.
     Vampiro, 50% contra Asesino, 0% contra Axe, Nigromante y Alquimista. Banco de 66: puesto 6, 36% de duelos.
   - [x] Retirar al Sniper (2026-10-28): sus pruebas pasaron a Rec, Zeus y el Vampiro; las de su innato y su definitiva
     se fueron con él. Banco de 66 sin el Sniper: el que más gana, 25% (antes el Sniper, 75%); duelo mediano 6,4 → 7,7 s.
-  - [ ] Ajustar a Rec: gana el 44% de sus duelos, pero queda en el puesto 5,7 y gana el 2% de las partidas.
+  - [x] Ajustar a Rec (2026-10-28): los drones suman 130% del daño (60/45/25%). Banco de 66: puesto 4,7 (el grupo va
+    de 4,0 a 5,6), 55% de sus duelos. Medido junto con los ajustes de la ficha: Reflejos 22 (+3), daño 8, rango 5,
+    velocidad 2,3 y la IA no tira el Acople ni la Cámara Fija con el rival encima.
 - [ ] Los otros siete del show (borrador en `docs/MATCH.md` §4): Grúa, Eco, Flash, Kilo, Parche, Vector, Viral, Glitch.
   Antes de cada uno, su ficha para aprobar.
 - [ ] El Danzante, el Arcanista y el Sabio del Vacío pasados al estilo nuevo (su lectura y su respuesta).
