@@ -779,3 +779,17 @@ body.pixel-ui { background: repeating-linear-gradient(135deg, #121412 0 14px, #1
 @keyframes dc-show { 0% { opacity: 0; } 6% { opacity: 1; } 88% { opacity: 1; } 100% { opacity: 0; } }
 @keyframes dc-left { from { transform: translateX(-60px); opacity: 0; } }
 @keyframes dc-right { from { transform: translateX(60px); opacity: 0; } }
+
+/* Zócalo de TV con el ranking (ui.js, renderTvRank): reemplaza a la ayuda de controles durante el combate */
+#tv-rank { display: none; }
+body.tv-rank-on #tv-rank { display: flex; gap: 2px; background: var(--in-line); border: 2px solid var(--in-edge); border-left: 8px solid var(--in-yellow); padding: 2px; font-size: 0.72rem; }
+body.tv-rank-on #controls-hint { display: none; }
+.tv-cell { flex: 1 1 0; min-width: 0; display: flex; align-items: center; gap: 3px; background: var(--in-cell); padding: 3px 4px; cursor: pointer; border-bottom: 2px solid transparent; }
+.tv-cell:hover { background: var(--in-cell2); }
+.tv-cell.you .tv-name { color: var(--in-orange); }
+.tv-cell.viewed { border-bottom-color: var(--in-yellow); }
+.tv-cell.dueling { background: #4a2f12; }
+.tv-cell.out { opacity: 0.4; }
+.tv-pos { color: var(--in-orange); }
+.tv-name { flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: var(--in-bone); }
+.tv-pts { color: var(--in-yellow); }

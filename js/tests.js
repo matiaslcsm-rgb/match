@@ -1851,6 +1851,25 @@ test('Cartel del duelo: presenta a los dos y la frase del presentador sale de c�
     checkEq(card.innerHTML, '', 'se limpia con la partida');
 });
 
+test('Zócalo de TV: en combate muestra la tabla y un clic mira la arena de ese competidor', () => {
+    resetGame();
+    selectHero(HERO_TEMPLATES.AXE);
+    learnSkill(currentDraft.options[0]);
+    renderScoreboard();
+    check(!document.body.classList.contains('tv-rank-on'), 'en la preparación no está');
+    startWave();
+    renderScoreboard();
+    const strip = document.getElementById('tv-rank'), ranked = rankedHeroes();
+    check(document.body.classList.contains('tv-rank-on'), 'en combate está');
+    checkEq(strip.children.length, heroes.length, 'uno por competidor');
+    check(strip.children[0].textContent.startsWith('1º'), 'en orden');
+    strip.children[3].click();
+    checkEq(viewedHero, ranked[3], 'el clic cambia la arena que mirás');
+    resetGame();
+    checkEq(strip.innerHTML, '', 'se limpia con la partida');
+    check(!document.body.classList.contains('tv-rank-on'), 'y se apaga');
+});
+
 test('Mapa agrandable: M cambia el tamaño del mapa y vuelve', () => {
     const w = canvas.style.width;
     toggleBigMap();

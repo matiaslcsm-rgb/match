@@ -798,6 +798,21 @@ function fightingText(h) {
     if (!isFighting(h)) return '';
     return h.arena.kind === 'duel' ? ' · 🔥 en duelo' : h.arena.boss && h.arena.boss.isRoundBoss ? ' · 🔥 contra el jefe' : ' · 🔥 contra creeps';
 }
+// El zócalo de TV (Fase 4): la misma tabla en una tira abajo de la arena, durante el combate. Clic = mirar esa arena, como en el ranking.
+function tvRankHtml(ranked) {
+    return ranked.map((h, i) => {
+        const url = heroSpriteUrl(h);
+        const cls = 'tv-cell' + (h === player ? ' you' : '') + (h === (viewedHero || player) ? ' viewed' : '') + (h.eliminated ? ' out' : '') + (isFighting(h) && h.arena.kind === 'duel' ? ' dueling' : '');
+        return `<div class="${cls}" title="${h.displayName} · ${h.points} pts"><span class="tv-pos">${i + 1}º</span>${url ? `<img src="${url}" alt="${h.symbol}" class="pixel-img tiny">` : ''}` +
+            `<span class="tv-name">${h.ownerName || h.name}</span><span class="tv-pts">${h.points}</span></div>`;
+    }).join('');
+}
+function renderTvRank(ranked) {
+    const strip = document.getElementById('tv-rank');
+    document.body.classList.toggle('tv-rank-on', inCombat());
+    strip.innerHTML = tvRankHtml(ranked);
+    [...strip.children].forEach((cell, i) => { cell.onclick = () => { viewedHero = ranked[i]; lastScoreboardSignature = ''; }; });
+}
 function renderScoreboard() {
     const ranked = rankedHeroes();
     const signature = ranked.map(h => [h.displayName, h.points, h.gold, h.lives, heroStatusIcon(h), isCondemned(h), h.arena && h.arena.kind].join(':')).join('|') + (viewedHero ? viewedHero.displayName : '') + spritesOn;
@@ -816,6 +831,7 @@ function renderScoreboard() {
         row.onclick = () => { viewedHero = h; lastScoreboardSignature = ''; };
         board.appendChild(row);
     });
+    renderTvRank(ranked);
 }
 
 // Deja la interfaz como al abrir el juego (usado por "Nueva Partida").
@@ -830,6 +846,7 @@ function resetHud() {
     document.getElementById('hero-stats-panel').style.display = 'none';
     document.getElementById('combat-info').style.display = 'none';
     document.getElementById('scoreboard').innerHTML = ''; lastScoreboardSignature = '';
+    document.getElementById('tv-rank').innerHTML = ''; document.body.classList.remove('tv-rank-on');
     document.getElementById('combat-log').innerHTML = '';
     lastKitSignature = '';
 }
