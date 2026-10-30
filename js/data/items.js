@@ -278,7 +278,7 @@ function jumpWith(owner, threat, dist) {
     const dx = c ? c.x - owner.x : threat ? owner.x - threat.x : 0, dy = c ? c.y - owner.y : threat ? owner.y - threat.y : 0, len = Math.hypot(dx, dy) || 1;
     for (let d = c ? Math.min(dist, len) : dist; d >= 1; d--) {
         const x = Math.round(owner.x + dx / len * d), y = Math.round(owner.y + dy / len * d);
-        if (!walkable(owner.arena, x, y) || bodiesAt(owner.arena, x, y, owner).length) continue;
+        if (!walkable(owner.arena, x, y) || bodyAt(owner.arena, x, y, owner)) continue;
         owner.x = x; owner.y = y; owner.moveTarget = null;
         emit(owner, 'onMove', { steps: Math.round(d) });
         return true;

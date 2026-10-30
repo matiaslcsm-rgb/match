@@ -82,9 +82,10 @@ function stepCreepToward(c, tx, ty, dt) {
     const main = Math.abs(dx) >= Math.abs(dy) ? [Math.sign(dx), 0] : [0, Math.sign(dy)];
     const alt = main[0] ? [0, Math.sign(dy)] : [Math.sign(dx), 0];
     let [sx, sy] = main;
-    let penalty = bodyPenalty(c, c.x + sx, c.y + sy);
-    if (penalty > 0 && (alt[0] || alt[1]) && bodyPenalty(c, c.x + alt[0], c.y + alt[1]) === 0) { [sx, sy] = alt; penalty = 0; }
-    if (c.moveTimer < stepTime * (1 + penalty)) return;
+    if (!canStep(c, c.x + sx, c.y + sy)) { // ocupada: por el otro eje o rodeando (bodies.js)
+        if ((alt[0] || alt[1]) && canStep(c, c.x + alt[0], c.y + alt[1])) [sx, sy] = alt;
+        else { const side = bodyStep(c, tx, ty); if (!side) return; sx = side.x - c.x; sy = side.y - c.y; }
+    }
     c.moveTimer = 0;
     c.x += sx; c.y += sy;
 }

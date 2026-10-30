@@ -448,6 +448,7 @@ function updateArena(arena, dt) {
     arena.creeps.forEach(c => { if (c.isAlive()) tickEffects(c, dt); });
     if (!inCombat() || arena.done) return;
 
+    separateBodies(arena);
     arena.heroes.forEach(hero => { if (!arena.done) updateHero(hero, arena, dt); });
     if (arena.done) return; // el héroe quedó eliminado o el duelo se resolvió
     updateProjectiles(arena, dt);
@@ -500,14 +501,14 @@ function updateHero(hero, arena, dt) {
         if (!walkable(hero.arena, nx, ny) || cutsCorner) { // paredes: si iba en diagonal, prueba deslizarse por un eje
             if (dir.dx && walkable(hero.arena, nx, y)) ny = y; else if (dir.dy && walkable(hero.arena, x, ny)) nx = x; else { nx = x; ny = y; }
         }
-        // Cuerpos físicos (bodies.js): entrar a una casilla ocupada tarda más; mientras tanto, sigue empujando
-        const penalty = (nx !== x || ny !== y) ? bodyPenalty(hero, nx, ny) : 0;
-        const pushing = hero.moveTimer < need * (1 + penalty);
-        if (!pushing) {
-            // Se guarda el tiempo que sobró del paso (así caminar seguido no pierde un pedacito en cada casilla)
-            const carry = hero.moveTimer - need;
-            hero.x = nx; hero.y = ny; hero.moveTimer = penalty === 0 && carry < stepTime ? carry : 0;
+        // Cuerpos sólidos (bodies.js): si está ocupada, rodea hacia donde iba; rodeado, se queda
+        if ((nx !== x || ny !== y) && !bodyFree(hero, nx, ny)) {
+            const t = hero.moveTarget, side = bodyStep(hero, t ? t.x : nx + (nx - x), t ? t.y : ny + (ny - y));
+            nx = side ? side.x : x; ny = side ? side.y : y;
         }
+        // Se guarda el tiempo que sobró del paso (así caminar seguido no pierde un pedacito en cada casilla)
+        const carry = hero.moveTimer - need;
+        hero.x = nx; hero.y = ny; hero.moveTimer = carry < stepTime ? carry : 0;
         if (hero.x !== x || hero.y !== y) {
             hero.lastStepDir = { dx: Math.sign(hero.x - x), dy: Math.sign(hero.y - y) };
             emit(hero, 'onMove', { steps: 1 });

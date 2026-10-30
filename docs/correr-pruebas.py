@@ -27,6 +27,10 @@ class Callado(Manejador):
         pass
 
 
+class Servidor(http.server.ThreadingHTTPServer):
+    request_queue_size = 128  # con la cola chica de fábrica, Windows rechaza conexiones, falta algún script y las pruebas nunca terminan
+
+
 def una_vuelta(page, url):
     errores = []
     page.on('pageerror', lambda e: errores.append(str(e)))
@@ -41,7 +45,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--veces', type=int, default=1)
     args = ap.parse_args()
-    srv = http.server.ThreadingHTTPServer(('127.0.0.1', 0), Callado)
+    srv = Servidor(('127.0.0.1', 0), Callado)
     threading.Thread(target=srv.serve_forever, daemon=True).start()
     url = f'http://127.0.0.1:{srv.server_address[1]}/index.html?test'
     ok = 0

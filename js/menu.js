@@ -140,6 +140,7 @@ const TUTORIAL_PAGES = [
         </div>` },
     { icon: '🖱️', color: '#9fb3bd', title: 'Mouse', body: `
         <div class="tut-cards">
+            ${tutCard('🚧', 'Cuerpos sólidos', 'Nadie pisa ni atraviesa a nadie: te rodean, los podés encerrar y tapar el paso. Solo lo que está en fase pasa por encima.')}
             ${tutCard('🗡️', 'Ataque automático', 'Tu héroe le pega solo al enemigo más cercano que tenga a tiro (el círculo punteado es tu alcance).')}
             ${tutCard('👣', 'Clic derecho en el mapa', 'Caminás hasta ahí, como en Dota. También en los boxes, entre ronda y ronda.')}
             ${tutCard('⚔️', 'Clic derecho en un rival', 'Lo atacás: tu héroe va hasta tenerlo a tiro y le pega. Caminar a otro lado cancela la orden.')}

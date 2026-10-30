@@ -1051,29 +1051,64 @@ test('Brujo: rayo cada 5s con daño mágico y aturdimiento; Escarchador ralentiz
     checkNear(effAtkSpeed(ally) / ally.atkSpeed, 1 + CREEP_TYPES.DRUMMER.auraAtkSpeed, 'aliado acelerado');
 });
 
-test('Cuerpos físicos: entrar a una casilla ocupada tarda más según el tamaño; Paso Fantasma atraviesa', () => {
-    newGame('DANCER');
-    const c = dummy();
-    checkNear(bodyPenalty(player, c.x, c.y), BODY_SLOW.medium, 'creep normal: mediano');
-    checkNear(bodyPenalty(player, c.x, c.y + 1), 0, 'casilla libre');
-    const swarm = spawnType('SWARM', { x: 10, y: 2 }), boss = spawnType('GRUNT', { x: 11, y: 2, isBoss: true });
-    checkNear(bodyPenalty(player, 10, 2), BODY_SLOW.small, 'enjambre: chico');
-    checkNear(bodyPenalty(player, 11, 2), BODY_SLOW.large, 'jefe: grande');
-    // El héroe empuja: con el tiempo de un paso normal no entra; con el tiempo extra, sí
-    const step = player.moveInterval / (effMoveMult(player) * MOVE_SPEED_MULT);
-    keys['arrowright'] = true;
-    try {
-        player.moveTimer = step * 1.2; updateHero(player, player.arena, 0);
-        checkEq(player.x, c.x - 1, 'todavía empujando');
-        player.moveTimer = step * (1 + BODY_SLOW.medium) + 0.01; updateHero(player, player.arena, 0);
-        checkEq(player.x, c.x, 'pasó');
-        player.x = c.x - 1;
-        addEffect(player, { id: 'PHASE', duration: 5, flags: ['phasing'] });
-        player.moveTimer = step * 1.2; updateHero(player, player.arena, 0);
-        checkEq(player.x, c.x, 'atravesando no frena');
-    } finally { keys['arrowright'] = false; }
+test('Cuerpos sólidos: nadie pisa a nadie y el que está en fase pasa', () => {
+    newGame('CRANE');
+    keyboardMove = true;
+    const c = creeps[0], step = heroStepTime(player);
+    creeps.slice(1).forEach(o => { o.hp = 0; });
+    player.x = 5; player.y = 5; c.x = 6; c.y = 5; c.moveInterval = 1e9;
+    check(!bodyFree(player, 6, 5), 'ocupada');
+    check(bodyFree(player, 6, 6), 'libre');
+    player.moveTarget = { x: 9, y: 5, arena: player.arena };
+    player.moveTimer = step + 0.01; keys = {}; updateHero(player, player.arena, 0);
+    check(!(player.x === 6 && player.y === 5), 'no la pisa');
+    check(player.x === 6 || player.y !== 5, 'rodea');
+    player.x = 5; player.y = 5; player.moveTarget = null;
+    addEffect(player, { id: 'PHASE', duration: 5, flags: ['phasing'] });
+    check(bodyFree(player, 6, 5), 'en fase pasa');
+    keys = { arrowright: true }; player.moveTimer = step + 0.01; updateHero(player, player.arena, 0); keys = {};
+    checkEq(player.x, 6, 'y pisa la casilla');
+    check(!bodyAt(player.arena, 6, 5, c), 'en fase no ocupa lugar');
+    removeEffect(player, 'PHASE');
+    separateBodies(player.arena);
+    check(player.x !== c.x || player.y !== c.y, 'al salir de fase, se separan');
 });
 
+test('Cuerpos sólidos: rodeado no se mueve, los creeps rodean y un salto no deja a dos en la misma casilla', () => {
+    newGame('CRANE');
+    const list = creeps.slice(0, 9);
+    creeps.slice(9).forEach(o => { o.hp = 0; });
+    player.x = 5; player.y = 5;
+    list.slice(0, 8).forEach((c, i) => { const [dx, dy] = CIRCLE_STEPS[i]; c.x = 5 + dx; c.y = 5 + dy; });
+    checkEq(bodyStep(player, 9, 5), null, 'rodeado: no hay por dónde');
+    const a = list[0], b = list[8];
+    a.hp = 100; b.hp = 100;
+    b.x = 2; b.y = 2; a.x = 3; a.y = 2;
+    list.slice(1, 8).forEach(o => { o.hp = 0; });
+    b.moveTimer = 1e9;
+    stepCreepToward(b, 5, 2, 0.05);
+    check(!(b.x === 3 && b.y === 2), 'el creep no pisa al otro');
+    check(b.x !== 2 || b.y !== 2, 'y rodea');
+    b.x = a.x; b.y = a.y;
+    separateBodies(player.arena);
+    check(a.x !== b.x || a.y !== b.y, 'el que cayó encima se corre');
+    check(walkable(player.arena, b.x, b.y), 'a una casilla válida');
+});
+
+test('Cuerpos sólidos: en una oleada entera nunca hay dos en la misma casilla', () => {
+    newGame('CRANE');
+    autopilot = true;
+    try {
+        const a = player.arena;
+        creeps.forEach((c, i) => { c.x = 10 + (i % 5); c.y = 3 + (i % 3) * 2; });
+        for (let f = 0; f < 200 && a.creeps.some(c => c.isAlive()) && player.isAlive(); f++) {
+            gameClock += 0.05; updateArena(a, 0.05);
+            separateBodies(a);
+            const seen = new Set();
+            [...a.creeps.filter(c => c.isAlive()), player].forEach(u => { const k = u.x * 100 + u.y; check(!seen.has(k), `dos en ${u.x},${u.y}`); seen.add(k); });
+        }
+    } finally { autopilot = false; }
+});
 test('Cuerpos físicos: un creep bloqueado prueba el otro camino si está libre', () => {
     newGame('CRANE');
     const a = spawnType('GRUNT', { x: 10, y: 5 }), b = spawnType('GRUNT', { x: 12, y: 6 });

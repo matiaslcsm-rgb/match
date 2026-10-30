@@ -1,23 +1,9 @@
-// Cuerpos físicos: las unidades no se atraviesan libremente. Entrar a una casilla ocupada por otra unidad viva (héroe,
-// creep o jefe) cuesta más tiempo según el tamaño del que está ahí ("cuerpo blando": nunca te quedás trabado).
-// Reglas: DISEÑO.md §8 bis.
-//
-//   Tamaño     quiénes                                   el paso tarda
-//   chico      Chusma, Enjambre (type.size = 'small')    +25%
-//   mediano    héroes y creeps normales                  +75%
-//   grande     jefes de oleada y jefes de ronda          +150%
-//
-// Los creeps, además, prueban otro camino libre antes de empujar. Las habilidades que teletransportan o saltan no
-// frenan, y con el estado 'phasing' (ej: Paso Fantasma) se atraviesa todo sin frenar.
+// Cuerpos sólidos (pedido del usuario 2026-10-30): nadie pisa ni atraviesa a nadie, como en un MOBA. Una casilla con una
+// unidad viva está ocupada; solo el que está en fase ('phasing', ej: Paso Fantasma) pasa por encima de los demás, y a él
+// tampoco lo choca nadie. El que se topa con alguien rodea (bodyStep). Si un salto o un teletransporte cae encima de otro, al
+// cuadro siguiente pasa a la casilla libre más cercana (separateBodies). Reglas: DISEÑO.md §8 bis.
 
-const BODY_SLOW = { small: 0.25, medium: 0.75, large: 1.5 };
 let BODIES_ON = true; // se puede apagar para medir
-
-function bodySize(u) {
-    if (u.isRoundBoss || u.isBoss) return 'large';
-    if (u.type && u.type.size) return u.type.size;
-    return 'medium';
-}
 
 // ¿Se puede pisar (x, y)? Dentro del mundo y sin pared (arena.walls: para las columnas de la arena de duelo).
 function walkable(arena, x, y) {
@@ -43,22 +29,62 @@ function dragUnit(unit, dx, dy, cells) {
         const x = Math.round(x0 + dx * i), y = Math.round(y0 + dy * i);
         if (x === unit.x && y === unit.y) continue;
         if (!walkable(unit.arena, x, y)) { wall = !!(unit.arena && unit.arena.walls) && x >= 0 && y >= 0 && x < COLS && y < ROWS; break; }
-        if (bodiesAt(unit.arena, x, y, unit).length) break;
+        if (bodyAt(unit.arena, x, y, unit)) break;
         unit.x = x; unit.y = y; moved++;
     }
     if (moved) unit.moveTarget = null;
     return { moved, wall };
 }
 
-// Unidades vivas de la arena que ocupan una casilla (sin contar a `self`).
-function bodiesAt(arena, x, y, self) {
-    if (!arena) return [];
-    const heroes = arena.heroes.filter(h => !h.eliminated && !h.inRest && h.isAlive());
-    return [...heroes, ...arena.creeps.filter(c => c.isAlive())].filter(u => u !== self && u.x === x && u.y === y);
+// Corre muchas veces por cuadro, por eso son bucles simples y no listas nuevas. El que está en fase no ocupa lugar.
+function bodyBlocks(u, x, y, self) { return u !== self && u.x === x && u.y === y && u.isAlive() && !u.eliminated && !u.inRest && !(u.effects && hasFlag(u, 'phasing')); }
+function bodyAt(arena, x, y, self) {
+    if (!arena) return false;
+    for (const u of arena.creeps) if (bodyBlocks(u, x, y, self)) return true;
+    for (const u of arena.heroes) if (bodyBlocks(u, x, y, self)) return true;
+    return false;
 }
 
-// Cuánto más tarda `unit` en entrar a (x, y): 0 si está libre o si atraviesa cuerpos.
-function bodyPenalty(unit, x, y) {
-    if (!BODIES_ON || (unit.effects && hasFlag(unit, 'phasing'))) return 0;
-    return bodiesAt(unit.arena, x, y, unit).reduce((m, u) => Math.max(m, BODY_SLOW[bodySize(u)]), 0);
+// ¿`unit` se puede parar en (x, y)? El que está en fase pasa por arriba de todos.
+function bodyFree(unit, x, y) {
+    return !BODIES_ON || (unit.effects && hasFlag(unit, 'phasing')) || !bodyAt(unit.arena, x, y, unit);
+}
+function canStep(unit, x, y) {
+    const a = unit.arena, cut = x !== unit.x && y !== unit.y && (!walkable(a, x, unit.y) || !walkable(a, unit.x, y)); // no corta esquinas de columnas
+    return walkable(a, x, y) && !cut && bodyFree(unit, x, y);
+}
+// Casilla vecina libre para seguir hacia (gx, gy) cuando la directa está ocupada: la que más acerca, sin volver para atrás.
+// null: no hay por dónde (rodeado: se queda).
+function bodyStep(unit, gx, gy) {
+    const here = Math.hypot(gx - unit.x, gy - unit.y);
+    let best = null, bestD = here + 0.75;
+    for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) {
+        const x = unit.x + dx, y = unit.y + dy;
+        if ((!dx && !dy) || !canStep(unit, x, y)) continue;
+        const d = Math.hypot(gx - x, gy - y);
+        if (d < bestD) { bestD = d; best = { x, y }; }
+    }
+    return best;
+}
+
+// Si dos quedaron en la misma casilla (un salto, el fin de una fase, una oleada que aparece), el que llegó después pasa a la
+// casilla libre más cercana. Los jefes no se corren.
+function separateBodies(arena) {
+    if (!BODIES_ON) return;
+    const grid = new Uint8Array(COLS * ROWS), key = (x, y) => y * COLS + x, solid = u => u.isAlive() && !u.eliminated && !u.inRest && !(u.effects && hasFlag(u, 'phasing'));
+    let stacked = false;
+    for (const list of [arena.creeps, arena.heroes]) for (const u of list) if (solid(u)) { if (grid[key(u.x, u.y)]++) stacked = true; }
+    if (!stacked) return; // lo normal: nadie encimado
+    grid.fill(0);
+    [...arena.creeps, ...arena.heroes].filter(solid).sort((a, b) => !!(b.isBoss || b.isRoundBoss) - !!(a.isBoss || a.isRoundBoss)).forEach(u => {
+        if (grid[key(u.x, u.y)]) {
+            search: for (let r = 1; r < COLS; r++) for (let dx = -r; dx <= r; dx++) for (let dy = -r; dy <= r; dy++) {
+                const x = u.x + dx, y = u.y + dy;
+                if (Math.max(Math.abs(dx), Math.abs(dy)) !== r || !walkable(arena, x, y) || grid[key(x, y)]) continue;
+                u.x = x; u.y = y;
+                break search;
+            }
+        }
+        grid[key(u.x, u.y)] = 1;
+    });
 }
