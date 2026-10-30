@@ -66,6 +66,7 @@ competidores entre sí en duelo (`DUEL_DAMAGE_REDUCTION`): 60% (hoy) → 7,9 s y
   cortan por tiempo. Hay que medirlo.
 - b) 75% menos de daño y dejar el tiempo: algo intermedio (~11-12 s, a medir).
 - c) No tocar el daño y alargar los duelos con más golpes anunciados (más habilidades con `windup`) y competidores nuevos.
+**Aplicada la (a) el 2026-10-30** (`DUEL_DAMAGE_REDUCTION` 0,8 y `DUEL_TIME` 60 s). Banco de 66, antes → después: duelo mediano 7,9 → **15,9 s** (meta 15-30 ✔), por tiempo 5 → 12% (meta <10% ✘), cambios de quién gana 0,8 → 0,8 (meta >1 ✘), esquive de la IA 34 → 29% (meta 30-70%, casi). Con 75 s: 16,4 s y 11% por tiempo, casi igual, así que se dejó en 60. Lo que falta de la meta (cambios de ventaja y los empates por tiempo) no es cuestión de números: pide mecánicas, ver Fase 3.
 
 ## Fase 3 — Los competidores de MATCH
 De a uno: ficha aprobada por el usuario → programado con su robot 3D → medido en duelos. Cada uno reemplaza a un héroe
