@@ -236,11 +236,28 @@ function ringMesh(r0, r1, color, opacity) {
 const rangeRing = ringMesh(0.97, 1, '#e8b4a0', 0.55); scene.add(rangeRing); // (la cruz de a dónde caminás va con los efectos del piso)
 
 // Cámara: arriba y atrás, mirando el centro de la arena con unos 55° de inclinación (como Dota)
-function placeCamera(aspect) {
+// La cámara se acerca y sigue a tu competidor (2026-10-30, pedido del usuario: los robots se veían chicos). En el duelo encuadra
+// a los dos y se aleja lo que haga falta; en los boxes se ve todo. Nunca muestra lo que está afuera de la arena.
+const ZOOM = 0.7, cam = { x: COLS / 2, z: ROWS / 2 + 0.9, k: 1, arena: null };
+const clampTo = (v, half, size) => half * 2 >= size ? size / 2 : Math.max(half, Math.min(size - half, v));
+function cameraGoal(arena) {
+    const full = { x: COLS / 2, z: ROWS / 2 + 0.9, k: 1 };
+    if (arena.kind === 'rest') return full;
+    const me = [viewedHero, player].find(h => h && arena.heroes.includes(h)) || arena.heroes[0];
+    if (!me) return full;
+    const spot = u => ({ x: (u.rx ?? u.x) + 0.5, z: (u.ry ?? u.y) + 0.5 });
+    const a = spot(me), other = arena.kind === 'duel' ? arena.heroes.find(h => h !== me) : null, b = other ? spot(other) : a;
+    const k = Math.min(1, Math.max(ZOOM, (Math.abs(a.x - b.x) + 5) / COLS, (Math.abs(a.z - b.z) + 4) / ROWS));
+    return { x: clampTo((a.x + b.x) / 2, COLS * k / 2, COLS), z: clampTo((a.z + b.z) / 2, ROWS * k / 2, ROWS) + 0.9, k };
+}
+function placeCamera(aspect, arena, dt) {
     camera.aspect = aspect;
-    const pitch = 55 * Math.PI / 180, dist = 18.8 + Math.max(0, 1.75 - aspect) * 8;
-    camera.position.set(COLS / 2, Math.sin(pitch) * dist, ROWS / 2 + Math.cos(pitch) * dist + 1.2);
-    camera.lookAt(COLS / 2, 0, ROWS / 2 + 0.9);
+    const goal = cameraGoal(arena), ease = cam.arena === arena ? Math.min(1, dt * 5) : 1; // al cambiar de arena, sin barrido
+    cam.arena = arena;
+    ['x', 'z', 'k'].forEach(n => { cam[n] += (goal[n] - cam[n]) * ease; });
+    const pitch = 55 * Math.PI / 180, dist = (18.8 + Math.max(0, 1.75 - aspect) * 8) * cam.k;
+    camera.position.set(cam.x, Math.sin(pitch) * dist, cam.z + Math.cos(pitch) * dist + 0.3);
+    camera.lookAt(cam.x, 0, cam.z);
     camera.updateProjectionMatrix();
 }
 
@@ -449,7 +466,7 @@ function frame(arena, dt) {
     cv.style.width = w + 'px'; cv.style.height = h + 'px';
     const rw = Math.max(64, Math.round(w / PIXEL)), rh = Math.max(48, Math.round(h / PIXEL));
     if (rw !== RES.w || rh !== RES.h) { setRes(rw, rh); renderer.setSize(rw, rh, false); }
-    placeCamera(w / Math.max(1, h));
+    placeCamera(w / Math.max(1, h), arena, dt);
     if (shakeAmount) { camera.position.x += (Math.random() - 0.5) * shakeAmount * 0.03; camera.position.z += (Math.random() - 0.5) * shakeAmount * 0.03; } // temblor de los golpes fuertes
     // Jefe: luz más roja; los boxes, más cálidos
     const boss = arena.kind === 'boss', rest = arena.kind === 'rest';
