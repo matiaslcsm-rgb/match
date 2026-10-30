@@ -1828,6 +1828,29 @@ test('Tienda en ventana: se abre sola en la preparación, se cierra y se vuelve 
     checkEq(document.getElementById('shop-container').style.display, 'none', 'se cierra al empezar la oleada');
 });
 
+test('Cartel del duelo: presenta a los dos y la frase del presentador sale de cómo llegan', () => {
+    resetGame();
+    selectHero(HERO_TEMPLATES.AXE);
+    learnSkill(currentDraft.options[0]);
+    const [a, b] = heroes;
+    check(duelTagline(a, b).includes('Se estrenan'), 'sin duelos jugados');
+    a.duelWins = 2;
+    check(duelTagline(a, b).includes(`${a.name} no perdió`), 'invicto');
+    a.duelLosses = 1; a.points = 5; b.points = 5;
+    check(duelTagline(a, b).includes('Parejos'), 'empatados');
+    b.points = 9;
+    check(duelTagline(a, b).includes(`${b.name} viene arriba`), 'favorito');
+    heroes.slice(2).forEach(h => { h.eliminated = true; });
+    check(duelTagline(a, b).includes('final'), 'quedan dos');
+    heroes.slice(2).forEach(h => { h.eliminated = false; });
+    const card = document.getElementById('duel-card');
+    showDuelCard(a, b);
+    check(card.textContent.includes(a.name) && card.textContent.includes(b.name), 'muestra a los dos');
+    check(card.textContent.includes('¡Te toca!'), 'avisa si peleás vos');
+    resetGame();
+    checkEq(card.innerHTML, '', 'se limpia con la partida');
+});
+
 test('Mapa agrandable: M cambia el tamaño del mapa y vuelve', () => {
     const w = canvas.style.width;
     toggleBigMap();

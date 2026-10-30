@@ -94,6 +94,9 @@ Que se sienta un programa de TV (concepto en `docs/CONCEPTO-FUTURISTA.md`).
 - [x] Menús con la estética del show (portada, elección de competidor, tienda, apuestas). Hecho 2026-10-30, con el
   resumen de fin de partida y los glosarios: paleta industrial y colores de atributo dentro de la paleta.
 - [ ] El presentador y los carteles del programa (presentación de cada duelo, repeticiones, ranking como zócalo de TV).
+  - [x] Presentación de cada duelo (2026-10-30): cartel EN VIVO con los dos competidores, puesto y duelos, y una frase del
+    presentador según cómo llegan (`showDuelCard`, ui.js). Dura 3,4 s y no frena el duelo, así que no cambia el balance;
+    mientras está, tapa el panel del rival.
 - [x] El público reacciona (sonido y gradas). Hecho 2026-10-28: tribunas de hormigón atrás y a los costados de la
   arena 3D con espectadores de colores que se mueven solos y saltan cuando cae alguien (más si es un competidor o el
   jefe), con el grito de la tribuna (sonido sintetizado, `crowd` en audio.js).

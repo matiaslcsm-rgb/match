@@ -249,6 +249,7 @@ function startWave(plan) {
     const duel = duelArenas[0];
     setStateText(duel ? `RONDA ${waveNumber}: DUELO + ${wave.name.toUpperCase()}` : `OLEADA · RONDA ${waveNumber}: ${wave.name.toUpperCase()}`);
     sfx(duel ? 'duel' : 'wave');
+    if (duel) showDuelCard(...duel.heroes);
     const rival = duel && duel.heroes.includes(player) ? duel.heroes.find(h => h !== player) : null;
     log(`🌊 ¡Ronda ${waveNumber}: ${wave.name}!` + (duel ? ` ⚔️ Duelo: ${duel.heroes[0].displayName} vs ${duel.heroes[1].displayName}` +
         (rival ? ` (¡te toca a vos contra ${rival.displayName}!). Los demás pelean su oleada.` : '; mientras tanto, vos peleás tu oleada.') : ' Cada héroe pelea en su arena.'));
@@ -309,6 +310,7 @@ function resetGame() {
     duelPlan = null; currentBet = null; duelBets = []; nextRoundBoss = null; lastRoundBoss = null; lastDuelPair = [];
     cancelTargeting();
     paused = false; showPanel('pause-menu', false);
+    const dcard = document.getElementById('duel-card'); if (dcard) dcard.innerHTML = '';
     hideMatchSummary(); const rsum = document.getElementById('round-summary'); if (rsum) rsum.style.display = 'none'; // la tarjeta de la última ronda
     if (autopilot) setAutopilot(false); // el piloto de una partida no juega la siguiente
     setPhaseTimer(PHASE_TIMES.heroSelect);

@@ -758,6 +758,31 @@ function showBetBanner(winners) {
     sfx('betWin');
 }
 
+// --- CARTEL DEL DUELO (Fase 4): la presentación del show. Pasa por encima de la arena sin frenar nada: el duelo ya arrancó ---
+// La frase del presentador sale de cómo llegan los dos, la primera regla que se cumpla.
+function duelTagline(a, b) {
+    if (aliveHeroes().length === 2) return '¡La gran final! Solo uno sigue en el show.';
+    if (a.duelWins + a.duelLosses + b.duelWins + b.duelLosses === 0) return 'Se estrenan en la arena: nadie los vio pelear todavía.';
+    const unbeaten = [a, b].find(h => h.duelWins >= 2 && !h.duelLosses);
+    if (unbeaten) return `${unbeaten.name} no perdió ningún duelo. ¿Quién lo frena?`;
+    if (a.points === b.points) return 'Parejos en la tabla: esto se define acá.';
+    const [fav, dog] = a.points > b.points ? [a, b] : [b, a];
+    return `${fav.name} viene arriba en la tabla. ¿Da la sorpresa ${dog.name}?`;
+}
+function duelCardHtml(a, b) {
+    const side = h => `<div class="dc-side${h === player ? ' you' : ''}">${heroIconHtml(h, 'lg')}<b>${h.name}</b>` +
+        `<small>${h.ownerName || h.name}</small><small>${heroRank(h)}º · ${h.duelWins}G ${h.duelLosses}P</small></div>`;
+    return `<div class="dc-box"><div class="dc-head"><span class="lb-live"><i></i>EN VIVO</span><span>Duelo de la ronda ${waveNumber}</span>` +
+        `${[a, b].includes(player) ? '<span class="dc-yours">¡Te toca!</span>' : ''}</div>` +
+        `<div class="dc-versus">${side(a)}<span class="dc-vs">VS</span>${side(b)}</div><p class="dc-line">${duelTagline(a, b)}</p></div>`;
+}
+function showDuelCard(a, b) {
+    const card = document.getElementById('duel-card');
+    if (!card || matchSummaryOff) return; // el banco juega sin mirar
+    card.innerHTML = duelCardHtml(a, b);
+    card.firstChild.addEventListener('animationend', e => { if (e.animationName === 'dc-show') card.innerHTML = ''; }); // las de adentro también avisan acá
+}
+
 // --- RANKING ---
 // Tabla con los 8 héroes: puesto, vidas, puntos, oro y dónde está. Un clic en un héroe muestra su arena.
 let lastScoreboardSignature = '';

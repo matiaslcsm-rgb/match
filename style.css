@@ -758,3 +758,24 @@ body.pixel-ui { background: repeating-linear-gradient(135deg, #121412 0 14px, #1
 .badge-innate { background: var(--in-yellow); color: var(--in-line); }
 .hs-scaling, .counter-item { color: var(--in-orange); }
 .modal { padding-top: 78px; } /* que el contador grande no tape el título de la ventana */
+
+/* Cartel del show que presenta cada duelo (ui.js, showDuelCard): no bloquea los clics y se va solo */
+#duel-card { position: fixed; top: 96px; left: 50%; transform: translateX(-50%); width: min(620px, calc(100vw - 32px)); z-index: 930; pointer-events: none; zoom: var(--ui-scale); }
+.dc-box { --c: var(--in-chamfer); position: relative; background: var(--in-panel); box-shadow: inset 0 0 0 3px var(--in-orange); padding: 15px 16px 10px; color: var(--in-bone); text-align: center; animation: dc-show 3.4s linear forwards;
+    clip-path: polygon(var(--c) 0, calc(100% - var(--c)) 0, 100% var(--c), 100% calc(100% - var(--c)), calc(100% - var(--c)) 100%, var(--c) 100%, 0 calc(100% - var(--c)), 0 var(--c)); }
+.dc-box::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 7px; background: var(--in-hazard); }
+.dc-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 0.8rem; letter-spacing: 2px; text-transform: uppercase; color: var(--in-dim); }
+.dc-head .lb-live { display: flex; align-items: center; gap: 6px; color: var(--in-bone); }
+.dc-head .lb-live i { width: 10px; height: 10px; background: #d9402c; display: inline-block; animation: lb-blink 1.2s steps(2) infinite; }
+.dc-yours { color: var(--in-yellow); }
+.dc-versus { display: grid; grid-template-columns: 1fr 70px 1fr; align-items: center; margin: 6px 0; }
+.dc-side { display: flex; flex-direction: column; align-items: center; gap: 2px; animation: dc-left 0.3s ease-out; }
+.dc-side:last-child { animation-name: dc-right; }
+.dc-side b { font-size: 1.15rem; text-transform: uppercase; letter-spacing: 1px; }
+.dc-side.you b { color: var(--in-orange); }
+.dc-side small { color: var(--in-dim); font-size: 0.75rem; }
+.dc-vs { font-size: 2rem; color: var(--in-orange); text-shadow: 3px 3px 0 var(--in-line); }
+.dc-line { margin: 0; font-size: 0.9rem; color: var(--in-yellow); }
+@keyframes dc-show { 0% { opacity: 0; } 6% { opacity: 1; } 88% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes dc-left { from { transform: translateX(-60px); opacity: 0; } }
+@keyframes dc-right { from { transform: translateX(60px); opacity: 0; } }
