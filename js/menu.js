@@ -129,8 +129,8 @@ const TUTORIAL_PAGES = [
         <div class="tut-keys">
             ${tutKey(['Q', 'W', 'E', 'R', 'D', 'F'], 'Tus habilidades: definitivas en R (si no, D o F), pasivas en W o E y activas en Q. Las que se apuntan se confirman con clic.')}
             ${tutKey(['K'], 'Acomodar habilidades: las arrastrás a la tecla que quieras.')}
-            ${tutKey(['1', '2', '3', '4', '5', '6'], 'Los ítems activos, según su casilla del inventario.')}
-            ${tutKey(['WASD'], 'Moverte con el teclado: solo si lo prendés en Opciones (Esc), y las habilidades dejan libres W y D. Como en Dota, se juega con el mouse.')}
+            ${tutKey(['1', '2', '3', '4', '5', '6'], 'Los ítems, según su casilla. Los activos se usan así; los acomodás arrastrándolos.')}
+            ${tutKey(['L'], 'Retraer los paneles de los costados y dejarle la pantalla al juego.')}
             ${tutKey(['H'], 'Habilidades automáticas: se lanzan solas y vos solo te movés.')}
             ${tutKey(['B'], 'Abrir o cerrar la tienda (en la preparación).')}
             ${tutKey(['M'], 'Agrandar el mapa.')}
@@ -160,7 +160,7 @@ const TUTORIAL_PAGES = [
             ${tutCard('🔀', 'Armá según lo que venga', 'Cada básico dice en qué se arma: la misma pieza te lleva a ítems distintos. Decidí según tu rival y la ronda.')}
             ${tutCard('⚡', 'Ítems activos', 'Algunos se usan con las teclas <b>1 a 6</b>: silenciar, aturdir, atrapar, saltar, protegerte. Los ves con su número en el inventario.')}
             ${tutCard('🛡️', 'Contras', 'Mirá el aviso de la próxima oleada: hay ítems que contrarrestan a cada tipo de creep.')}
-            ${tutCard('🎒', 'Inventario', '6 espacios + 1 para el objeto neutral. Vender devuelve la mitad.')}
+            ${tutCard('🎒', 'Inventario', '6 casillas que dan stats, 3 de <b>reserva</b> para guardar piezas (no dan nada, pero sirven para armar) y 1 de jungla para lo que dan los jefes. Vender devuelve la mitad.')}
         </div>` },
     { icon: '💀', color: '#e0523c', title: 'Vidas y muerte', body: `
         <div class="tut-cards">

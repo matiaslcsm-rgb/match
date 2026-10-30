@@ -31,7 +31,6 @@ function renderPauseMenu() {
         opt('sprites', '🎨 Pixel art (G)', spritesOn) +
         opt('colorblind', '🎨 Zonas de ataque para daltonismo (azul y naranja)', A11Y.colorblind) +
         opt('quickcast', '⚡ Lanzamiento rápido (la habilidad sale al apretar la tecla)', quickCast) +
-        opt('wasd', '⌨️ Moverse con W A S D (además del clic derecho)', wasdMove) +
         opt('autocast', '✨ Habilidades automáticas (H)', autoCast) +
         opt('autopilot', '🤖 Piloto automático (P)', autopilot) +
         opt('bigmap', '⤢ Mapa grande (M)', mapScale > 1);
@@ -51,7 +50,7 @@ function renderPauseMenu() {
     });
     document.querySelectorAll('#pause-options .pm-toggle').forEach(btn => {
         btn.onclick = () => {
-            ({ sound: () => setSound(!soundOn), music: () => setMusic(!musicOn), colorblind: () => setA11y('colorblind', !A11Y.colorblind), sprites: () => setSprites(!spritesOn), autocast: () => setAutoCast(!autoCast), quickcast: () => setQuickCast(!quickCast), wasd: () => setWasdMove(!wasdMove),
+            ({ sound: () => setSound(!soundOn), music: () => setMusic(!musicOn), colorblind: () => setA11y('colorblind', !A11Y.colorblind), sprites: () => setSprites(!spritesOn), autocast: () => setAutoCast(!autoCast), quickcast: () => setQuickCast(!quickCast),
                autopilot: () => setAutopilot(!autopilot), bigmap: toggleBigMap })[btn.dataset.opt]();
             renderPauseMenu();
         };

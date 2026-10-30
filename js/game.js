@@ -36,6 +36,7 @@ window.addEventListener('keydown', e => {
     const act = actionForKey(k); // teclas configurables (keymap.js)
     if (skillKeysOpen) { if (k === 'escape' || act === 'skillKeys') toggleSkillKeys(false); return; }
     if (act === 'skillKeys') { toggleSkillKeys(); return; }
+    if (act === 'panels') { togglePanels(); return; }
     if (act === 'autopilot') { setAutopilot(!autopilot); return; }
     if (act === 'shop') { toggleShop(); return; }
     if (act === 'map') { toggleBigMap(); return; }
@@ -539,10 +540,10 @@ function updateHero(hero, arena, dt) {
 }
 
 function keyboardDirection() {
-    if (!keyboardMoveOn()) return { dx: 0, dy: 0 }; // W A S D solo si lo prendés en Opciones (mouse.js)
+    if (!keyboardMoveOn()) return { dx: 0, dy: 0 }; // se camina con el mouse; el teclado es solo para las pruebas (mouse.js)
     return {
-        dx: (keys[KEYMAP.right] || keys['arrowright'] ? 1 : 0) - (keys[KEYMAP.left] || keys['arrowleft'] ? 1 : 0),
-        dy: (keys[KEYMAP.down] || keys['arrowdown'] ? 1 : 0) - (keys[KEYMAP.up] || keys['arrowup'] ? 1 : 0)
+        dx: (keys['arrowright'] ? 1 : 0) - (keys['arrowleft'] ? 1 : 0),
+        dy: (keys['arrowdown'] ? 1 : 0) - (keys['arrowup'] ? 1 : 0)
     };
 }
 

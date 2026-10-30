@@ -1,19 +1,16 @@
 // Teclas configurables (REWORK.md, lista de interfaz, 2026-10-07). En la pausa → "⌨️ Teclas": clic en una acción y apretás la
 // tecla nueva; si otra acción la usaba, se intercambian (nunca quedan dos con la misma). Se guarda en el navegador.
-// Las flechas siempre mueven y Esc siempre pausa (no se cambian).
+// Esc siempre pausa (no se cambia). Se camina con el mouse, como en un MOBA.
 
 const KEY_DEFAULTS = {
-    up: 'w', left: 'a', down: 's', right: 'd', // W A S D: solo si lo prendés en Opciones (mouse.js)
-    map: 'm', shop: 'b', autocast: 'h', autopilot: 'p', skillKeys: 'k'
+    map: 'm', shop: 'b', autocast: 'h', autopilot: 'p', skillKeys: 'k', panels: 'l'
 };
 const KEY_LABELS = {
-    up: 'Mover arriba', left: 'Mover a la izquierda', down: 'Mover abajo', right: 'Mover a la derecha',
-    map: 'Mapa grande', shop: 'Tienda', autocast: 'Habilidades automáticas', autopilot: 'Piloto automático', skillKeys: 'Acomodar habilidades'
+    map: 'Mapa grande', shop: 'Tienda', autocast: 'Habilidades automáticas', autopilot: 'Piloto automático', skillKeys: 'Acomodar habilidades', panels: 'Retraer los paneles'
 };
-// Fijas: Esc, las flechas, G (pixel art) y las de las habilidades (hero.js, SKILL_KEYS)
-const KEY_FIXED = ['escape', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'g', 'e', 'r', 't', 'f', 'q', 'v'];
+// Fijas: Esc, G (pixel art), las de las habilidades (hero.js, SKILL_KEYS) y las de los ítems
+const KEY_FIXED = ['escape', 'g', 'q', 'w', 'e', 'r', 'd', 'f', 't', 'v', '1', '2', '3', '4', '5', '6'];
 const ITEM_KEYS = ['1', '2', '3', '4', '5', '6']; // los ítems activos, una por casilla del inventario (items.js, useItem)
-const KEY_MOVES = ['up', 'left', 'down', 'right']; // W y D son de movimiento y de habilidades: ninguna otra acción las puede usar
 const KEYMAP = Object.assign({}, KEY_DEFAULTS);
 try { const saved = JSON.parse(localStorage.getItem('chc-keys') || '{}'); Object.keys(KEY_DEFAULTS).forEach(a => { if (saved[a] && !KEY_FIXED.includes(saved[a])) KEYMAP[a] = saved[a]; }); } catch (e) { /* las de fábrica */ }
 
@@ -23,7 +20,6 @@ function actionForKey(k) { return Object.keys(KEYMAP).find(a => KEYMAP[a] === k)
 // Cambia la tecla de una acción (intercambiando si hace falta) y actualiza las habilidades que la usaban
 function setKey(action, key) {
     if (KEY_FIXED.includes(key) || !KEY_DEFAULTS.hasOwnProperty(action)) return false;
-    if (ITEM_KEYS.includes(key) || (WASD_SKILL_KEYS.includes(key) && !KEY_MOVES.includes(action))) return false;
     const old = KEYMAP[action], other = actionForKey(key);
     if (old === key) return true;
     KEYMAP[action] = key;
@@ -47,10 +43,6 @@ function assignSkillKey(hero, id, key) {
     hero.keyBindings[id] = key;
     if (other && other.id !== id) { if (old) hero.keyBindings[other.id] = old; else delete hero.keyBindings[other.id]; }
 }
-// Al prender W A S D, las habilidades que estaban en W o D pasan a la próxima tecla libre.
-function freeWasdKeys(hero) {
-    hero.skills.filter(s => WASD_SKILL_KEYS.includes(hero.keyBindings[s.id])).forEach(s => { delete hero.keyBindings[s.id]; const k = hero.nextSkillKey(s); if (k) hero.keyBindings[s.id] = k; });
-}
 function toggleSkillKeys(open = !skillKeysOpen) {
     if (open && !player) return;
     skillKeysOpen = open; skillKeyPicked = null;
@@ -60,7 +52,7 @@ function toggleSkillKeys(open = !skillKeysOpen) {
 function renderSkillKeys() {
     const box = document.getElementById('skill-keys-list');
     box.innerHTML = '';
-    skillKeysFree().forEach(k => {
+    SKILL_KEYS.forEach(k => {
         const s = player.skillForKey(k), cap = document.createElement('div');
         cap.className = 'sk-cap' + (s && s.id === skillKeyPicked ? ' picked' : '') + (s ? (s.isUltimate ? ' ult' : ` ${s.kind}`) : ' empty');
         cap.innerHTML = `<b>${keyName(k)}</b><span>${s ? s.name : 'libre'}</span><small>${s ? (s.isUltimate ? 'Definitiva' : s.kind === 'passive' ? 'Pasiva' : 'Activa') : ''}</small>`;

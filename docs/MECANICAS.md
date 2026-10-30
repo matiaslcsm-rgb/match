@@ -55,7 +55,7 @@ cómo es el juego original, en `docs/REFERENCIA-CHC.md`.
 | **Kit mezclado** | Armás tu kit con habilidades de cualquier héroe. Se puede terminar con 2 definitivas o ninguna. | 🔵 el corazón del género |
 | **Cuándo** | 1 por ronda en las rondas 1 a 4, y una quinta en la ronda 9 (desde el 2026-10-18). | 🔵 (el original: 1, 1, 3, 6 y 9) |
 | **Opciones** | 3 por elección: 1 garantizada de tu héroe (si te queda alguna) y 2 del resto. Nunca algo que ya tenés. | 🟢 los números |
-| **Teclas** | Definitivas en R (si no, D o F), pasivas en W o E, activas en Q; después, la que quede libre. Con W A S D, las habilidades no usan W ni D. Con K se acomodan a gusto. | 🟢 |
+| **Teclas** | Definitivas en R (si no, D o F), pasivas en W o E, activas en Q; después, la que quede libre. Con K se acomodan a gusto. | 🟢 |
 | **Baneo** | Antes de empezar baneás 1 habilidad: no le sale a nadie (desde el 2026-10-18). | 🔵 |
 | **Rehacer el kit** | Fragmento del Destino (te saca una habilidad al azar y elegís entre 4) y Libro del Destino (elegís cuál cambiar, entre 6). Devuelven los puntos invertidos. Se usan fuera del combate. Un Fragmento se puede vender (75 de oro). | 🔵 la idea (fichas del original); 🟢 nombres y reglas |
 

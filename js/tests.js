@@ -164,7 +164,6 @@ test('Sin objetivo en rango no se cobra maná ni enfriamiento', () => {
 
 test('Teclas por tipo: definitivas en R, D y F; pasivas en W y E; activas en Q', () => {
     newGame('AXE');
-    wasdMove = false;
     const fake = (id, kind, isUltimate) => { const s = { id, kind, isUltimate, values: {} }; player.addSkill(s); return player.keyBindings[id]; };
     checkEq(fake('A1', 'active'), 'q', 'la activa');
     checkEq(fake('P1', 'passive'), 'w', 'la pasiva');
@@ -173,12 +172,10 @@ test('Teclas por tipo: definitivas en R, D y F; pasivas en W y E; activas en Q',
     checkEq(fake('U2', 'active', true), 'd', 'la segunda definitiva');
     checkEq(fake('U3', 'active', true), 'f', 'la tercera definitiva');
     checkEq(fake('A2', 'active'), 't', 'otra activa, a lo libre');
-    wasdMove = true;
 });
 
-test('Acomodar habilidades: se mueven e intercambian, y W A S D libera W y D', () => {
+test('Acomodar habilidades: se mueven e intercambian', () => {
     newGame('AXE');
-    wasdMove = false;
     const fake = (id, kind) => { player.addSkill({ id, kind, values: {} }); };
     fake('A1', 'active'); fake('P1', 'passive');
     assignSkillKey(player, 'A1', 'w');
@@ -189,12 +186,8 @@ test('Acomodar habilidades: se mueven e intercambian, y W A S D libera W y D', (
     toggleSkillKeys(true);
     checkEq(document.querySelectorAll('#skill-keys-list .sk-cap').length, SKILL_KEYS.length, 'una casilla por tecla');
     toggleSkillKeys(false);
-    wasdMove = true; // como quedan las pruebas de movimiento
-    freeWasdKeys(player);
-    check(!WASD_SKILL_KEYS.includes(player.keyBindings.A1), 'al caminar con W A S D deja la W');
-    fake('P2', 'passive');
-    check(!WASD_SKILL_KEYS.includes(player.keyBindings.P2), 'y las nuevas tampoco la usan');
     check(!setKey('shop', 'w'), 'la W no se le puede dar a otra acción');
+    check(!setKey('shop', '3'), 'ni las de los ítems');
 });
 
 test('Definitiva: niveles 1/2/3 recién en los niveles 6/12/18 del héroe', () => {
@@ -898,7 +891,7 @@ test('Aturdidor: aturde cada N golpes; aturdido no te movés ni lanzás; las Bot
     check(!hasFlag(player, 'stun'), 'todavía no');
     t.attackTimer = 99; updateCreep(t, 0.016);
     check(hasFlag(player, 'stun'), 'aturdido al golpe ' + stunEvery);
-    keys = { d: true }; const x = player.x;
+    keys = { arrowright: true }; const x = player.x;
     updateWave(1);
     keys = {};
     checkEq(player.x, x, 'no se mueve');
@@ -964,15 +957,63 @@ test('Recetas con componentes repetidos (Martillo = 2 Espadas) y básicos que se
     checkEq(countItem(player, 'HAMMER'), 1, 'y armó el Martillo');
 });
 
-test('Inventario: 6 espacios; un compuesto entra si libera los espacios de sus componentes', () => {
+test('Inventario: 6 casillas + 3 de reserva; un compuesto entra si libera los espacios de sus componentes', () => {
     newGame('AXE');
     gameState = 'PREP'; player.gold = 5000;
-    ['BLADE', 'QUICK_GLOVES', 'CHAINMAIL', 'RUNE_CAPE', 'VITALITY', 'VITALITY'].forEach(k => buyItem(ITEMS[k]));
-    checkEq(player.inventory.length, INVENTORY_SLOTS, 'inventario lleno');
-    checkEq(itemBlocker(ITEMS.FANG, player), 'Inventario lleno', 'un séptimo básico no entra');
+    ['BLADE', 'QUICK_GLOVES', 'CHAINMAIL', 'RUNE_CAPE', 'VITALITY', 'VITALITY', 'FANG', 'FANG', 'FANG'].forEach(k => buyItem(ITEMS[k]));
+    checkEq(player.inventory.length, INVENTORY_SLOTS + RESERVE_SLOTS, 'inventario y reserva llenos');
+    checkEq(itemBlocker(ITEMS.FANG, player), 'Inventario lleno', 'uno más no entra');
     check(buyItem(ITEMS.TRUESTRIKE), 'la Hoja Certera entra: usa 2 espacios y ocupa 1');
-    checkEq(player.inventory.length, INVENTORY_SLOTS - 1, 'quedó un espacio libre');
+    checkEq(player.inventory.length, INVENTORY_SLOTS + RESERVE_SLOTS - 1, 'quedó un espacio libre');
     check(buyItem(ITEMS.HEART), 'el Corazón usa las 2 Piedras que ya tenía');
+});
+
+test('Reserva: no da stats, sirve para armar, y los ítems se mueven a donde quieras', () => {
+    newGame('AXE');
+    gameState = 'PREP'; player.gold = 5000;
+    const atk = effAttack(player);
+    giveItem(player, 'BLADE');
+    checkEq(effAttack(player) - atk, ITEMS.BLADE.mods.flatAtk, 'en las 6 da stats');
+    moveItem(player, 0, INVENTORY_SLOTS);
+    checkEq(effAttack(player), atk, 'en la reserva no');
+    moveItem(player, INVENTORY_SLOTS, 4);
+    checkEq(itemInSlot(player, 4).key, 'BLADE', 'va a la casilla que elijas');
+    checkEq(effAttack(player) - atk, ITEMS.BLADE.mods.flatAtk, 'y vuelve a dar stats');
+    giveItem(player, 'FANG');
+    moveItem(player, 4, 0);
+    checkEq(itemInSlot(player, 0).key, 'BLADE', 'ocupada: se intercambian');
+    checkEq(itemInSlot(player, 4).key, 'FANG', 'el otro va a la casilla libre');
+    moveItem(player, 0, INVENTORY_SLOTS + 2);
+    check(buyItem(ITEMS.HAMMER), 'arma con piezas de la reserva');
+    checkEq(countItem(player, 'BLADE'), 0, 'la Espada de la reserva se usó');
+    player.inventory = []; applyInventory(player);
+    giveItem(player, 'SHOCK_MACE');
+    moveItem(player, 0, INVENTORY_SLOTS);
+    check(!useItem(player, INVENTORY_SLOTS), 'un activo en la reserva no se usa');
+});
+
+test('La IA y el piloto no usan la reserva', () => {
+    resetGame();
+    selectHero(HERO_TEMPLATES.AXE);
+    learnSkill(currentDraft.options[0]);
+    const rival = heroes[1];
+    checkEq(inventoryCap(rival), INVENTORY_SLOTS, 'la IA, 6');
+    checkEq(inventoryCap(player), INVENTORY_SLOTS + RESERVE_SLOTS, 'vos, 9');
+    autopilot = true;
+    checkEq(inventoryCap(player), INVENTORY_SLOTS, 'el piloto, 6');
+    autopilot = false;
+    resetGame();
+});
+
+test('Paneles retráctiles: el mapa ocupa lo que dejan', () => {
+    const before = mapScale;
+    togglePanels();
+    check(document.body.classList.contains('hide-left') && document.body.classList.contains('hide-right'), 'se retraen los dos');
+    togglePanel('right');
+    check(!document.body.classList.contains('hide-right'), 'se muestran de a uno');
+    togglePanel('left');
+    check(!document.body.classList.contains('hide-left'), 'y se vuelven a mostrar');
+    checkEq(mapScale, before, 'el mapa vuelve a su tamaño');
 });
 
 test('Ítem de atributo: suma al atributo y a sus stats; venderlo devuelve la mitad y lo quita', () => {
@@ -1042,7 +1083,7 @@ test('Cuerpos físicos: entrar a una casilla ocupada tarda más según el tamañ
     checkNear(bodyPenalty(player, 11, 2), BODY_SLOW.large, 'jefe: grande');
     // El héroe empuja: con el tiempo de un paso normal no entra; con el tiempo extra, sí
     const step = player.moveInterval / (effMoveMult(player) * MOVE_SPEED_MULT);
-    keys['d'] = true;
+    keys['arrowright'] = true;
     try {
         player.moveTimer = step * 1.2; updateHero(player, player.arena, 0);
         checkEq(player.x, c.x - 1, 'todavía empujando');
@@ -1052,7 +1093,7 @@ test('Cuerpos físicos: entrar a una casilla ocupada tarda más según el tamañ
         addEffect(player, { id: 'PHASE', duration: 5, flags: ['phasing'] });
         player.moveTimer = step * 1.2; updateHero(player, player.arena, 0);
         checkEq(player.x, c.x, 'atravesando no frena');
-    } finally { keys['d'] = false; }
+    } finally { keys['arrowright'] = false; }
 });
 
 test('Cuerpos físicos: un creep bloqueado prueba el otro camino si está libre', () => {
@@ -1145,7 +1186,6 @@ test('Teclas configurables: cambiar, intercambiar y reservadas (las de las habil
         check(KEYMAP.map === 'z' && KEYMAP.shop === KEY_DEFAULTS.map, 'se intercambian');
         check(!setKey('map', 'escape'), 'Esc no se puede usar');
         check(!setKey('map', 'e'), 'las teclas de las habilidades tampoco');
-        setKey('up', 'u'); keys = { u: true }; checkEq(keyboardDirection().dy, -1, 'moverse con la tecla nueva'); keys = {};
     } finally { resetKeymap(); Object.assign(KEYMAP, saved); saveKeymap(); keys = {}; }
 }, { random: true });
 
@@ -1230,7 +1270,8 @@ test('IA: con el inventario lleno vende un contra que no sirve para comprar el q
     gameState = 'PREP'; player.gold = 500;
     ['BELT', 'TRUESTRIKE', 'SPEAR', 'BOOTS', 'CLOAK', 'THORNS'].forEach(k => giveItem(player, k));
     nextWave = { name: 'Muralla', groups: [{ type: 'ARMORED', count: 3 }], boss: 'ARMORED' };
-    aiShop(player);
+    autopilot = true; // la IA no usa la reserva
+    try { aiShop(player); } finally { autopilot = false; }
     checkEq(countItem(player, 'HAMMER'), 1, 'compró el Martillo');
     check(player.inventory.length <= INVENTORY_SLOTS, 'no pasó de 6');
     checkEq(countItem(player, 'BELT'), 1, 'no vendió su ítem de atributo');
@@ -2412,12 +2453,12 @@ test('Sala de espera: el jugador camina con el teclado y no pisa la fuente', () 
     selectHero(HERO_TEMPLATES.AXE);
     check(player.inRest, 'en la sala de espera');
     player.x = REST_SPOT.x; player.y = REST_SPOT.y - 2; // justo debajo de la fuente
-    keys['w'] = true;
-    try { for (let i = 0; i < 10; i++) updateRestArea(1); } finally { keys['w'] = false; }
+    keys['arrowup'] = true;
+    try { for (let i = 0; i < 10; i++) updateRestArea(1); } finally { keys['arrowup'] = false; }
     check(!restBlocked(player.x, player.y), 'no está sobre la fuente');
     checkEq(player.y, REST_SPOT.y - 2, 'la fuente lo frena');
-    keys['a'] = true;
-    try { updateRestArea(1); } finally { keys['a'] = false; }
+    keys['arrowleft'] = true;
+    try { updateRestArea(1); } finally { keys['arrowleft'] = false; }
     checkEq(player.x, REST_SPOT.x - 1, 'caminó a la izquierda');
 });
 
@@ -2464,7 +2505,7 @@ test('Ataque al moverse: libre por defecto; con la regla "reset", moverse reinic
             newGame('REC');
             dummy({ x: player.x + 3 });
             player.attackTimer = 0.5; player.moveTimer = 99;
-            keys = { a: true };
+            keys = { arrowleft: true };
             updateWave(0.001);
             keys = {};
             check(rule === 'reset' ? player.attackTimer < 0.01 : player.attackTimer >= 0.5, rule + ': ' + player.attackTimer);
@@ -2681,7 +2722,7 @@ test('MATCH 3D: los efectos del piso se dibujan en otro canvas (la calcomanía d
 
 function testSandbox() {
     autoCast = false; // las pruebas controlan a mano cuándo se lanza cada habilidad (la de habilidades automáticas lo prende)
-    wasdMove = true; quickCast = false; // las pruebas de movimiento usan el teclado (la opción W A S D); las de controles estilo Dota lo apagan
+    keyboardMove = true; quickCast = false; // las pruebas de movimiento usan las flechas; las de controles estilo Dota lo apagan
 }
 
 function runTests() {

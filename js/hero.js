@@ -25,8 +25,6 @@ const SKILL_KEY_ORDER = {
     passive: ['w', 'e', 't', 'v', 'q', 'f', 'd', 'r'],
     active: ['q', 'e', 'w', 't', 'v', 'f', 'd', 'r']
 };
-const WASD_SKILL_KEYS = ['w', 'd']; // si te movés con W A S D, las habilidades no las usan
-function skillKeysFree() { return SKILL_KEYS.filter(k => !wasdMove || !WASD_SKILL_KEYS.includes(k)); }
 
 class Hero {
     // Cómo lo nombran los mensajes de las habilidades (los creeps tienen su label; los competidores, su nombre de jugador)
@@ -111,8 +109,8 @@ class Hero {
         this.recalculateStats();
     }
     nextSkillKey(skill) {
-        const used = Object.values(this.keyBindings), free = skillKeysFree();
-        return SKILL_KEY_ORDER[skill.isUltimate ? 'ultimate' : skill.kind === 'passive' ? 'passive' : 'active'].find(k => free.includes(k) && !used.includes(k));
+        const used = Object.values(this.keyBindings);
+        return SKILL_KEY_ORDER[skill.isUltimate ? 'ultimate' : skill.kind === 'passive' ? 'passive' : 'active'].find(k => !used.includes(k));
     }
     // Quita una habilidad del kit (Fragmento/Libro del Destino) y devuelve los puntos invertidos en ella.
     // Su tecla queda libre para la próxima habilidad que se aprenda.

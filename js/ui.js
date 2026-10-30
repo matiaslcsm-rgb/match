@@ -9,12 +9,35 @@ const MAP_W = VIEW_COLS * TILE, MAP_H = VIEW_ROWS * TILE; // tamaño lógico de 
 let mapScale = 1;
 const BIG_MAP_SCALE = 1.3;
 function applyMapSize() {
+    const fit = panelsHidden.left || panelsHidden.right;
+    if (fit) mapScale = fitMapScale();
+    else if (mapScale !== BIG_MAP_SCALE) mapScale = 1;
+    document.getElementById('hud-main').style.gridTemplateColumns = fit
+        ? [!panelsHidden.left && '215px', `${Math.round(MAP_W * mapScale)}px`, !panelsHidden.right && '370px'].filter(Boolean).join(' ') : '';
     const k = mapScale * (window.devicePixelRatio || 1);
     canvas.width = Math.round(MAP_W * k); canvas.height = Math.round(MAP_H * k);
     canvas.style.width = `${Math.round(MAP_W * mapScale)}px`; canvas.style.height = `${Math.round(MAP_H * mapScale)}px`;
-    document.body.classList.toggle('big-map', mapScale > 1);
+    document.body.classList.toggle('big-map', !fit && mapScale > 1);
+    document.body.classList.toggle('hide-left', panelsHidden.left);
+    document.body.classList.toggle('hide-right', panelsHidden.right);
 }
-function toggleBigMap() { mapScale = mapScale > 1 ? 1 : BIG_MAP_SCALE; applyMapSize(); }
+function toggleBigMap() {
+    if (panelsHidden.left || panelsHidden.right) { panelsHidden = { left: false, right: false }; savePanels(); mapScale = 1; }
+    else mapScale = mapScale > 1 ? 1 : BIG_MAP_SCALE;
+    applyMapSize();
+}
+// Paneles retráctiles (pedido del usuario 2026-10-30): el mapa ocupa lo que dejan libre, sin pasarse del alto de la ventana.
+let panelsHidden = { left: false, right: false };
+const panelsPersist = !/[?&](test|demo|banco)/.test(location.search);
+try { if (panelsPersist) Object.assign(panelsHidden, JSON.parse(localStorage.getItem('chc-paneles') || '{}')); } catch (e) { /* los dos a la vista */ }
+function savePanels() { try { if (panelsPersist) localStorage.setItem('chc-paneles', JSON.stringify(panelsHidden)); } catch (e) { /* no se guarda */ } }
+const PANEL_W = { left: 225, right: 380 }, MAP_RESERVED_H = 345; // lo que ocupan los paneles y, a lo alto, las barras y la del héroe
+function fitMapScale() {
+    const w = window.innerWidth - 24 - (panelsHidden.left ? 0 : PANEL_W.left) - (panelsHidden.right ? 0 : PANEL_W.right);
+    return Math.max(0.6, Math.min(w / MAP_W, (window.innerHeight - MAP_RESERVED_H) / MAP_H));
+}
+function togglePanel(side) { panelsHidden[side] = !panelsHidden[side]; savePanels(); applyMapSize(); }
+function togglePanels() { const hide = !(panelsHidden.left && panelsHidden.right); panelsHidden = { left: hide, right: hide }; savePanels(); applyMapSize(); }
 applyMapSize();
 
 function setStateText(text) { document.getElementById('game-state-text').textContent = text; }
@@ -312,7 +335,7 @@ function renderShop() {
 // Objeto neutral: el equipado (con botón para venderlo) y, después de un jefe de ronda, los 3 para elegir.
 function renderNeutralPanel() {
     const panel = document.getElementById('inventory-panel');
-    const title = document.createElement('div'); title.className = 'shop-category'; title.textContent = '🎁 Objeto neutral (solo uno)';
+    const title = document.createElement('div'); title.className = 'shop-category'; title.textContent = '🎁 Jungla: lo que dan los jefes (solo uno)';
     panel.appendChild(title);
     const row = document.createElement('div'); row.className = 'destiny-row';
     if (player.neutral) {
@@ -343,15 +366,18 @@ function renderInventoryPanel() {
     const panel = document.getElementById('inventory-panel'); panel.innerHTML = '';
     const title = document.createElement('div');
     title.className = 'shop-category';
-    title.textContent = `🎒 Inventario (${player.inventory.length}/${INVENTORY_SLOTS})`;
+    title.textContent = `🎒 Inventario (${equippedItems(player).length}/${INVENTORY_SLOTS} · reserva ${player.inventory.length - equippedItems(player).length}/${RESERVE_SLOTS})`;
     panel.appendChild(title);
-    player.inventory.forEach(inv => {
+    const grid = document.createElement('div'); grid.id = 'shop-slots'; grid.className = 'item-grid-slots';
+    panel.appendChild(grid);
+    renderItemSlots(grid);
+    player.inventory.slice().sort((a, b) => a.slot - b.slot).forEach(inv => {
         const item = ITEMS[inv.key];
         const row = document.createElement('div'); row.className = 'destiny-row';
-        row.innerHTML = `<span>${itemNameHtml(item)}${item.tier === 'basic' ? ' <span class="item-level">básico</span>' : ''}</span>`;
+        row.innerHTML = `<span>${itemNameHtml(item)}${inv.slot >= INVENTORY_SLOTS ? ' <span class="item-level">reserva</span>' : item.tier === 'basic' ? ' <span class="item-level">básico</span>' : ''}</span>`;
         const sell = document.createElement('button');
         sell.textContent = `Vender (${Math.floor(itemTotalCost(item) * SELL_REFUND)}g)`;
-        sell.onclick = () => sellItem(inv.key);
+        sell.onclick = () => sellItem(inv.key, player, inv.slot);
         row.appendChild(sell);
         panel.appendChild(row);
     });
@@ -568,7 +594,7 @@ function renderHeroBar() {
     }
 
     // Estructura (solo si cambió algo)
-    const signature = [p.level, p.skillPoints, p.neutral, p.inventory.map(i => i.key).join(','), Math.floor(p.attr('str')), Math.floor(p.attr('agi')),
+    const signature = [p.level, p.skillPoints, p.neutral, p.inventory.map(i => `${i.key}:${i.slot}`).join(','), Math.floor(p.attr('str')), Math.floor(p.attr('agi')),
         Math.floor(p.attr('int')), p.armor.toFixed(1), ...p.skills.map(s => s.id + ':' + skillLevel(p, s) + ':' + p.keyBindings[s.id] + ':' + !!levelUpBlocker(p, s))].join('|');
     if (signature === lastKitSignature) return;
     lastKitSignature = signature;
@@ -606,38 +632,46 @@ function renderHeroBar() {
         const btn = levelButton(s); if (btn) slot.appendChild(btn);
         skills.appendChild(slot);
     }
-    // Innato: chip (las pasivas drafteadas ya están en las casillas)
+    // El innato va debajo de las estadísticas (renderHeroStats); las pasivas, en las casillas
     const passives = document.getElementById('hb-passives'); passives.innerHTML = '';
-    if (p.innate) {
-        const chip = document.createElement('span');
-        chip.className = 'passive-chip innate';
-        chip.innerHTML = `◆ ${p.innate.name} <span class="badge-innate">Innato</span>`;
-        chip.title = `Innato: ${p.innate.name}\n${stripHtml(p.innate.description)}`;
-        passives.appendChild(chip);
-    }
     const arrange = document.createElement('button');
     arrange.className = 'passive-chip sk-open'; arrange.textContent = `⌨ Acomodar (${keyName(KEYMAP.skillKeys)})`;
     arrange.title = 'Arrastrá tus habilidades a la tecla que quieras';
     arrange.onclick = () => toggleSkillKeys();
     passives.appendChild(arrange);
 
-    // Inventario: 6 casillas + el neutral
-    const slots = document.getElementById('hb-slots'); slots.innerHTML = '';
-    for (let i = 0; i < INVENTORY_SLOTS; i++) {
-        const inv = p.inventory[i], el = document.createElement('div');
-        el.className = 'item-slot' + (inv ? '' : ' empty');
+    renderItemSlots(document.getElementById('hb-slots'));
+}
+
+// Inventario: 6 casillas, 3 de reserva y la de jungla. Los ítems se arrastran a cualquier casilla. Se ve en la barra y en la tienda.
+function renderItemSlots(slots) {
+    const p = player;
+    slots.innerHTML = '';
+    for (let i = 0; i < INVENTORY_SLOTS + RESERVE_SLOTS; i++) {
+        const inv = itemInSlot(p, i), el = document.createElement('div'), reserve = i >= INVENTORY_SLOTS;
+        el.className = 'item-slot' + (inv ? '' : ' empty') + (reserve ? ' reserve' : '');
+        el.title = reserve ? 'Reserva: guarda piezas para armar, no da stats' : `Casilla ${ITEM_KEYS[i]}`;
+        el.draggable = !!inv;
+        el.ondragstart = () => { itemDragFrom = i; };
+        el.ondragover = e => e.preventDefault();
+        el.ondrop = e => {
+            e.preventDefault(); moveItem(p, itemDragFrom, i);
+            if (document.getElementById('shop-container').style.display === 'block') renderShop();
+        };
         if (inv) {
             const item = ITEMS[inv.key];
             el.innerHTML = itemIconHtml(item.key, 'md') || shortName(item.name, 11); el.style.color = itemColor(item); el.style.borderColor = itemColor(item); el.title = `${item.name}\n${describeItem(item)}`;
-            if (item.active) { el.dataset.cd = itemCooldownId(item); el.classList.add('active-item'); el.insertAdjacentHTML('beforeend', `<span class="is-key">${ITEM_KEYS[i]}</span><div class="cd"></div>`); }
+            if (reserve) el.title = `${item.name} (reserva: no da stats)\n${describeItem(item)}`;
+            if (item.active && !reserve) { el.dataset.cd = itemCooldownId(item); el.classList.add('active-item'); el.insertAdjacentHTML('beforeend', '<div class="cd"></div>'); }
         }
+        if (!reserve) el.insertAdjacentHTML('beforeend', `<span class="is-key">${ITEM_KEYS[i]}</span>`);
         slots.appendChild(el);
     }
     const n = p.neutral ? NEUTRAL_ITEMS[p.neutral] : null, neutral = document.createElement('div');
     neutral.className = 'item-slot neutral' + (n ? '' : ' empty');
-    if (n) neutral.innerHTML = `${itemIconHtml(n.key, 'md')}<span>${shortName(n.name, 12)}</span>`; else neutral.textContent = 'neutral';
-    if (n) { neutral.style.color = itemColor(n); neutral.style.borderColor = itemColor(n); neutral.title = `${n.name} (neutral)\n${describeNeutral(n)}`; }
-    else neutral.title = 'Objeto neutral: se gana contra los jefes de ronda';
+    if (n) neutral.innerHTML = `${itemIconHtml(n.key, 'md')}<span>${shortName(n.name, 12)}</span>`; else neutral.textContent = 'jungla';
+    if (n) { neutral.style.color = itemColor(n); neutral.style.borderColor = itemColor(n); neutral.title = `${n.name} (jungla)\n${describeNeutral(n)}`; }
+    else neutral.title = 'Jungla: lo que dan los jefes de ronda';
     slots.appendChild(neutral);
 }
 
@@ -659,6 +693,7 @@ function renderHeroStats() {
         const toNext = p.scaling.perKills - (p.creepKillCount % p.scaling.perKills);
         html += `<div class="hs-scaling">📈 Escalado: +${(p.bonus[p.scaling.stat] || 0).toFixed(1)} ${scalingStatLabel(p.scaling.stat)} · próximo en ${toNext} bajas</div>`;
     }
+    if (p.innate) html += `<div class="passive-chip innate hs-innate" title="${stripHtml(p.innate.description).replace(/"/g, '&quot;')}">◆ ${p.innate.name} <span class="badge-innate">Innato</span></div>`;
     const box = document.getElementById('hero-stats');
     if (box.dataset.html !== html) { box.dataset.html = html; box.innerHTML = html; }
 }
@@ -868,6 +903,7 @@ function playDuelReplay(canvas, clip, isWinner) {
 // --- RANKING ---
 // Tabla con los 8 héroes: puesto, vidas, puntos, oro y dónde está. Un clic en un héroe muestra su arena.
 let lastScoreboardSignature = '';
+let itemDragFrom = -1; // casilla del ítem que se está arrastrando
 // 🔥 = peleando ahora (duelo, oleada o jefe); 🏕 = en la sala de espera.
 function isFighting(h) { return !h.eliminated && !h.inRest && h.isAlive() && inCombat() && !!h.arena && !h.arena.done; }
 function heroStatusIcon(h) {
@@ -1059,7 +1095,7 @@ function renderRestArea(dt = 0) {
         ctx.beginPath(); ctx.moveTo(px - 5, py - 5); ctx.lineTo(px + 5, py + 5); ctx.moveTo(px + 5, py - 5); ctx.lineTo(px - 5, py + 5); ctx.stroke();
     }
     ctx.font = '11px monospace'; ctx.fillStyle = '#74c69d';
-    ctx.fillText(wasdMove ? 'Podés caminar con W A S D o clic derecho' : 'Caminá con clic derecho', MAP_W / 2, TILE * 1.5);
+    ctx.fillText('Caminá con clic derecho', MAP_W / 2, TILE * 1.5);
 }
 
 // Portada en el mapa mientras estás en el menú o eligiendo héroe.
@@ -1166,7 +1202,7 @@ function renderRest3d(dt) {
     ctx.strokeText('BOXES DEL SHOW', MAP_W / 2, TILE * 0.6); ctx.fillStyle = '#f2c21a'; ctx.fillText('BOXES DEL SHOW', MAP_W / 2, TILE * 0.6);
     ctx.font = '11px monospace'; ctx.lineWidth = 3;
     const note = (t, y) => { ctx.strokeText(t, MAP_W / 2, y); ctx.fillStyle = '#e9e5d8'; ctx.fillText(t, MAP_W / 2, y); };
-    note(wasdMove ? 'Podés caminar con W A S D o clic derecho' : 'Caminá con clic derecho', TILE * 1.25);
+    note('Caminá con clic derecho', TILE * 1.25);
     note('Volvés al combate con vida y maná completos', MAP_H - TILE * 0.35);
     restScene.heroes.forEach(h => {
         const p = M3D.project(h.rx ?? h.x, h.ry ?? h.y, M3D.headHeight(h)), name = h.displayName;

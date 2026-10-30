@@ -1,13 +1,28 @@
-// Inventario y tienda con recetas estilo Dota 2: 6 espacios; los básicos se pueden repetir; los compuestos
+// Inventario y tienda con recetas estilo Dota 2: 6 casillas que dan stats (teclas 1 a 6) y 3 de reserva que no dan nada pero
+// guardan piezas para armar (cada ítem sabe en qué casilla está, `slot`); los básicos se pueden repetir; los compuestos
 // se arman con básicos + receta (usando los componentes que ya tenés y pagando solo lo que falta).
 // Los equipables dan sus bonus como efectos permanentes del héroe (ver applyInventory).
 // Reglas: DISEÑO.md §7. Datos de los ítems: data/items.js.
 
-const INVENTORY_SLOTS = 6;
+const INVENTORY_SLOTS = 6, RESERVE_SLOTS = 3;
 const SELL_REFUND = 0.5; // al vender se recupera la mitad de lo que costó el ítem
 
 function isEquip(item) { return item.tier === 'basic' || item.tier === 'composite'; }
 function countItem(hero, key) { return hero.inventory.filter(i => i.key === key).length; }
+function itemInSlot(hero, slot) { return hero.inventory.find(i => i.slot === slot) || null; }
+function equippedItems(hero) { return hero.inventory.filter(i => i.slot < INVENTORY_SLOTS); }
+function freeItemSlot(hero) { for (let s = 0; s < INVENTORY_SLOTS + RESERVE_SLOTS; s++) if (!itemInSlot(hero, s)) return s; return -1; }
+// La IA no usa la reserva: compra para las 6 casillas, como el piloto.
+function inventoryCap(hero) { return hero.isAI || (hero === player && autopilot) ? INVENTORY_SLOTS : INVENTORY_SLOTS + RESERVE_SLOTS; }
+function placeItem(hero, key) { hero.inventory.push({ key, slot: freeItemSlot(hero) }); }
+// Mueve un ítem a otra casilla; si estaba ocupada, se intercambian. Pasar de la reserva a las 6 (o al revés) cambia los stats.
+function moveItem(hero, from, to) {
+    const a = itemInSlot(hero, from), b = itemInSlot(hero, to);
+    if (!a || from === to) return;
+    a.slot = to;
+    if (b) b.slot = from;
+    applyInventory(hero);
+}
 
 // Precio total de un ítem (un compuesto suma sus componentes y la receta).
 function itemTotalCost(item) {
@@ -37,7 +52,7 @@ function itemBlocker(item, hero) {
     if (!isEquip(item)) return item.available && !item.available(hero) ? 'No disponible' : null;
     if (item.tier === 'composite' && countItem(hero, item.key) > 0) return 'Ya lo tenés';
     const freed = item.tier === 'composite' ? recipeStatus(hero, item).used.length : 0;
-    if (hero.inventory.length - freed + 1 > INVENTORY_SLOTS) return 'Inventario lleno';
+    if (hero.inventory.length - freed + 1 > inventoryCap(hero)) return 'Inventario lleno';
     return null;
 }
 function itemAvailable(item, hero) { return !itemBlocker(item, hero); }
@@ -45,10 +60,10 @@ function itemAvailable(item, hero) { return !itemBlocker(item, hero); }
 // Rehace los efectos de todos los ítems del inventario (uno permanente por ítem).
 function applyInventory(hero) {
     hero.effects = hero.effects.filter(e => !e.flags.includes('item'));
-    hero.inventory.forEach((inv, i) => {
+    equippedItems(hero).forEach(inv => {
         const item = ITEMS[inv.key];
         addEffect(hero, {
-            id: `ITEM_${inv.key}_${i}`, name: item.name, duration: Infinity,
+            id: `ITEM_${inv.key}_${inv.slot}`, name: item.name, duration: Infinity,
             flags: ['persistent', 'item', ...(item.flags || [])], mods: item.mods, hooks: item.hooks ? item.hooks(item) : {}
         });
     });
@@ -68,11 +83,11 @@ function buyItem(item, hero = player) {
     if (item.tier === 'composite') {
         const { used } = recipeStatus(hero, item);
         used.forEach(k => { hero.inventory.splice(hero.inventory.findIndex(i => i.key === k), 1); });
-        hero.inventory.push({ key: item.key });
+        placeItem(hero, item.key);
         applyInventory(hero);
         log(`🔨 Armaste ${item.name}${used.length ? ` (usando ${used.map(k => ITEMS[k].name).join(', ')})` : ''}.`);
     } else if (item.tier === 'basic') {
-        hero.inventory.push({ key: item.key });
+        placeItem(hero, item.key);
         applyInventory(hero);
         log(`🎒 Compraste: ${item.name}.`);
     } else {
@@ -85,8 +100,8 @@ function buyItem(item, hero = player) {
 }
 
 // Vende una unidad del ítem: devuelve la mitad de su precio total.
-function sellItem(key, hero = player) {
-    const idx = hero.inventory.findIndex(i => i.key === key);
+function sellItem(key, hero = player, slot) {
+    const idx = hero.inventory.findIndex(i => i.key === key && (slot === undefined || i.slot === slot));
     if (idx < 0) return 0;
     const refund = Math.floor(itemTotalCost(ITEMS[key]) * SELL_REFUND);
     hero.inventory.splice(idx, 1);
@@ -101,8 +116,8 @@ function sellItem(key, hero = player) {
 // El silencio no frena los ítems, como en Dota; el aturdimiento sí.
 function itemCooldownId(item) { return 'ITEM_' + item.key; }
 function useItem(hero, slot, opts = {}) {
-    const inv = hero.inventory[slot], item = inv && ITEMS[inv.key];
-    if (!item || !item.active || !hero.arena || !hero.isAlive() || hero.inRest || hasFlag(hero, 'stun')) return false;
+    const inv = itemInSlot(hero, slot), item = inv && ITEMS[inv.key];
+    if (!item || !item.active || slot >= INVENTORY_SLOTS || !hero.arena || !hero.isAlive() || hero.inRest || hasFlag(hero, 'stun')) return false;
     const id = itemCooldownId(item);
     if ((hero.cooldowns[id] || 0) > 0) return false;
     const target = nearestEnemy(hero, item.active.range);
@@ -117,7 +132,7 @@ function itemBuildsInto(key) { return Object.values(ITEMS).filter(i => i.tier ==
 
 // Da un ítem directamente (sin oro): para pruebas y, más adelante, premios.
 function giveItem(hero, key) {
-    hero.inventory.push({ key });
+    placeItem(hero, key);
     applyInventory(hero);
 }
 

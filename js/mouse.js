@@ -13,20 +13,14 @@
 // CONTROLES ESTILO DOTA en Custom Hero (MATCH, pedido del usuario 2026-10-18): clic derecho camina y, sobre un rival,
 // lo ataca; las habilidades apuntadas se confirman con clic (salvo que prendas el "lanzamiento rápido"); W A S D solo si
 // lo prendés en Opciones.
-let quickCast = false, wasdMove = false;
-try { quickCast = localStorage.getItem('chc-lanzamiento-rapido') === 'on'; wasdMove = localStorage.getItem('chc-wasd') === 'on'; } catch (e) { /* sin almacenamiento: como Dota */ }
+let quickCast = false, keyboardMove = false; // keyboardMove: solo para las pruebas, en el juego se camina con el mouse
+try { quickCast = localStorage.getItem('chc-lanzamiento-rapido') === 'on'; } catch (e) { /* sin almacenamiento: como Dota */ }
 function setQuickCast(on) {
     quickCast = on;
     try { localStorage.setItem('chc-lanzamiento-rapido', on ? 'on' : 'off'); } catch (e) { /* no se guarda */ }
     log(on ? '⚡ Lanzamiento rápido: las habilidades salen al apretar la tecla, hacia el cursor.' : '🎯 Habilidades con tecla y clic: apretás la tecla, apuntás y confirmás con clic izquierdo.');
 }
-function setWasdMove(on) {
-    wasdMove = on;
-    try { localStorage.setItem('chc-wasd', on ? 'on' : 'off'); } catch (e) { /* no se guarda */ }
-    if (on && player) freeWasdKeys(player); // W y D son para caminar
-    log(on ? '⌨️ Te podés mover con W A S D (y las flechas), además del clic derecho.' : '🖱️ Te movés con clic derecho, como en Dota.');
-}
-function keyboardMoveOn() { return wasdMove; }
+function keyboardMoveOn() { return keyboardMove; }
 function aimWithClick() { return !quickCast; }
 
 let targeting = null;               // { skill } mientras se está apuntando una habilidad

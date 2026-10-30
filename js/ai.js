@@ -155,12 +155,12 @@ function aiCastSkills(hero) {
 const AI_ITEM_LOW_HP = 0.35;
 // Los ítems activos no se gastan en creeps comunes: contra competidores y jefes, o para cortar un golpe anunciado.
 function aiUseItems(hero, winding) {
-    hero.inventory.forEach((inv, slot) => {
+    equippedItems(hero).forEach(inv => {
         const item = ITEMS[inv.key];
         if (!item.active || (hero.cooldowns[itemCooldownId(item)] || 0) > 0) return;
         const t = nearestEnemy(hero, item.active.range);
         if (!t || (item.active.aiLow && hero.hp / hero.maxHp >= AI_ITEM_LOW_HP)) return;
-        if (item.active.aiLow || t.isHero || t.isBoss || t.isRoundBoss || winding) useItem(hero, slot, { quiet: true });
+        if (item.active.aiLow || t.isHero || t.isBoss || t.isRoundBoss || winding) useItem(hero, inv.slot, { quiet: true });
     });
 }
 

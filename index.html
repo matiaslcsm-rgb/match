@@ -64,6 +64,8 @@
                     <span class="mh-item" id="lives-text" title="Vidas"></span>
                     <span class="mh-item mh-gold" title="Oro">💰 <span id="player-gold">0</span>g <span id="player-income" class="mh-income" title="Lo que cobrás al terminar la ronda: interés (+1 cada 10g ahorrados, tope 5) y la racha (🔥 ganadas / 🧊 perdidas seguidas)"></span></span>
                     <span class="mh-item" id="points-text" title="Puntos y puesto en el ranking"></span>
+                    <button id="panel-left" title="Retraer o mostrar el ranking y las estadísticas">◧</button>
+                    <button id="panel-right" title="Retraer o mostrar la fase y el registro">◨</button>
                     <button id="map-toggle" title="Agrandar o achicar el mapa (tecla M)">⤢</button>
                     <button id="pause-btn" title="Pausa, tutorial, glosario y opciones (Esc)">⏸</button>
                 </div>
@@ -95,7 +97,7 @@
                         <div id="hb-effects"></div>
                     </div>
                 </div>
-                <div id="controls-hint">Caminar: clic derecho · Atacar: clic derecho sobre un rival · Habilidades: Q W E R D F (se acomodan con K) y clic para apuntar · Ítems activos: 1 a 6 · Objetivo: clic izquierdo · W A S D y lanzamiento rápido: en Opciones · Automáticas: H · Tienda: B · Piloto: P</div>
+                <div id="controls-hint">Caminar: clic derecho · Atacar: clic derecho sobre un rival · Habilidades: Q W E R D F (se acomodan con K) y clic para apuntar · Ítems activos: 1 a 6 · Objetivo: clic izquierdo · Ítems: arrastralos a la casilla que quieras · Retraer paneles: L · Lanzamiento rápido: en Opciones · Automáticas: H · Tienda: B · Piloto: P</div>
                 <!-- Zócalo de TV con el ranking, durante el combate (ui.js) -->
                 <div id="tv-rank"></div>
             </div>
@@ -166,7 +168,7 @@
                 <h3>⌨️ Teclas</h3>
                 <button class="modal-close" onclick="toggleKeys(false)" title="Cerrar (Esc)">✕</button>
             </div>
-            <p class="subtitle">Clic en una acción y apretá la tecla nueva. Si otra acción la usaba, se intercambian. Las flechas siempre mueven y Esc siempre pausa.</p>
+            <p class="subtitle">Clic en una acción y apretá la tecla nueva. Si otra acción la usaba, se intercambian. Esc siempre pausa.</p>
             <div id="keys-list"></div>
             <button class="secondary-btn" onclick="resetKeymap(); renderKeys()">Volver a las de fábrica</button>
         </div>

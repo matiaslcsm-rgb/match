@@ -793,8 +793,18 @@ body.pixel-ui { background: repeating-linear-gradient(135deg, #121412 0 14px, #1
 @keyframes dc-left { from { transform: translateX(-60px); opacity: 0; } }
 @keyframes dc-right { from { transform: translateX(60px); opacity: 0; } }
 
+/* Inventario: 6 casillas + 3 de reserva + jungla, y paneles retráctiles */
+#hb-slots { grid-template-columns: repeat(3, 1fr); }
+.item-grid-slots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; margin-bottom: 6px; }
+.item-slot { position: relative; }
+.item-slot[draggable="true"] { cursor: grab; }
+.item-slot.reserve { height: 24px; opacity: 0.75; background: var(--in-line); }
+.item-slot.neutral { grid-column: 1 / -1; }
+.hs-innate { margin-top: 6px; display: block; }
+body.hide-left #left-col, body.hide-right #right-col { display: none; }
+body.big-map #hud-main { justify-content: center; }
+#hud-main { justify-content: center; }
 /* Ítems activos en el inventario: la tecla y el enfriamiento */
-.item-slot.active-item { position: relative; }
 .item-slot .is-key { position: absolute; top: 0; left: 1px; font-size: 0.6rem; color: var(--in-yellow); text-shadow: 1px 1px 0 var(--in-line); }
 .item-slot .cd { position: absolute; left: 0; right: 0; bottom: 0; height: 0; background: rgba(10, 11, 10, 0.75); color: var(--in-bone); font-size: 0.7rem; overflow: hidden; }
 
