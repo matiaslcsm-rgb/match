@@ -782,6 +782,13 @@ body.pixel-ui { background: repeating-linear-gradient(135deg, #121412 0 14px, #1
 .dc-result small { color: var(--in-dim); font-size: 0.75rem; }
 .dc-stats { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px 16px; margin-bottom: 6px; font-size: 0.78rem; color: var(--in-dim); }
 .dc-stats b { color: var(--in-bone); font-weight: normal; }
+.dc-box.dc-with-replay { animation-duration: 4.8s; } /* que entre la repetición en cámara lenta */
+.dc-body { display: flex; align-items: center; justify-content: center; gap: 12px; }
+.dc-info { flex: 1; min-width: 0; }
+.dc-replay { margin: 6px 0; flex: none; }
+.dc-replay figcaption { font-size: 0.68rem; letter-spacing: 1px; text-transform: uppercase; color: var(--in-dim); margin-bottom: 2px; }
+.dc-replay canvas { display: block; width: 220px; height: 132px; border: 2px solid var(--in-edge); }
+@media (max-width: 560px) { .dc-body { flex-direction: column; } }
 @keyframes dc-show { 0% { opacity: 0; } 6% { opacity: 1; } 88% { opacity: 1; } 100% { opacity: 0; } }
 @keyframes dc-left { from { transform: translateX(-60px); opacity: 0; } }
 @keyframes dc-right { from { transform: translateX(60px); opacity: 0; } }

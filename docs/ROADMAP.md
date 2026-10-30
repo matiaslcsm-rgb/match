@@ -93,7 +93,7 @@ copiado de Dota.
 Que se sienta un programa de TV (concepto en `docs/CONCEPTO-FUTURISTA.md`).
 - [x] Menús con la estética del show (portada, elección de competidor, tienda, apuestas). Hecho 2026-10-30, con el
   resumen de fin de partida y los glosarios: paleta industrial y colores de atributo dentro de la paleta.
-- [ ] El presentador y los carteles del programa (presentación de cada duelo, repeticiones, ranking como zócalo de TV).
+- [x] El presentador y los carteles del programa (presentación de cada duelo, repeticiones, ranking como zócalo de TV).
   - [x] Presentación de cada duelo (2026-10-30): cartel EN VIVO con los dos competidores, puesto y duelos, y una frase del
     presentador según cómo llegan (`showDuelCard`, ui.js). Dura 3,4 s y no frena el duelo, así que no cambia el balance;
     mientras está, tapa el panel del rival.
@@ -101,7 +101,9 @@ Que se sienta un programa de TV (concepto en `docs/CONCEPTO-FUTURISTA.md`).
     de controles (`renderTvRank`, ui.js). Clic = mirar esa arena. El ranking de la izquierda sigue, con vidas y estado.
   - [x] Cartel del resultado (2026-10-30): al terminar el duelo, quién ganó, cuánto duró, los cambios de ventaja, el mejor
     golpe y una frase del presentador según cómo terminó (`showDuelResult`, ui.js). Solo interfaz: no cambia el balance.
-  - [ ] Repeticiones (volver a ver la jugada).
+  - [x] Repetición (2026-10-30): el cartel del resultado muestra la jugada desde arriba en cámara lenta (`duelReplayClip`,
+    ui.js; la cinta, `tapeDuelFrame`, duels.js): los últimos 3 s, o el mejor golpe si terminó por tiempo. Es un tablero con los
+    dos competidores, las columnas, sus vidas y cada golpe, no la arena 3D. Solo mira: no cambia el balance.
 - [x] El público reacciona (sonido y gradas). Hecho 2026-10-28: tribunas de hormigón atrás y a los costados de la
   arena 3D con espectadores de colores que se mueven solos y saltan cuando cae alguien (más si es un competidor o el
   jefe), con el grito de la tribuna (sonido sintetizado, `crowd` en audio.js).

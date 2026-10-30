@@ -796,14 +796,61 @@ function duelVerdict(winner, loser, changes, byTime) {
 function duelResultHtml(arena, winner, loser, byTime) {
     const s = arena.stats || { changes: 0 }, hit = s.bestHit;
     const mine = winner === player ? '¡Ganaste!' : loser === player ? 'Perdiste' : '';
-    return `<div class="dc-box"><div class="dc-head"><span class="lb-live"><i></i>EN VIVO</span><span>Resultado · ronda ${waveNumber}</span>` +
-        `${mine ? `<span class="dc-yours">${mine}</span>` : ''}</div>` +
+    const replay = duelReplayClip(arena, byTime);
+    return `<div class="dc-box${replay ? ' dc-with-replay' : ''}"><div class="dc-head"><span class="lb-live"><i></i>EN VIVO</span><span>Resultado · ronda ${waveNumber}</span>` +
+        `${mine ? `<span class="dc-yours">${mine}</span>` : ''}</div><div class="dc-body"><div class="dc-info">` +
         `<div class="dc-result">${heroIconHtml(winner, 'lg')}<div><b>Gana ${winner.name}</b><small>${winner.ownerName || winner.name} · venció a ${loser.name}</small></div></div>` +
         `<div class="dc-stats"><span>Duró <b>${Math.round(arena.elapsed)} s</b></span><span>Ventaja <b>${s.changes} ${s.changes === 1 ? 'cambio' : 'cambios'}</b></span>` +
-        `${hit ? `<span>Mejor golpe <b>${hit.by.name}: ${hit.dmg}${hit.skill ? ` · ${hit.skill}` : ''}</b></span>` : ''}</div>` +
+        `${hit ? `<span>Mejor golpe <b>${hit.by.name}: ${hit.dmg}${hit.skill ? ` · ${hit.skill}` : ''}</b></span>` : ''}</div></div>` +
+        `${replay ? `<figure class="dc-replay"><figcaption>Repetición · ${byTime ? 'el mejor golpe' : 'el golpe final'}</figcaption><canvas width="${COLS * REPLAY_CELL}" height="${ROWS * REPLAY_CELL}"></canvas></figure>` : ''}</div>` +
         `<p class="dc-line">${duelVerdict(winner, loser, s.changes, byTime)}</p></div>`;
 }
-function showDuelResult(arena, winner, loser, byTime) { playDuelCard(duelResultHtml(arena, winner, loser, byTime)); }
+function showDuelResult(arena, winner, loser, byTime) {
+    playDuelCard(duelResultHtml(arena, winner, loser, byTime));
+    const canvas = document.querySelector('#duel-card canvas');
+    if (canvas) playDuelReplay(canvas, duelReplayClip(arena, byTime), arena.heroes.map(h => h === winner));
+}
+
+// La repetición: los últimos 3 s del duelo (si terminó por tiempo, los que rodean al mejor golpe) vistos desde arriba, en
+// cámara lenta. Por ahora es el tablero, no la arena 3D; solo mira la cinta, así que no cambia el balance.
+const REPLAY_FRAMES = 30, REPLAY_AFTER_HIT = 10, REPLAY_SLOW = 0.75, REPLAY_CELL = 11;
+function duelReplayClip(arena, byTime) {
+    const s = arena.stats, tape = s && s.tape;
+    if (!tape || tape.length < 2 || (byTime && !s.bestHit)) return null;
+    const end = byTime ? Math.min(tape.length, s.bestHit.frame + REPLAY_AFTER_HIT) : tape.length;
+    return tape.slice(Math.max(0, end - REPLAY_FRAMES), end);
+}
+// Dibuja el momento `pos` del clip (con decimales: va mezclando dos cuadros para que se muevan parejo).
+function drawDuelReplay(ctx, clip, time, isWinner) {
+    const pos = Math.max(0, Math.min(clip.length - 1, time)); // el primer cuadro de animación puede venir con la hora de un toque antes
+    const c = REPLAY_CELL, i = Math.min(clip.length - 1, Math.floor(pos)), f = clip[i], next = clip[Math.min(clip.length - 1, i + 1)], k = pos - i;
+    const units = [0, 3].map(o => ({ x: (f[o] + (next[o] - f[o]) * k + 0.5) * c, y: (f[o + 1] + (next[o + 1] - f[o + 1]) * k + 0.5) * c, hp: f[o + 2],
+        hit: f[o + 2] < clip[Math.max(0, i - 3)][o + 2] })); // le acaban de pegar
+    ctx.fillStyle = '#262a24'; ctx.fillRect(0, 0, COLS * c, ROWS * c);
+    ctx.fillStyle = '#4f554a'; DUEL_COLUMNS.forEach(([x, y]) => ctx.fillRect(x * c, y * c, c, c));
+    units.forEach((u, n) => {
+        const rival = units[1 - n];
+        if (u.hit) { // el golpe: una línea desde el que pegó y un aro rojo en el que lo recibió
+            ctx.strokeStyle = '#f2c230'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(rival.x, rival.y); ctx.lineTo(u.x, u.y); ctx.stroke();
+            ctx.strokeStyle = '#d9402c'; ctx.beginPath(); ctx.arc(u.x, u.y, c * 0.95, 0, Math.PI * 2); ctx.stroke();
+        }
+    });
+    units.forEach((u, n) => {
+        ctx.fillStyle = u.hp <= 0 ? '#4f554a' : isWinner[n] ? '#ff9a2e' : '#e6e3d3';
+        ctx.beginPath(); ctx.arc(u.x, u.y, c * 0.55, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#0a0b0a'; ctx.fillRect(u.x - c, u.y - c * 1.2, c * 2, 3);
+        ctx.fillStyle = isWinner[n] ? '#ff9a2e' : '#e6e3d3'; ctx.fillRect(u.x - c, u.y - c * 1.2, c * 2 * u.hp, 3);
+    });
+}
+function playDuelReplay(canvas, clip, isWinner) {
+    const ctx = canvas.getContext('2d'), t0 = performance.now();
+    const step = now => {
+        if (!canvas.isConnected) return; // el cartel ya se fue
+        drawDuelReplay(ctx, clip, (now - t0) / 1000 * REPLAY_SLOW / DUEL_TAPE_STEP, isWinner);
+        requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+}
 
 // --- RANKING ---
 // Tabla con los 8 héroes: puesto, vidas, puntos, oro y dónde está. Un clic en un héroe muestra su arena.

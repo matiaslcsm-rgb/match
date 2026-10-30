@@ -1856,7 +1856,7 @@ test('Cartel del resultado: cuenta cómo terminó el duelo, con el golpe más fu
     selectHero(HERO_TEMPLATES.AXE);
     learnSkill(currentDraft.options[0]);
     const [a, b] = heroes;
-    const stats = { dmg: 0, avoidable: 0, changes: 0 };
+    const stats = { dmg: 0, avoidable: 0, changes: 0, tape: [] };
     noteDuelHit(stats, a, 30);
     dodgeableHit = { skillName: 'Rayo de prueba' };
     noteDuelHit(stats, b, 50);
@@ -1882,6 +1882,39 @@ test('Cartel del resultado: cuenta cómo terminó el duelo, con el golpe más fu
     check(card.textContent.includes('Rayo de prueba'), 'el mejor golpe');
     check(card.textContent.includes('¡Ganaste!'), 'si ganaste vos');
     resetGame();
+});
+
+test('Repetición: la cinta del duelo guarda la jugada y el cartel la muestra, sin tocar el combate', () => {
+    resetGame();
+    selectHero(HERO_TEMPLATES.AXE);
+    learnSkill(currentDraft.options[0]);
+    const [a, b] = heroes, arena = makeDuelArenas({ pairs: [[a, b]], bye: null })[0];
+    const hpA = a.hp, hpB = b.hp;
+    for (let i = 0; i < 100; i++) updateDuelArena(arena, 0.05);
+    checkEq(arena.stats.tape.length, 50, 'un cuadro cada 0,1 s');
+    checkEq(arena.stats.tape[0].length, 6, 'dos competidores: lugar y vida');
+    check(a.hp === hpA && b.hp === hpB, 'mirar no cambia la vida');
+    const tape = arena.stats.tape;
+    checkEq(duelReplayClip(arena, false).length, 30, 'los últimos 3 s');
+    checkEq(duelReplayClip(arena, false)[29], tape[49], 'hasta el final');
+    check(!duelReplayClip(arena, true), 'por tiempo y sin golpes, nada para mostrar');
+    arena.stats.bestHit = { by: a, dmg: 5, frame: 20 };
+    const clip = duelReplayClip(arena, true);
+    checkEq(clip[clip.length - 1], tape[29], 'por tiempo, termina 1 s después del mejor golpe');
+    check(!duelReplayClip({ stats: { tape: [] } }, false), 'sin cinta no hay repetición');
+    const frames = [[3, 6, 1, 16, 6, 1], [3, 6, 1, 15, 6, 1], [3, 6, 0.5, 14, 6, 0]];
+    const ctx = document.createElement('canvas').getContext('2d');
+    drawDuelReplay(ctx, frames, 1.5, [true, false]); // no revienta con vida 0 y entre dos cuadros
+    drawDuelReplay(ctx, frames, -0.2, [true, false]); // ni antes de empezar
+    drawDuelReplay(ctx, frames, 9, [true, false]); // ni después del final
+    arena.elapsed = 5;
+    a.hp = a.maxHp; b.hp = 1;
+    showDuelResult(arena, a, b, false);
+    const card = document.getElementById('duel-card');
+    check(card.querySelector('canvas'), 'el cartel trae el tablero');
+    check(card.textContent.includes('el golpe final'), 'y dice qué jugada es');
+    resetGame();
+    checkEq(card.innerHTML, '', 'se limpia con la partida');
 });
 
 test('Zócalo de TV: en combate muestra la tabla y un clic mira la arena de ese competidor', () => {

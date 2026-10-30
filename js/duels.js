@@ -51,6 +51,11 @@ function duelPlanOfRound() { const pair = pickDuelPair(); return { pairs: pair ?
 // los proyectiles de habilidad; el resto se engancha solo al rival). Lo junta el banco de partidas (tests.js).
 let duelLog = [];
 const DUEL_LEAD_MARGIN = 0.05; // cambia el que va ganando cuando el otro le saca más de 5 puntos de % de vida
+// La cinta del duelo, para la repetición del cartel del resultado (ui.js): dónde estaban los dos y con cuánta vida, cada 0,1 s.
+const DUEL_TAPE_STEP = 0.1;
+function tapeDuelFrame(arena) {
+    arena.stats.tape.push(arena.heroes.flatMap(h => [h.rx ?? h.x, h.ry ?? h.y, Math.max(0, h.hp / h.maxHp)]));
+}
 
 // Arma la arena del duelo de la ronda (se pelea al mismo tiempo que las oleadas de los demás, ver startWave).
 // Al empezar: vida y maná llenos, sin mejoras temporales y con los enfriamientos reiniciados.
@@ -59,7 +64,7 @@ function makeDuelArenas(plan) {
     const list = pairs.map(([a, b]) => {
         const arena = makeArena('duel', [a, b]);
         arena.walls = duelWalls();
-        arena.stats = { lead: null, changes: 0, dmg: 0, avoidable: 0 };
+        arena.stats = { lead: null, changes: 0, dmg: 0, avoidable: 0, tape: [] };
         [a, b].forEach((h, i) => {
             restoreHero(h);
             h.inRest = false;
@@ -79,6 +84,7 @@ function makeDuelArenas(plan) {
 function resolveDuel(arena, winner, loser, reason) {
     if (arena.done) return;
     arena.done = true;
+    if (arena.stats) tapeDuelFrame(arena); // el último cuadro: el golpe que lo definió
     if (arena.stats) duelLog.push({ round: waveNumber, secs: Math.round(arena.elapsed * 10) / 10, byTime: reason === 'se acabó el tiempo', changes: arena.stats.changes,
         dmg: arena.stats.dmg, avoidable: arena.stats.avoidable, winner: winner.name, loser: loser.name });
     showDuelResult(arena, winner, loser, reason === 'se acabó el tiempo'); // acá, antes de que vayan a descansar y se curen
@@ -119,6 +125,7 @@ function updateDuelArena(arena, dt) {
     if (!a.isAlive() || !b.isAlive()) return; // lo resuelve onHeroDeath
     const s = arena.stats, diff = a.hp / a.maxHp - b.hp / b.maxHp;
     if (s) { const lead = diff > DUEL_LEAD_MARGIN ? a : diff < -DUEL_LEAD_MARGIN ? b : s.lead; if (s.lead && lead !== s.lead) s.changes++; s.lead = lead; }
+    if (s && arena.elapsed >= s.tape.length * DUEL_TAPE_STEP) tapeDuelFrame(arena);
     if (arena.elapsed < DUEL_TIME) return;
     const pa = a.hp / a.maxHp, pb = b.hp / b.maxHp;
     const aWins = pa === pb ? Math.random() < 0.5 : pa > pb;

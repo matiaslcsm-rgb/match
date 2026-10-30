@@ -152,7 +152,7 @@ function dealDamage(source, target, amount, type = 'physical', opts = {}) {
 function noteDuelHit(stats, source, dmg) {
     stats.dmg += dmg;
     if (dodgeableHit) stats.avoidable += dmg;
-    if (!stats.bestHit || dmg > stats.bestHit.dmg) stats.bestHit = { by: source, dmg, skill: fxCastingSkill ? fxCastingSkill.name : dodgeableHit && dodgeableHit.skillName };
+    if (!stats.bestHit || dmg > stats.bestHit.dmg) stats.bestHit = { by: source, dmg, frame: stats.tape.length, skill: fxCastingSkill ? fxCastingSkill.name : dodgeableHit && dodgeableHit.skillName };
 }
 
 function onUnitDeath(unit, killer) {
