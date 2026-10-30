@@ -107,7 +107,7 @@ const tutCard = (icon, title, text) => `<div class="tut-card"><div class="tut-ca
 const tutKey = (keys, text) => `<div class="tut-key"><span>${keys.map(k => `<kbd>${k}</kbd>`).join(' ')}</span><p>${text}</p></div>`;
 
 const TUTORIAL_PAGES = [
-    { icon: '🎯', color: '#ffb703', title: 'El objetivo', heroes: true, body: `
+    { icon: '🎯', color: '#ff9a2e', title: 'El objetivo', heroes: true, body: `
         <p class="tut-lead">Sos uno de <b>8 héroes</b>. Cada ronda peleás contra creeps y, desde la ronda 5, en duelos contra los demás.</p>
         <div class="tut-cards">
             ${tutCard('🏆', 'Cómo se gana', 'Quedando último en pie. Los creeps se hacen más fuertes cada ronda, así que la partida siempre termina.')}
@@ -115,7 +115,7 @@ const TUTORIAL_PAGES = [
             ${tutCard('🧩', 'Tu kit', 'Armás 4 habilidades mezclando las de cualquier héroe. Cada partida es distinta.')}
             ${tutCard('🔓', 'Elegir a mano', 'Si no te convencen tus 3 opciones, el botón "Elegir cualquier héroe" te deja elegir cualquiera de los 11 — pero arrancás sin oro (en vez de 100g).')}
         </div>` },
-    { icon: '🔁', color: '#00b4d8', title: 'Una ronda', body: `
+    { icon: '🔁', color: '#8aa05a', title: 'Una ronda', body: `
         <div class="tut-steps">
             <div><span>1</span><b>Draft</b><p>Elegís una habilidad entre 3 (hasta tener 4).</p></div>
             <div><span>2</span><b>Preparación</b><p>Tienda, subir habilidades, ver qué oleada viene.</p></div>
@@ -125,7 +125,7 @@ const TUTORIAL_PAGES = [
             <div><span>6</span><b>Ranking</b><p>Ayuda para los de abajo y a la ronda siguiente.</p></div>
         </div>
         <p class="tut-note">⏱ Cada fase tiene tiempo: si se acaba, el juego decide por vos.</p>` },
-    { icon: '⌨️', color: '#2dc653', title: 'Teclado', body: `
+    { icon: '⌨️', color: '#7fa43f', title: 'Teclado', body: `
         <div class="tut-keys">
             ${tutKey(['E', 'R', 'T', 'F', 'Q'], 'Tus habilidades, en el orden en que las aprendiste. Las que se apuntan se confirman con clic.')}
             ${tutKey(['W', 'A', 'S', 'D'], 'Moverte con el teclado: solo si lo prendés en Opciones (Esc). Como en Dota, se juega con el mouse.')}
@@ -136,7 +136,7 @@ const TUTORIAL_PAGES = [
             ${tutKey(['P'], 'Piloto automático: la IA juega por vos.')}
             ${tutKey(['Esc'], 'Pausa: tutorial, glosario y opciones.')}
         </div>` },
-    { icon: '🖱️', color: '#c77dff', title: 'Mouse', body: `
+    { icon: '🖱️', color: '#9fb3bd', title: 'Mouse', body: `
         <div class="tut-cards">
             ${tutCard('🗡️', 'Ataque automático', 'Tu héroe le pega solo al enemigo más cercano que tenga a tiro (el círculo punteado es tu alcance).')}
             ${tutCard('👣', 'Clic derecho en el mapa', 'Caminás hasta ahí, como en Dota. También en los boxes, entre ronda y ronda.')}
@@ -144,21 +144,21 @@ const TUTORIAL_PAGES = [
             ${tutCard('🎯', 'Clic izquierdo en un enemigo', 'Lo marcás como objetivo: tu ataque y tus habilidades lo priorizan.')}
             ${tutCard('✨', 'Apuntar una habilidad', 'Tocá su tecla, se ve el alcance y el enemigo marcado; clic izquierdo la lanza, clic derecho cancela. Con "lanzamiento rápido" (Opciones) sale al apretar la tecla.')}
         </div>` },
-    { icon: '📈', color: '#ff9f1c', title: 'Habilidades y niveles', body: `
+    { icon: '📈', color: '#ff9a2e', title: 'Habilidades y niveles', body: `
         <div class="tut-cards">
             ${tutCard('🃏', 'Draft', 'En cada draft una de las 3 opciones es de tu héroe (natural, ★); las otras pueden ser de cualquiera.')}
             ${tutCard('➕', 'Puntos', 'Llegan en nivel 0: con el botón <b>[+]</b> les ponés puntos (1 por nivel del héroe). Normales hasta 4, la <u>definitiva</u> hasta 3 (niveles 6, 12 y 18).')}
             ${tutCard('◆', 'Innato y pasivas', 'El innato está siempre activo. Las pasivas no usan tecla: funcionan solas.')}
             ${tutCard('🔮', 'Rehacer el kit', '<b>Fragmento del Destino</b>: cambia una habilidad al azar por una de 4. <b>Libro</b>: elegís cuál, entre 6.')}
         </div>` },
-    { icon: '🛒', color: '#ffd166', title: 'Tienda e ítems', body: `
+    { icon: '🛒', color: '#ffc457', title: 'Tienda e ítems', body: `
         <div class="tut-cards">
             ${tutCard('⭐', 'Guía de tu héroe', 'La primera pestaña de la tienda te sugiere qué comprar: inicio, núcleo y final.')}
             ${tutCard('🧱', 'Básicos y mejoras', 'Los básicos se pueden repetir; las mejoras se arman con básicos + una receta y pagás solo lo que falta.')}
             ${tutCard('🛡️', 'Contras', 'Mirá el aviso de la próxima oleada: hay ítems que contrarrestan a cada tipo de creep.')}
             ${tutCard('🎒', 'Inventario', '6 espacios + 1 para el objeto neutral. Vender devuelve la mitad.')}
         </div>` },
-    { icon: '💀', color: '#ff477e', title: 'Vidas y muerte', body: `
+    { icon: '💀', color: '#e0523c', title: 'Vidas y muerte', body: `
         <div class="tut-cards">
             ${tutCard('♥♥', '2 vidas', 'Se pierden contra creeps y jefes, no en duelos. Al morir revivís a los 3s con la <b>Voluntad de Titán</b>: 5s sin recibir daño. Sin vidas, quedás eliminado (podés seguir mirando).')}
             ${tutCard('☠', 'Maldición', 'Solo se gana perdiendo duelos: con 3 héroes en juego, cada duelo perdido suma una instancia (recibís +10% de daño por cada una).')}

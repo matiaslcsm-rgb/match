@@ -7,7 +7,7 @@
 //   5 píxeles de la pantalla, según el alto) que el CSS agranda sin suavizar. Lo fijo se arma una vez por tamaño; lo
 //   animado, en cada cuadro. Solo corre en el menú (body.on-title).
 
-const TS = { sky: ['#06070c', '#0a0d18', '#101626', '#18203a', '#22294a', '#3a2f52'], steel: ['#0c0e12', '#161a20', '#20262e', '#2c333c', '#3c444e'] };
+const TS = { sky: ['#080a08', '#10130f', '#1a1e18', '#2a2d24', '#4a4030', '#7a5530'], steel: ['#0e100e', '#191c18', '#262a24', '#353b32', '#4a5145'] };
 const tsCanvas = document.getElementById('title-canvas'), tsg = tsCanvas.getContext('2d');
 let tsStatic = null, tsW = 0, tsH = 0, tsLast = 0, tsT = 0, tsWindows = [], tsCrowd = [], tsStadium = null;
 const TS_BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map(v => (v + 0.5) / 16); // tramado ordenado 4×4
@@ -27,7 +27,7 @@ function tsBuild(w, h) {
     const hy = Math.round(h * 0.62), gy = Math.round(h * 0.8), sky = TS.sky.map(hexRgb), steel = TS.steel.map(hexRgb);
     const put = (x, y, rgb) => { if (x < 0 || y < 0 || x >= w || y >= h) return; const o = (y * w + x) * 4; d[o] = rgb[0]; d[o + 1] = rgb[1]; d[o + 2] = rgb[2]; d[o + 3] = 255; };
     for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { // cielo: más claro abajo (la ciudad lo ilumina); abajo, la explanada
-        if (y >= hy) { put(x, y, hexRgb(tsNoise(x / 10, y / 4, 5) > 0.6 ? '#15171e' : '#111318')); continue; }
+        if (y >= hy) { put(x, y, hexRgb(tsNoise(x / 10, y / 4, 5) > 0.6 ? '#171a16' : '#121410')); continue; }
         const f = y / hy * (sky.length - 1), lo = Math.floor(f);
         put(x, y, sky[Math.min(sky.length - 1, lo + (f - lo > tsBayer(x, y) ? 1 : 0))]);
     }
@@ -35,8 +35,8 @@ function tsBuild(w, h) {
     tsWindows = [];
     for (let x = 0; x < w;) {
         const bw = 6 + Math.round(tsHash(x, 1, 3) * 12), bh = Math.round(h * (0.12 + tsHash(x, 2, 3) * 0.22)), top = hy - bh;
-        for (let xx = x; xx < Math.min(w, x + bw); xx++) for (let y = top; y < hy + 6; y++) put(xx, y, hexRgb(xx === x ? '#0e1220' : '#0a0d16'));
-        for (let wy = top + 3; wy < hy; wy += 4) for (let wx = x + 2; wx < x + bw - 1; wx += 3) if (tsHash(wx, wy, 5) < 0.35) tsWindows.push({ x: wx, y: wy, ph: tsHash(wx, wy, 6) * 6, c: tsHash(wx, wy, 7) < 0.7 ? '#e8c060' : '#7fd0d8' });
+        for (let xx = x; xx < Math.min(w, x + bw); xx++) for (let y = top; y < hy + 6; y++) put(xx, y, hexRgb(xx === x ? '#141713' : '#0c0e0c'));
+        for (let wy = top + 3; wy < hy; wy += 4) for (let wx = x + 2; wx < x + bw - 1; wx += 3) if (tsHash(wx, wy, 5) < 0.35) tsWindows.push({ x: wx, y: wy, ph: tsHash(wx, wy, 6) * 6, c: tsHash(wx, wy, 7) < 0.7 ? '#ffb347' : '#ff9a2e' });
         x += bw + Math.round(tsHash(x, 4, 3) * 3);
     }
     // El estadio: gradas en anillo (una elipse vista de costado), la pantalla gigante arriba y las torres de luz
@@ -53,7 +53,7 @@ function tsBuild(w, h) {
             put(sx + x, y, col);
         }
         // franja de peligro abajo
-        for (let y = sb - 3; y < sb; y++) put(sx + x, y, hexRgb(((x + y) >> 1) % 2 ? '#e0b020' : '#16181c'));
+        for (let y = sb - 3; y < sb; y++) put(sx + x, y, hexRgb(((x + y) >> 1) % 2 ? '#f2c230' : '#151714'));
     }
     const scrW = Math.round(sw * 0.3), scrH = Math.round(sh * 0.55), scrY = sb - sh - scrH - 4;
     for (let y = scrY - 1; y <= scrY + scrH; y++) for (let x = -Math.floor(scrW / 2) - 1; x <= Math.floor(scrW / 2) + 1; x++) put(sx + x, y, steel[y === scrY - 1 || y === scrY + scrH || Math.abs(x) > scrW / 2 ? 4 : 0]);
@@ -93,13 +93,13 @@ function tsFrame(now) {
         g.fillStyle = '#fff4c8'; g.fillRect(tx - 1, S.lampY - 1, 4, 2);
     });
     // El público: puntitos que titilan (se paran, aplauden)
-    tsCrowd.forEach(([x, y], i) => { const k = tsHash(i, Math.floor(tsT * 5), 3); if (k < 0.42) { g.fillStyle = ['#e8c8a0', '#c8402e', '#e8c060', '#7fb0ff', '#00f5d4'][Math.floor(k * 13) % 5]; g.fillRect(x, y - (k < 0.06 ? 1 : 0), 1, 1); } });
+    tsCrowd.forEach(([x, y], i) => { const k = tsHash(i, Math.floor(tsT * 5), 3); if (k < 0.42) { g.fillStyle = ['#d8d2bc', '#ff9a2e', '#f2c230', '#8aa05a', '#a3a595'][Math.floor(k * 13) % 5]; g.fillRect(x, y - (k < 0.06 ? 1 : 0), 1, 1); } });
     // La pantalla gigante: "MATCH" con barrido y la luz de "en vivo"
     const sc = S.scr;
     g.fillStyle = '#0a1a22'; g.fillRect(sc.x, sc.y, sc.w, sc.h);
     const scan = Math.floor(tsT * 18) % (sc.h + 6);
     g.fillStyle = 'rgba(0,245,212,0.18)'; g.fillRect(sc.x, sc.y + scan - 3, sc.w, 2);
-    tsDrawWord(g, 'MATCH', sc.x + sc.w / 2, sc.y + sc.h / 2, Math.max(1, Math.floor(sc.h / 9)), '#00f5d4');
+    tsDrawWord(g, 'MATCH', sc.x + sc.w / 2, sc.y + sc.h / 2, Math.max(1, Math.floor(sc.h / 9)), '#ff9a2e');
     if (Math.floor(tsT * 1.6) % 2) { g.fillStyle = '#ff2a2a'; g.fillRect(sc.x + 2, sc.y + 2, 2, 2); }
     // Los competidores, adelante, mirando al estadio
     const heroes = ['AXE', 'ZEUS', 'REC', 'FROSTWITCH', 'ASSASSIN'].map(k => spriteFor({ isHero: true, key: k })).filter(Boolean);
