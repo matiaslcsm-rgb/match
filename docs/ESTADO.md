@@ -28,6 +28,7 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
   de Rec) con la marca roja en el piso, que se cortan aturdiendo; la IA los lee con tiempos de persona (esquiva ~30-38%);
   4 columnas en la arena de duelo que frenan proyectiles; el panel del rival con sus habilidades. Falta la meta de
   cierre: los duelos duran ~8 s de mediana (meta 15-30 s); queda para decidir con el usuario (ver ROADMAP).
+- **Duelos de ~16 s (2026-10-30):** `DUEL_DAMAGE_REDUCTION` 0,8 y `DUEL_TIME` 60 s (opción (a) del roadmap). Banco de 66: mediana 7,9 → 15,9 s; 12% por tiempo, 0,8 cambios de ventaja y esquive IA 29% quedan por debajo de la meta (ver ROADMAP Fase 2).
 - **Rec, el primer competidor de MATCH (2026-10-28):** jugable (`js/data/heroes/rec.js`, ficha `docs/competidores/rec.md`)
   y **el Sniper se retiró**. Banco sin el Sniper: el que más gana, 25% (antes 75%); Rec, puesto 4,7 y 55% de duelos.
   Piezas nuevas del motor: silencio, canalización, disparo propio del innato, `aiMinDist`, etiqueta ESCAPE.
