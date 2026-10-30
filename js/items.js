@@ -97,6 +97,24 @@ function sellItem(key, hero = player) {
     return refund;
 }
 
+// Usa el ítem activo de una casilla del inventario, contra el enemigo más cercano en su rango. Devuelve true si salió.
+// El silencio no frena los ítems, como en Dota; el aturdimiento sí.
+function itemCooldownId(item) { return 'ITEM_' + item.key; }
+function useItem(hero, slot, opts = {}) {
+    const inv = hero.inventory[slot], item = inv && ITEMS[inv.key];
+    if (!item || !item.active || !hero.arena || !hero.isAlive() || hero.inRest || hasFlag(hero, 'stun')) return false;
+    const id = itemCooldownId(item);
+    if ((hero.cooldowns[id] || 0) > 0) return false;
+    const target = nearestEnemy(hero, item.active.range);
+    if (!target) { if (!opts.quiet) log(`${item.name}: sin objetivo en rango.`); return false; }
+    item.active.cast(hero, target);
+    hero.cooldowns[id] = item.active.cooldown;
+    (hero.cooldownTotals = hero.cooldownTotals || {})[id] = item.active.cooldown;
+    return true;
+}
+// En qué se puede convertir un ítem: los compuestos que lo usan.
+function itemBuildsInto(key) { return Object.values(ITEMS).filter(i => i.tier === 'composite' && i.components.includes(key)); }
+
 // Da un ítem directamente (sin oro): para pruebas y, más adelante, premios.
 function giveItem(hero, key) {
     hero.inventory.push({ key });

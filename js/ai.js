@@ -150,6 +150,16 @@ function aiCastSkills(hero) {
         if (!(winding && control(s)) && !aiWantsToCast(hero, s, near.length, bossNear, nearestDist, nearest)) return;
         tryCastSkill(hero, s, { quiet: true });
     });
+    aiUseItems(hero, winding);
+}
+// Los ítems activos no se gastan en creeps comunes: contra competidores y jefes, o para cortar un golpe anunciado.
+function aiUseItems(hero, winding) {
+    hero.inventory.forEach((inv, slot) => {
+        const item = ITEMS[inv.key];
+        if (!item.active || (hero.cooldowns[itemCooldownId(item)] || 0) > 0) return;
+        const t = nearestEnemy(hero, item.active.range);
+        if (t && (t.isHero || t.isBoss || t.isRoundBoss || winding)) useItem(hero, slot, { quiet: true });
+    });
 }
 
 // --- FUERA DEL COMBATE ---
@@ -218,10 +228,15 @@ const AI_EARLY_LAST_ROUND = 7;
 const AI_HERO_ITEMS = {
     ALCHEMIST: { early: ['STARTER_CELL'], late: ['EMERGENCY_CELL'] },
     FROSTWITCH: { early: ['STARTER_CELL'], late: ['BOSS_PLATE'] },
-    ARCANIST: { early: ['STARTER_CELL'] },
-    AXE: { late: ['BOSS_PLATE', 'EVO_CORE'] },
-    REC: { late: ['BOSS_PLATE', 'EVO_CORE'] },
-    VOIDSAGE: { late: ['EMERGENCY_CELL'] }
+    ARCANIST: { early: ['STARTER_CELL'], late: ['NET_GUN'] },
+    AXE: { late: ['SHOCK_MACE', 'BOSS_PLATE'] },
+    REC: { late: ['NET_GUN', 'BOSS_PLATE'] },
+    VOIDSAGE: { late: ['EMERGENCY_CELL', 'INHIBITOR'] },
+    VAMPIRE: { late: ['CLAMP'] },
+    DANCER: { late: ['CLAMP'] },
+    ASSASSIN: { late: ['SHOCK_MACE'] },
+    NECROMANCER: { late: ['NET_GUN'] },
+    ZEUS: { late: ['INHIBITOR'] }
 };
 
 function aiNeededCounters(wave) {

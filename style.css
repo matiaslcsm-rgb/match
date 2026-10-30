@@ -793,6 +793,11 @@ body.pixel-ui { background: repeating-linear-gradient(135deg, #121412 0 14px, #1
 @keyframes dc-left { from { transform: translateX(-60px); opacity: 0; } }
 @keyframes dc-right { from { transform: translateX(60px); opacity: 0; } }
 
+/* Ítems activos en el inventario: la tecla y el enfriamiento */
+.item-slot.active-item { position: relative; }
+.item-slot .is-key { position: absolute; top: 0; left: 1px; font-size: 0.6rem; color: var(--in-yellow); text-shadow: 1px 1px 0 var(--in-line); }
+.item-slot .cd { position: absolute; left: 0; right: 0; bottom: 0; height: 0; background: rgba(10, 11, 10, 0.75); color: var(--in-bone); font-size: 0.7rem; overflow: hidden; }
+
 /* Ventana para acomodar las habilidades (keymap.js) */
 #skill-keys-list { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
 .sk-cap { display: flex; flex-direction: column; align-items: center; gap: 2px; min-height: 84px; padding: 8px 4px; background: var(--in-cell); border: 2px solid var(--in-edge); text-align: center; cursor: grab; color: var(--in-bone); font-size: 0.78rem; }

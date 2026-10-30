@@ -43,7 +43,7 @@ window.addEventListener('keydown', e => {
     if (k === 'g') { setSprites(!spritesOn); return; }
     if (k === 'escape') { handleEscape(); return; }
     if (paused) return; // en pausa no responden las demás teclas
-    if (inCombat() && !autopilot) handleSkillKeypress(k);
+    if (inCombat() && !autopilot) { if (ITEM_KEYS.includes(k)) useItem(player, ITEM_KEYS.indexOf(k)); else handleSkillKeypress(k); }
 });
 window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
 
@@ -478,7 +478,7 @@ function updateHero(hero, arena, dt) {
         aiCastSkills(hero); // habilidades automáticas: el jugador solo se mueve (los puntos los reparte él)
     }
 
-    const stunned = hasFlag(hero, 'stun');
+    const stunned = hasFlag(hero, 'stun'), rooted = hasFlag(hero, 'root');
 
     // Movimiento: del teclado o de la IA (la velocidad la modifican los efectos: Masacre, Visión de Cazador...)
     hero.moveTimer = (hero.moveTimer || 0) + dt;
@@ -487,7 +487,7 @@ function updateHero(hero, arena, dt) {
     const kb = aiControlled ? null : keyboardDirection(), last = hero.lastStepDir;
     const turning = kb && (kb.dx || kb.dy) && last && (kb.dx !== last.dx || kb.dy !== last.dy);
     const need = turning ? stepTime * 0.55 : stepTime; // tiempo que pide este paso
-    if (!stunned && !busy && hero.moveTimer > need) {
+    if (!stunned && !rooted && !busy && hero.moveTimer > need) {
         let dir = aiControlled ? aiMoveDirection(hero) : kb;
         if (!aiControlled) {
             if (dir.dx || dir.dy) { hero.moveTarget = null; hero.focusChase = false; } // el teclado manda sobre el mouse

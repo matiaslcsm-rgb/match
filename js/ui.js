@@ -269,6 +269,7 @@ function shopCard(item) {
         `<p>${describeItem(item)}</p>` +
         (item.tier === 'composite' ? recipeHtml(item, player) : '') +
         (item.counters ? `<p class="meta">Contra: ${item.counters}</p>` : '') +
+        (item.tier === 'basic' && itemBuildsInto(item.key).length ? `<p class="meta">Se arma en: ${itemBuildsInto(item.key).map(i => i.name).join(' · ')}</p>` : '') +
         (blocker ? `<p class="meta">${blocker}</p>` : '');
     card.onclick = () => buyItem(item);
     return card;
@@ -553,6 +554,11 @@ function renderHeroBar() {
         cd.textContent = left > 0 ? left.toFixed(left < 10 ? 1 : 0) : '';
         slot.classList.toggle('no-mana', skillLevel(p, s) > 0 && p.mana < (val(s, p, 'manaCost') || 0));
     });
+    document.querySelectorAll('#hb-slots .item-slot[data-cd]').forEach(slot => {
+        const left = Math.max(0, p.cooldowns[slot.dataset.cd] || 0), cd = slot.querySelector('.cd');
+        cd.style.height = `${Math.min(100, left / ((p.cooldownTotals && p.cooldownTotals[slot.dataset.cd]) || 1) * 100)}%`;
+        cd.textContent = left > 0 ? Math.ceil(left) : '';
+    });
     const effects = activeEffects(p).filter(e => !e.flags.includes('item') && !e.flags.includes('passive'));
     const effSig = effects.map(e => e.id + (isFinite(e.until) ? Math.ceil(e.until - gameClock) : '')).join('|');
     const effBox = document.getElementById('hb-effects');
@@ -620,7 +626,11 @@ function renderHeroBar() {
     for (let i = 0; i < INVENTORY_SLOTS; i++) {
         const inv = p.inventory[i], el = document.createElement('div');
         el.className = 'item-slot' + (inv ? '' : ' empty');
-        if (inv) { const item = ITEMS[inv.key]; el.innerHTML = itemIconHtml(item.key, 'md') || shortName(item.name, 11); el.style.color = itemColor(item); el.style.borderColor = itemColor(item); el.title = `${item.name}\n${describeItem(item)}`; }
+        if (inv) {
+            const item = ITEMS[inv.key];
+            el.innerHTML = itemIconHtml(item.key, 'md') || shortName(item.name, 11); el.style.color = itemColor(item); el.style.borderColor = itemColor(item); el.title = `${item.name}\n${describeItem(item)}`;
+            if (item.active) { el.dataset.cd = itemCooldownId(item); el.classList.add('active-item'); el.insertAdjacentHTML('beforeend', `<span class="is-key">${ITEM_KEYS[i]}</span><div class="cd"></div>`); }
+        }
         slots.appendChild(el);
     }
     const n = p.neutral ? NEUTRAL_ITEMS[p.neutral] : null, neutral = document.createElement('div');

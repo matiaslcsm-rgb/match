@@ -59,6 +59,7 @@ const ITEM_ICON_SHAPES = {
 };
 
 const ITEM_ICONS = {
+    COIL: ['crystal', '#48cae4'], INHIBITOR: ['orb', '#c77dff'], SHOCK_MACE: ['hammer', '#f2c230'], NET_GUN: ['cape', '#8d99ae'], CLAMP: ['glove', '#ff9a2e'],
     STARTER_CELL: ['crystal', '#f2c230'], EVO_CORE: ['orb', '#ff9a2e'], BOSS_PLATE: ['shield', '#ff9a2e'], EMERGENCY_CELL: ['heart', '#f2c230'],
     BRANCH_STR: ['branch', '#ff6b6b'], BRANCH_AGI: ['branch', '#69db7c'], BRANCH_INT: ['branch', '#74c0fc'],
     BLADE: ['sword', '#adb5bd'], QUICK_GLOVES: ['glove', '#f4a261'], FANG: ['fang', '#f1faee'], CHAINMAIL: ['armor', '#8d99ae'],

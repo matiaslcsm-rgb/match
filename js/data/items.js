@@ -12,6 +12,7 @@
 // Los equipables (básicos y compuestos) ocupan un espacio del inventario (6) y dan, mientras los llevás:
 //   mods     modificadores de stats (ver effects.js; str/agi/int, maxHp, hpRegen, maxMana, manaRegen también valen)
 //   flags    estados (ej: 'trueStrike')
+//   active   ítem activo: { cooldown, range, cast(owner, target) }. Se usa con la tecla de su casilla, 1 a 6 (ver useItem).
 //   hooks(item)  reacciones a eventos (opcional): función que devuelve el objeto de hooks
 //   special  texto de lo que hacen los hooks/flags (el resto de la descripción se arma solo con los mods)
 //   counters texto de qué contrarresta
@@ -54,6 +55,9 @@ const ITEMS = {
         special: 'Tus ataques básicos hacen +12 de daño a los creeps (a los competidores, no).', counters: 'Las primeras rondas',
         hooks: item => ({ beforeAttack(owner, ctx) { if (!ctx.target.isHero) ctx.dmg += item.creepDmg; } })
     },
+
+    // La rama de control: de la misma Bobina salen cuatro ítems, según lo que pida la partida.
+    COIL: { key: 'COIL', name: 'Bobina de Choque', tier: 'basic', cost: 95, mods: { flatAtk: 5, int: 3 } },
 
     // ============================================================ COMPUESTOS
     // --- Atributos ---
@@ -152,6 +156,35 @@ const ITEMS = {
         } })
     },
 
+    // --- Control ---
+    INHIBITOR: {
+        key: 'INHIBITOR', name: 'Inhibidor de Señal', tier: 'composite', group: 'Control', components: ['COIL', 'MANA_CRYSTAL'], recipe: 110,
+        mods: { int: 8, manaRegen: 1.5 }, silence: 2.5, counters: 'Magos y definitivas',
+        special: 'ACTIVO (tecla de su casilla, 1 a 6): silencia 2,5 s al enemigo más cercano a 5 casillas o menos. Enfriamiento: 24 s.',
+        active: { cooldown: 24, range: 5, cast(owner, target) { addEffect(target, { id: 'SILENCE', name: 'Callado', duration: ITEMS.INHIBITOR.silence, flags: ['silence'], tags: ['CONTROL'] }); fxText(target, 'CALLADO', '#c77dff', 12, 0.8); } }
+    },
+    SHOCK_MACE: {
+        key: 'SHOCK_MACE', name: 'Maza de Choque', tier: 'composite', group: 'Control', components: ['COIL', 'BLADE'], recipe: 130,
+        mods: { flatAtk: 16 }, stun: 1.2, counters: 'Golpes anunciados y canalizaciones',
+        special: 'ACTIVO (tecla de su casilla, 1 a 6): aturde 1,2 s al enemigo más cercano a 3 casillas o menos. Enfriamiento: 26 s.',
+        active: { cooldown: 26, range: 3, cast(owner, target) { addEffect(target, { id: 'STUN', name: 'Aturdido', duration: ITEMS.SHOCK_MACE.stun, flags: ['stun'] }); fxText(target, '¡CHOQUE!', '#f2c230', 12, 0.8); } }
+    },
+    NET_GUN: {
+        key: 'NET_GUN', name: 'Lanzarredes', tier: 'composite', group: 'Control', components: ['COIL', 'VITALITY'], recipe: 100,
+        mods: { maxHp: 120 }, root: 2.5, counters: 'Los que escapan y los cuerpo a cuerpo',
+        special: 'ACTIVO (tecla de su casilla, 1 a 6): atrapa 2,5 s al enemigo más cercano a 6 casillas o menos: no camina, pero puede pegar. Enfriamiento: 20 s.',
+        active: { cooldown: 20, range: 6, cast(owner, target) { applyRoot(target, ITEMS.NET_GUN.root); } }
+    },
+    CLAMP: {
+        key: 'CLAMP', name: 'Tenaza Magnética', tier: 'composite', group: 'Control', components: ['COIL', 'QUICK_GLOVES'], recipe: 90,
+        mods: { flatAtk: 8, atkSpeedPct: 0.15 }, every: 5, root: 1.2, counters: 'Los que no se quedan quietos',
+        special: 'Cada 5 ataques básicos, atrapás 1,2 s a tu objetivo: no camina, pero puede pegar.',
+        hooks: item => ({ onHit(owner, { target }) {
+            owner.clampHits = (owner.clampHits || 0) + 1;
+            if (owner.clampHits % item.every === 0) applyRoot(target, item.root);
+        } })
+    },
+
     // --- Magia ---
     ARCANE_STAFF: {
         key: 'ARCANE_STAFF', name: 'Báculo Arcano', tier: 'composite', group: 'Magia', components: ['BRANCH_INT', 'MANA_CRYSTAL'], recipe: 60,
@@ -202,9 +235,13 @@ function talentBook(key, name, stat, label) {
 }
 
 // Grupos de compuestos, en el orden en que se muestran.
-const ITEM_GROUPS = ['Atributos', 'Ataque', 'Robo de vida y anticuración', 'Defensa y tanque', 'Magia'];
+const ITEM_GROUPS = ['Atributos', 'Ataque', 'Robo de vida y anticuración', 'Defensa y tanque', 'Control', 'Magia'];
 
 // --- Efectos reutilizables de los ítems ---
+function applyRoot(target, duration) {
+    if (!target.isAlive()) return;
+    if (addEffect(target, { id: 'ROOT', name: 'Atrapado', duration, flags: ['root'], tags: ['PERJUICIO'] })) fxText(target, '¡ATRAPADO!', '#ff9a2e', 12, 0.8);
+}
 function applyAntiHeal(target, pct, duration = 3) {
     if (!target.isAlive()) return;
     const current = getEffect(target, 'ANTIHEAL');

@@ -2003,6 +2003,70 @@ test('Ítems nuevos: Carga de Emergencia salva una vez y después recarga', () =
     checkEq(player.hp, after, 'una sola vez');
 });
 
+test('Ítems activos: silencio, aturdir y atrapar, con enfriamiento y sin objetivo no se gastan', () => {
+    toDuels();
+    const [a, b] = arenas[0].heroes;
+    a.inventory = []; b.inventory = [];
+    ['INHIBITOR', 'SHOCK_MACE', 'NET_GUN'].forEach(k => giveItem(a, k));
+    b.x = a.x + 2; b.y = a.y;
+    check(useItem(a, 0), 'silencia');
+    check(hasFlag(b, 'silence'), 'quedó callado');
+    check(!useItem(a, 0), 'en enfriamiento');
+    checkEq(a.cooldowns.ITEM_INHIBITOR, ITEMS.INHIBITOR.active.cooldown, 'enfriamiento');
+    check(useItem(a, 1), 'aturde');
+    check(hasFlag(b, 'stun'), 'quedó aturdido');
+    check(useItem(a, 2), 'atrapa');
+    check(hasFlag(b, 'root'), 'quedó atrapado');
+    checkNear(getEffect(b, 'ROOT').until - gameClock, ITEMS.NET_GUN.root * (1 - DUEL_CONTROL_REDUCTION), 'en duelo el control dura la mitad');
+    b.x = a.x + 12;
+    a.cooldowns.ITEM_NET_GUN = 0;
+    check(!useItem(a, 2), 'lejos no sale');
+    checkEq(a.cooldowns.ITEM_NET_GUN, 0, 'y no gasta el enfriamiento');
+    check(!useItem(a, 5), 'casilla vacía');
+    addEffect(a, { id: 'STUN', name: 'Aturdido', duration: 2, flags: ['stun'] });
+    b.x = a.x + 2;
+    check(!useItem(a, 2), 'aturdido no se usa');
+});
+
+test('Atrapado: no camina pero sigue pegando; la Tenaza atrapa cada 5 golpes', () => {
+    toDuels();
+    const [a, b] = arenas[0].heroes;
+    a.inventory = []; giveItem(a, 'CLAMP');
+    for (let i = 0; i < ITEMS.CLAMP.every - 1; i++) emit(a, 'onHit', { target: b });
+    check(!hasFlag(b, 'root'), 'todavía no');
+    emit(a, 'onHit', { target: b });
+    check(hasFlag(b, 'root'), 'al quinto golpe');
+    b.moveTimer = 10;
+    const x = b.x, y = b.y;
+    b.isAI = true;
+    updateHero(b, arenas[0], 0.05);
+    check(b.x === x && b.y === y, 'no caminó');
+});
+
+test('Una Bobina se arma en cuatro ítems y la tienda lo dice', () => {
+    checkEq(itemBuildsInto('COIL').length, 4, 'cuatro caminos');
+    resetGame();
+    selectHero(HERO_TEMPLATES.AXE);
+    learnSkill(currentDraft.options[0]);
+    player.gold = 1000;
+    buyItem(ITEMS.COIL);
+    check(itemCost(ITEMS.SHOCK_MACE, player) < itemTotalCost(ITEMS.SHOCK_MACE), 'la Bobina que tenés ya cuenta');
+    buyItem(ITEMS.SHOCK_MACE);
+    checkEq(countItem(player, 'COIL'), 0, 'se usó');
+    checkEq(countItem(player, 'SHOCK_MACE'), 1, 'se armó');
+    check(shopCard(ITEMS.COIL).textContent.includes('Se arma en: '), 'la carta lo muestra');
+    resetGame();
+});
+
+test('La IA usa los activos contra un competidor en rango', () => {
+    toDuels();
+    const [a, b] = arenas[0].heroes;
+    a.inventory = []; giveItem(a, 'SHOCK_MACE');
+    b.x = a.x + 1; b.y = a.y;
+    aiUseItems(a, false);
+    check(hasFlag(b, 'stun'), 'lo usó');
+});
+
 test('La IA: la Batería solo temprano y lo propio de cada competidor existe', () => {
     Object.values(AI_HERO_ITEMS).forEach(o => [...(o.early || []), ...(o.late || [])].forEach(k => check(ITEMS[k], `existe ${k}`)));
     resetGame();

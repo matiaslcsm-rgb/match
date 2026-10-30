@@ -57,11 +57,12 @@ let DUEL_CONTROL_REDUCTION = 0.5; // aturdimientos y ralentizaciones entre héro
 function addEffect(unit, def) {
     const isStun = (def.flags || []).includes('stun');
     if (isStun && unit.isHero && gameClock < (unit.stunImmuneUntil || 0)) return null;
-    const isControlDef = isStun || (def.mods && def.mods.moveSpeedPct < 0);
+    const isRoot = (def.flags || []).includes('root');
+    const isControlDef = isStun || isRoot || (def.mods && def.mods.moveSpeedPct < 0);
     if (isControlDef && unit.effects && hasFlag(unit, 'magicImmune')) return null; // inmunidad mágica: tampoco lo controlan
     removeEffect(unit, def.id);
     // Resistencia al control: acorta aturdimientos y ralentizaciones
-    const isControl = isStun || (def.mods && def.mods.moveSpeedPct < 0);
+    const isControl = isControlDef;
     if (isControl && isFinite(def.duration)) def = { ...def, duration: def.duration * (1 - Math.min(0.8, sumMod(unit, 'statusResist'))) };
     // En duelo, el control entre héroes dura menos (DUEL_CONTROL_REDUCTION); si no, el que aturde primero gana casi siempre
     if (isControl && isFinite(def.duration) && unit.isHero && unit.arena && unit.arena.kind === 'duel') def = { ...def, duration: def.duration * (1 - DUEL_CONTROL_REDUCTION) };

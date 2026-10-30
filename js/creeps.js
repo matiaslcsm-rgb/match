@@ -118,7 +118,7 @@ function updateCreep(c, dt) {
     }
 
     const dTarget = Math.hypot(c.x - target.x, c.y - target.y);
-    if (dTarget > c.range) { stepCreepToward(c, target.x, target.y, dt); return; }
+    if (dTarget > c.range) { if (!hasFlag(c, 'root')) stepCreepToward(c, target.x, target.y, dt); return; }
 
     c.attackTimer += dt;
     if (c.attackTimer < 1 / (effAtkSpeed(c) * enrage)) return;

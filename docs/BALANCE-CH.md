@@ -62,3 +62,22 @@ Se probó tocar stats (más ataque básico): mejoraba, pero el usuario prefirió
 
 Lectura: el Arcanista subió de más y el Alquimista llega más lejos, pero sigue sin ganar partidas. Bruja, Sabio, Rec y Axe siguen casi en 0 (Sabio y Axe bajaron): esta tanda no los resuelve. Ojo con el ruido: a 132 partidas, un ajuste mínimo movió al Arcanista de 18 a 31% y al Alquimista de 25 a 5%. Para decidir, mirar puesto y 264 partidas.
 
+### 2026-10-30: rama de control (264 partidas, tanda anterior → con control)
+Bobina de Choque y cuatro compuestos: Inhibidor de Señal (silencia), Maza de Choque (aturde), Lanzarredes (atrapa) y Tenaza Magnética (atrapa cada 5 golpes). La IA los usa solo contra competidores y jefes, o para cortar un golpe anunciado: 1579 usos en 33 partidas. El Núcleo Evolutivo no lo compró nunca (0 en 33): no le llega el turno en la build.
+
+| Héroe | % antes | % después | Puesto antes | Puesto después |
+|---|---|---|---|---|
+| Zeus | 27 | 28 | 4,0 | 4,1 |
+| Arcanista | 21 | 19 | 3,0 | 2,9 |
+| Nigromante | 13 | 19 | 4,7 | 4,4 |
+| Asesino | 19 | 19 | 4,2 | 4,5 |
+| Guerrero Vampiro | 21 | 18 | 4,8 | 5,3 |
+| Danzante Cinético | 20 | 14 | 4,5 | 5,0 |
+| Alquimista | 6 | 11 | 3,8 | 3,7 |
+| Sabio del Vacío | 3 | 4 | 4,9 | 4,8 |
+| Rec | 2 | 3 | 4,8 | 4,7 |
+| Axe | 2 | 1 | 5,2 | 4,8 |
+| Bruja del Hielo | 4 | 1 | 5,6 | 5,5 |
+
+Duelos: mediana 15,5 s, 12% por tiempo, 0,8 cambios de ventaja, esquive de la IA 32%. Bruja, Axe, Rec y Sabio siguen casi en 0% de victorias: falta resolverlos. La Bruja sigue saliendo en la ronda 15.
+
