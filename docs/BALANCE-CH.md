@@ -87,3 +87,7 @@ Probado y descartado: que la IA compre esto antes de la build. Rec, Bruja y Axe 
 Con los ítems después de la build, % de victorias y puesto: Arcanista 24 / 2,7 · Nigromante 23 / 4,2 · Zeus 22 / 4,1 · Vampiro 20 / 5,0 · Danzante 19 / 4,8 · Asesino 15 / 4,7 · Alquimista 7 / 3,6 · Sabio 3 / 4,7 · Rec 3 / 5,2 · Axe 2 / 5,0 · Bruja 1 / 5,5.
 Comparado con el inicio de hoy, nadie pasa de 24% (antes 29%). Bruja, Axe, Rec y Sabio siguen en 1-3%. Duelos: mediana 16 s, 13% por tiempo.
 
+### 2026-10-30: probado y descartado, IA que compra la guía de su héroe
+En vez de la build por atributo (`AI_BUILDS`), los primeros 4 ítems de núcleo y final de `BUILD_GUIDES`. A 264 partidas empeoró: Arcanista 38%, Rec 0%, Danzante puesto 6,5 y ronda final 21. Las guías orientan a una persona; no sirven tal cual como build de la IA.
+Pendiente: Bruja, Axe, Rec y Sabio siguen en 1-3% de victorias con la IA. Los héroes jugados por una persona pueden rendir distinto: el banco mide a la IA.
+
