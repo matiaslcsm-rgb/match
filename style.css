@@ -654,3 +654,16 @@ body.on-title { overflow: hidden; }
 .ts-lobby .ts-play, button.primary-btn, #tutorial-foot button:not(:disabled) { background: #c96a12; color: #fff4dc; }
 .ts-lobby .ts-play:hover, button.primary-btn:hover, #tutorial-foot button:not(:disabled):hover { background: #e07d1a; }
 #tutorial-box { border-color: #ff9a2e; }
+
+/* Barra "EN VIVO" del show (zócalo de TV) y fondo de la partida */
+#live-bar { display: none; }
+body.pixel-ui #live-bar {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 5px 14px; margin-bottom: 6px;
+    background: #0a0b0a; border: 2px solid #4f554a; border-left: 8px solid #f2c230; color: #e6e3d3; font-size: 0.8rem; letter-spacing: 2px; text-transform: uppercase;
+}
+#live-bar .lb-live { color: #e6e3d3; display: flex; align-items: center; gap: 6px; }
+#live-bar .lb-live i { width: 10px; height: 10px; background: #d9402c; display: inline-block; animation: lb-blink 1.2s steps(2) infinite; }
+@keyframes lb-blink { 50% { opacity: 0.25; } }
+#live-bar .lb-title { color: #a3a595; }
+#live-bar .lb-info { color: #ff9a2e; }
+body.pixel-ui { background: repeating-linear-gradient(135deg, #121412 0 14px, #141714 14px 28px); }

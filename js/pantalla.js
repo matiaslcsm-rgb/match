@@ -8,3 +8,9 @@ function screenW() { return MAP_W; }
 function screenH() { return MAP_H; }
 // Tema de la interfaz en pixel art (paneles oscuros con borde de píxeles y fuente Tiny5, style.css): en todo menos la portada
 function pxUiSync() { document.body.classList.toggle('pixel-ui', gameState !== 'MENU'); }
+
+// Barra "EN VIVO" arriba de la partida (2026-10-30, interfaz industrial): solo lee lo que ya muestra el HUD
+setInterval(() => {
+    const el = document.getElementById('lb-info'), r = document.getElementById('round-num'), s = document.getElementById('game-state-text');
+    if (el && r && s) el.textContent = `RONDA ${r.textContent} · ${s.textContent}`;
+}, 500);
