@@ -119,6 +119,7 @@ Que se sienta un programa de TV (concepto en `docs/CONCEPTO-FUTURISTA.md`).
     Evolutivo, Placa de Producción y Carga de Emergencia. Números en `docs/BALANCE-CH.md`. Bruja, Sabio, Rec y Axe siguen abajo.
   - [x] Rama de control e ítems activos (2026-10-30, pedido del usuario: ítems que se arman según la situación, activos como en
     Dota o LoL): Bobina de Choque → Inhibidor, Maza, Lanzarredes o Tenaza. Se usan con las teclas 1 a 6.
+  - [x] La IA compra sus contras con el inventario lleno (2026-10-30): se moría a los Emisores sin la Capa. No resuelve a los de abajo y el Nigromante cae a 8%; números en `docs/BALANCE-CH.md`.
   - [ ] Bruja, Axe, Rec y Sabio siguen casi en 0% de victorias.
 - [x] Tutorial al día con todo lo nuevo (2026-10-30).
 - [ ] Rendimiento: el 3D fluido en una compu común. Medido el 2026-10-28 (con tribunas, columnas y drones): 7,7 ms por

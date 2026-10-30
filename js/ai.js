@@ -248,13 +248,15 @@ function aiNeededCounters(wave) {
 }
 
 // Da un paso hacia un ítem: lo compra entero si le alcanza o, si es compuesto, compra el componente faltante
-// más barato. Si el inventario está lleno, vende primero un contra que no esté en sus objetivos.
-function aiWorkToward(hero, key, targets) {
+// más barato. Si el inventario está lleno, vende primero un contra que no esté en sus objetivos y, si no hay y el ítem
+// es más urgente que lo demás (keep: lo único que no se toca), cualquier otra cosa. No vende si igual no le alcanza.
+function aiWorkToward(hero, key, targets, keep = null) {
     const item = ITEMS[key];
     if (countItem(hero, key) > 0) return false;
     if (itemBlocker(item, hero) === 'Inventario lleno') {
-        const spare = hero.inventory.find(inv => ITEMS[inv.key].counters && !targets.includes(inv.key));
-        if (!spare) return false;
+        const spare = hero.inventory.find(inv => ITEMS[inv.key].counters && !targets.includes(inv.key))
+            || (keep && hero.inventory.find(inv => !keep.includes(inv.key)));
+        if (!spare || hero.gold + Math.floor(itemTotalCost(ITEMS[spare.key]) * SELL_REFUND) < itemCost(item, hero)) return false;
         sellItem(spare.key, hero);
     }
     if (itemAvailable(item, hero) && hero.gold >= itemCost(item, hero)) return buyItem(item, hero);
@@ -268,10 +270,15 @@ function aiShop(hero) {
     if (itemAvailable(ITEMS.GREED, hero) && hero.gold >= itemCost(ITEMS.GREED, hero)) buyItem(ITEMS.GREED, hero);
     const counters = aiBuysCounters && nextWave ? aiNeededCounters(nextWave) : [];
     const own = AI_HERO_ITEMS[hero.key] || {}, early = waveNumber <= AI_EARLY_LAST_ROUND && own.early || [];
-    const targets = [...counters, ...early, ...AI_BUILDS[hero.primaryAttr], ...(own.late || [])]; // lo propio va después de la build: antes los hundía
+    const late = own.late || [], keep = [...counters, ...early, ...AI_BUILDS[hero.primaryAttr]];
+    const targets = [...keep, ...late]; // lo propio va después de la build: antes los hundía
+    // Los contras desplazan a lo propio de `late` (con 6 casillas llenas no entraban: se moría a Emisores sin la Capa);
+    // lo de `late` no desplaza contras, solo entra si hay lugar: venderlos y recomprarlos cada ronda gasta de más.
+    const step = key => counters.includes(key) ? aiWorkToward(hero, key, targets, keep)
+        : aiWorkToward(hero, key, late.includes(key) ? Object.keys(ITEMS) : targets);
     // Siempre intenta primero el objetivo más prioritario; cuando no puede avanzar en ninguno, termina
     for (let guard = 0; guard < 30; guard++) {
-        if (!targets.some(key => aiWorkToward(hero, key, targets))) break;
+        if (!targets.some(step)) break;
     }
     // Con la build armada, el oro que sobra va a libros de talento de su atributo principal (guarda una reserva)
     if (AI_BUILDS[hero.primaryAttr].every(k => countItem(hero, k) > 0)) {

@@ -91,3 +91,23 @@ Comparado con el inicio de hoy, nadie pasa de 24% (antes 29%). Bruja, Axe, Rec y
 En vez de la build por atributo (`AI_BUILDS`), los primeros 4 ítems de núcleo y final de `BUILD_GUIDES`. A 264 partidas empeoró: Arcanista 38%, Rec 0%, Danzante puesto 6,5 y ronda final 21. Las guías orientan a una persona; no sirven tal cual como build de la IA.
 Pendiente: Bruja, Axe, Rec y Sabio siguen en 1-3% de victorias con la IA. Los héroes jugados por una persona pueden rendir distinto: el banco mide a la IA.
 
+### 2026-10-30: la IA ahora compra sus contras con el inventario lleno (264 partidas, antes → después)
+Diagnóstico: todas las muertes contra Drones Emisores de la ronda 15 en adelante fueron sin la Capa Antimagia, aunque la IA la tenía de objetivo y le sobraba oro (cuesta 165). Con las 6 casillas llenas solo podía vender un contra que no necesitara, y 3 de los 4 temas tardíos piden Capa y Botas a la vez. Axe moría así 103 veces cada 264 partidas.
+Arreglo (`aiWorkToward`/`aiShop`, ai.js, sin tocar stats ni ítems): el contra desplaza a lo propio de `late`; lo de `late` ya no desplaza contras, solo entra si hay lugar; y no vende nada si igual no le alcanza. Probado y descartado: que lo de `late` también vendiera contras (se recompra cada ronda; Arcanista 31%, Nigromante puesto 5,1).
+
+| Héroe | % antes | % después | Puesto antes | Puesto después | Afuera antes | Afuera después |
+|---|---|---|---|---|---|---|
+| Zeus | 22 | 23 | 4,1 | 4,3 | 20 | 22 |
+| Danzante Cinético | 19 | 22 | 4,8 | 4,7 | 19 | 21 |
+| Arcanista | 24 | 21 | 2,7 | 3,0 | 20 | 21 |
+| Guerrero Vampiro | 20 | 19 | 5,0 | 4,9 | 21 | 22 |
+| Asesino | 15 | 18 | 4,7 | 4,4 | 18 | 19 |
+| Alquimista | 7 | 15 | 3,6 | 3,2 | 18 | 20 |
+| Nigromante | 23 | 8 | 4,2 | 5,3 | 19 | 19 |
+| Sabio del Vacío | 3 | 6 | 4,8 | 4,8 | 17 | 19 |
+| Bruja del Hielo | 1 | 2 | 5,5 | 5,5 | 15 | 16 |
+| Rec | 3 | 2 | 5,2 | 5,0 | 18 | 19 |
+| Axe | 2 | 1 | 5,0 | 4,6 | 17 | 18 |
+
+Lectura: arregla una falla de la IA, no el balance. El Alquimista sube y **el Nigromante cae de 23 a 8%** (sin explicar; la hipótesis es que ganaba más cuando los otros morían a los Emisores). Bruja, Rec y Axe siguen en 1-2%: llegan más lejos (Axe de puesto 5,0 a 4,6), pero no ganan.
+Duelos: mediana 16 → 13,4 s, debajo de la meta de 15-30 s, pero **no es que peleen distinto:** ronda final 22,6 → 24,2, así que hay más duelos en las rondas 20+ (769 → 1017, con muerte súbita duran menos de 15 s). Dentro de las rondas 10 a 19 no cambió. Por tiempo 12%, 0,83 cambios de ventaja.

@@ -1277,6 +1277,25 @@ test('IA: con el inventario lleno vende un contra que no sirve para comprar el q
     checkEq(countItem(player, 'BELT'), 1, 'no vendió su ítem de atributo');
 });
 
+test('IA: el contra desplaza a lo propio de su build tardía, y lo propio no desplaza contras', () => {
+    newGame('REC');
+    gameState = 'PREP'; player.gold = ITEMS.CLOAK.recipe;
+    ['GLOVES', 'SWIFT_BLADE', 'CRIMSON', 'SKADI', 'BOOTS', 'JET_PACK'].forEach(k => giveItem(player, k));
+    nextWave = { name: 'Asedio', groups: [{ type: 'SHAMAN', count: 3 }, { type: 'STUNNER', count: 3 }], boss: 'SHAMAN' };
+    autopilot = true;
+    try {
+        player.gold = 0; aiShop(player);
+        checkEq(countItem(player, 'JET_PACK'), 1, 'sin oro para el contra no vende nada');
+        player.gold = 500; aiShop(player);
+        checkEq(countItem(player, 'CLOAK'), 1, 'compró la Capa contra Emisores');
+        checkEq(countItem(player, 'JET_PACK'), 0, 'vendiendo lo propio');
+        check(countItem(player, 'BOOTS') === 1 && countItem(player, 'CRIMSON') === 1, 'sin tocar el otro contra ni la build');
+        nextWave = { name: 'Muralla', groups: [{ type: 'GRUNT', count: 3 }], boss: 'GRUNT' };
+        player.gold = 2000; aiShop(player);
+        checkEq(countItem(player, 'CLOAK'), 1, 'después, lo propio no le saca el contra');
+    } finally { autopilot = false; }
+});
+
 test('IA: arma los contras de la próxima oleada (de a componentes si no le alcanza)', () => {
     newGame('AXE');
     gameState = 'PREP'; player.gold = 1000;
