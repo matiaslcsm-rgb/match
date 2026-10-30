@@ -85,6 +85,8 @@ copiado de Dota.
     velocidad 2,3 y la IA no tira el Acople ni la Cámara Fija con el rival encima.
 - [ ] Los otros siete del show (borrador en `docs/MATCH.md` §4): Grúa, Eco, Flash, Kilo, Parche, Vector, Viral, Glitch.
   Antes de cada uno, su ficha para aprobar.
+  **(decisión)** Fichas listas para aprobar (2026-10-30): `docs/competidores/grua.md` (reemplaza a Axe) y
+  `docs/competidores/vector.md` (reemplaza al Asesino).
 - [ ] El Danzante, el Arcanista y el Sabio del Vacío pasados al estilo nuevo (su lectura y su respuesta).
 
 **Cierra cuando:** no queda ningún héroe de Dota y ningún cruce de competidores gana más del 65% de las veces.
