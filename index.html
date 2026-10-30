@@ -95,7 +95,7 @@
                         <div id="hb-effects"></div>
                     </div>
                 </div>
-                <div id="controls-hint">Caminar: clic derecho · Atacar: clic derecho sobre un rival · Habilidades: E R T F Q y clic para apuntar · Objetivo: clic izquierdo · W A S D y lanzamiento rápido: en Opciones · Automáticas: H · Tienda: B · Piloto: P</div>
+                <div id="controls-hint">Caminar: clic derecho · Atacar: clic derecho sobre un rival · Habilidades: Q W E R D F (se acomodan con K) y clic para apuntar · Objetivo: clic izquierdo · W A S D y lanzamiento rápido: en Opciones · Automáticas: H · Tienda: B · Piloto: P</div>
                 <!-- Zócalo de TV con el ranking, durante el combate (ui.js) -->
                 <div id="tv-rank"></div>
             </div>
@@ -144,6 +144,18 @@
             </div>
             <p class="subtitle" id="draft-subtitle">Elegí una habilidad nueva:</p>
             <div id="draft-options" class="draft-grid"></div>
+        </div>
+    </div>
+
+    <!-- Acomodar las habilidades en las teclas (keymap.js) -->
+    <div id="skill-keys-container" class="modal" style="display: none;">
+        <div class="modal-box">
+            <div class="modal-head">
+                <h3>⌨ Acomodar habilidades</h3>
+                <button class="modal-close" onclick="toggleSkillKeys(false)" title="Cerrar (Esc)">✕</button>
+            </div>
+            <p class="subtitle">Arrastrá una habilidad a otra tecla, o tocá una y después la tecla. Si estaba ocupada, se intercambian.</p>
+            <div id="skill-keys-list"></div>
         </div>
     </div>
 

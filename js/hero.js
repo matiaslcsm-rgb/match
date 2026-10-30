@@ -17,8 +17,16 @@ const ATTRIBUTE_RULES = {
                           // con simulateGame(i, false, 60) como en DISEÑO.md §6)
 };
 
-// Teclas de habilidades activas, asignadas por orden de aprendizaje.
-const SKILL_KEYS = ['e', 'r', 't', 'f', 'q', 'v']; // 4 al empezar, 5 desde la ronda de la quinta (progression.js)
+// Teclas de habilidades, por tipo (pedido del usuario 2026-10-30): definitivas en R (si no, D o F), pasivas en W o E y activas
+// en Q; después, lo que quede libre. Cada jugador las puede acomodar en su ventana (keymap.js).
+const SKILL_KEYS = ['q', 'w', 'e', 'r', 'd', 'f', 't', 'v'];
+const SKILL_KEY_ORDER = {
+    ultimate: ['r', 'd', 'f', 't', 'v', 'q', 'e', 'w'],
+    passive: ['w', 'e', 't', 'v', 'q', 'f', 'd', 'r'],
+    active: ['q', 'e', 'w', 't', 'v', 'f', 'd', 'r']
+};
+const WASD_SKILL_KEYS = ['w', 'd']; // si te movés con W A S D, las habilidades no las usan
+function skillKeysFree() { return SKILL_KEYS.filter(k => !wasdMove || !WASD_SKILL_KEYS.includes(k)); }
 
 class Hero {
     // Cómo lo nombran los mensajes de las habilidades (los creeps tienen su label; los competidores, su nombre de jugador)
@@ -98,12 +106,13 @@ class Hero {
         this.skills.push(skill);
         this.skillLevels[skill.id] = 0;
         if (skill.kind === 'active') this.cooldowns[skill.id] = 0;
-        if (skill.kind !== 'passive') {
-            const used = Object.values(this.keyBindings);
-            const key = SKILL_KEYS.find(k => !used.includes(k));
-            if (key) this.keyBindings[skill.id] = key;
-        }
+        const key = this.nextSkillKey(skill);
+        if (key) this.keyBindings[skill.id] = key;
         this.recalculateStats();
+    }
+    nextSkillKey(skill) {
+        const used = Object.values(this.keyBindings), free = skillKeysFree();
+        return SKILL_KEY_ORDER[skill.isUltimate ? 'ultimate' : skill.kind === 'passive' ? 'passive' : 'active'].find(k => free.includes(k) && !used.includes(k));
     }
     // Quita una habilidad del kit (Fragmento/Libro del Destino) y devuelve los puntos invertidos en ella.
     // Su tecla queda libre para la próxima habilidad que se aprenda.

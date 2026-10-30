@@ -88,6 +88,7 @@ function handleEscape() {
     if (document.getElementById('tutorial').style.display === 'flex') { closeTutorial(); return; }
     if (closeGlossary()) return;
     if (keysOpen) { toggleKeys(false); return; }
+    if (skillKeysOpen) { toggleSkillKeys(false); return; }
     if (document.getElementById('hero-any-drawer').classList.contains('open')) { closeHeroDrawer(); return; }
     if (document.getElementById('shop-container').style.display === 'block') { closeShop(); return; }
     togglePause();

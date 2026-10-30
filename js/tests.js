@@ -143,11 +143,11 @@ test('Habilidad en nivel 0 no se lanza; en nivel 1 cobra maná y enfriamiento', 
     const s = learn('VAMP_CLAW', 0);
     const d = dummy({ hp: 9999, maxHp: 9999 });
     const mana = player.mana;
-    handleSkillKeypress('e');
+    handleSkillKeypress('q');
     checkEq(player.mana, mana, 'maná en nivel 0');
     checkEq(targeting, null, 'en nivel 0 ni siquiera se apunta');
     player.skillLevels[s.id] = 1;
-    handleSkillKeypress('e'); // lanzamiento al instante (estilo Hades): sin cursor, al enemigo más cercano
+    handleSkillKeypress('q'); // lanzamiento al instante (estilo Hades): sin cursor, al enemigo más cercano
     checkEq(targeting, null, 'sin paso extra de apuntar');
     checkEq(mana - player.mana, valueAt(s, 'manaCost', 1), 'maná gastado');
     checkNear(player.cooldowns[s.id], valueAt(s, 'cooldown', 1) * COOLDOWN_MULT, 'enfriamiento (25% más corto)');
@@ -157,15 +157,44 @@ test('Sin objetivo en rango no se cobra maná ni enfriamiento', () => {
     newGame('VAMPIRE');
     const s = learn('VAMP_LEAP', 1);
     const mana = player.mana;
-    handleSkillKeypress('e');
+    handleSkillKeypress('q');
     checkEq(player.mana, mana, 'maná');
     checkEq(player.cooldowns[s.id], 0, 'enfriamiento');
 });
 
-test('Teclas por orden de aprendizaje (E, R, T, F)', () => {
+test('Teclas por tipo: definitivas en R, D y F; pasivas en W y E; activas en Q', () => {
     newGame('AXE');
-    ['VAMP_CLAW', 'AXE_FURIA', 'ZEUS_ARC', 'AXE_GIRO'].forEach(id => learn(id, 0));
-    checkEq(['VAMP_CLAW', 'AXE_FURIA', 'ZEUS_ARC', 'AXE_GIRO'].map(id => player.keyBindings[id]).join(''), 'ertf', 'teclas');
+    wasdMove = false;
+    const fake = (id, kind, isUltimate) => { const s = { id, kind, isUltimate, values: {} }; player.addSkill(s); return player.keyBindings[id]; };
+    checkEq(fake('A1', 'active'), 'q', 'la activa');
+    checkEq(fake('P1', 'passive'), 'w', 'la pasiva');
+    checkEq(fake('P2', 'passive'), 'e', 'la segunda pasiva');
+    checkEq(fake('U1', 'active', true), 'r', 'la definitiva');
+    checkEq(fake('U2', 'active', true), 'd', 'la segunda definitiva');
+    checkEq(fake('U3', 'active', true), 'f', 'la tercera definitiva');
+    checkEq(fake('A2', 'active'), 't', 'otra activa, a lo libre');
+    wasdMove = true;
+});
+
+test('Acomodar habilidades: se mueven e intercambian, y W A S D libera W y D', () => {
+    newGame('AXE');
+    wasdMove = false;
+    const fake = (id, kind) => { player.addSkill({ id, kind, values: {} }); };
+    fake('A1', 'active'); fake('P1', 'passive');
+    assignSkillKey(player, 'A1', 'w');
+    checkEq(player.keyBindings.A1, 'w', 'la pone donde querés');
+    checkEq(player.keyBindings.P1, 'q', 'y la otra se intercambia');
+    assignSkillKey(player, 'P1', 'v');
+    checkEq(player.keyBindings.P1, 'v', 'a una tecla libre');
+    toggleSkillKeys(true);
+    checkEq(document.querySelectorAll('#skill-keys-list .sk-cap').length, SKILL_KEYS.length, 'una casilla por tecla');
+    toggleSkillKeys(false);
+    wasdMove = true; // como quedan las pruebas de movimiento
+    freeWasdKeys(player);
+    check(!WASD_SKILL_KEYS.includes(player.keyBindings.A1), 'al caminar con W A S D deja la W');
+    fake('P2', 'passive');
+    check(!WASD_SKILL_KEYS.includes(player.keyBindings.P2), 'y las nuevas tampoco la usan');
+    check(!setKey('shop', 'w'), 'la W no se le puede dar a otra acción');
 });
 
 test('Definitiva: niveles 1/2/3 recién en los niveles 6/12/18 del héroe', () => {
@@ -224,7 +253,7 @@ test('Fragmento del Destino: quita una, devuelve puntos, ofrece 4 sin la quitada
     checkEq(names.length, 4, 'opciones');
     check(!names.includes('Rayo Arco'), 'no ofrece la quitada');
     document.querySelector('#draft-options .skill-card').click();
-    checkEq(player.keyBindings[player.skills[1].id], 'e', 'la nueva toma la tecla liberada');
+    checkEq(player.keyBindings[player.skills[1].id], SKILL_KEY_ORDER[player.skills[1].kind === 'passive' ? 'passive' : 'active'][0], 'la nueva toma la tecla de su tipo que quedó libre');
 });
 
 // Antes, el botón de la tienda le pasaba el clic a startWave como si fuera el plan del duelo: la ronda se cortaba sin
@@ -366,7 +395,7 @@ test('Voluntad de Titán: revive en el lugar, inmortal, x2 vel. ataque y sin man
     checkNear(effAtkSpeed(player) / player.atkSpeed, 1 + TITAN_WILL.atkSpeedPct, 'velocidad de ataque');
     dealDamage(c, player, 500, 'pure');
     checkEq(player.hp, player.maxHp, 'no recibe daño');
-    player.mana = 0; c.x = 6; c.y = 5; handleSkillKeypress('e');
+    player.mana = 0; c.x = 6; c.y = 5; handleSkillKeypress('q');
     check(player.cooldowns[s.id] > 0, 'lanza sin maná');
     gameClock += TITAN_WILL.duration + 0.1; tickEffects(player, 0.016);
     check(!getEffect(player, 'TITAN_WILL'), 'dura ' + TITAN_WILL.duration + 's');

@@ -1,6 +1,6 @@
 // Control con el mouse, estilo MOBA.
 //
-//   Habilidades con objetivo (las que eligen un enemigo: golpes, proyectiles, saltos): apretás la tecla (E R T F Q) y entrás en
+//   Habilidades con objetivo (las que eligen un enemigo: golpes, proyectiles, saltos): apretás la tecla y entrás en
 //   modo apuntar: se ve el alcance y se marca el enemigo más cercano al cursor. Clic izquierdo la lanza sobre ese enemigo;
 //   clic derecho o Esc cancela. Con "lanzamiento rápido" (Opciones) salen al apretar la tecla. Las de área alrededor tuyo y
 //   las mejoras se lanzan al apretar la tecla.
@@ -23,6 +23,7 @@ function setQuickCast(on) {
 function setWasdMove(on) {
     wasdMove = on;
     try { localStorage.setItem('chc-wasd', on ? 'on' : 'off'); } catch (e) { /* no se guarda */ }
+    if (on && player) freeWasdKeys(player); // W y D son para caminar
     log(on ? '⌨️ Te podés mover con W A S D (y las flechas), además del clic derecho.' : '🖱️ Te movés con clic derecho, como en Dota.');
 }
 function keyboardMoveOn() { return wasdMove; }

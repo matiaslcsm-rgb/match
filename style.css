@@ -793,6 +793,19 @@ body.pixel-ui { background: repeating-linear-gradient(135deg, #121412 0 14px, #1
 @keyframes dc-left { from { transform: translateX(-60px); opacity: 0; } }
 @keyframes dc-right { from { transform: translateX(60px); opacity: 0; } }
 
+/* Ventana para acomodar las habilidades (keymap.js) */
+#skill-keys-list { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.sk-cap { display: flex; flex-direction: column; align-items: center; gap: 2px; min-height: 84px; padding: 8px 4px; background: var(--in-cell); border: 2px solid var(--in-edge); text-align: center; cursor: grab; color: var(--in-bone); font-size: 0.78rem; }
+.sk-cap b { font-size: 1.3rem; color: var(--in-orange); }
+.sk-cap small { color: var(--in-dim); font-size: 0.66rem; }
+.sk-cap.ult { border-color: var(--in-orange); }
+.sk-cap.passive { border-style: dashed; }
+.sk-cap.empty { opacity: 0.5; cursor: default; }
+.sk-cap.picked { border-color: var(--in-yellow); background: var(--in-cell2); }
+.skill-slot.passive { border-style: dashed; }
+.sk-open { cursor: pointer; background: none; font-family: inherit; }
+@media (max-width: 560px) { #skill-keys-list { grid-template-columns: repeat(2, 1fr); } }
+
 /* Zócalo de TV con el ranking (ui.js, renderTvRank): reemplaza a la ayuda de controles durante el combate */
 #tv-rank { display: none; }
 body.tv-rank-on #tv-rank { display: flex; gap: 2px; background: var(--in-line); border: 2px solid var(--in-edge); border-left: 8px solid var(--in-yellow); padding: 2px; font-size: 0.72rem; }

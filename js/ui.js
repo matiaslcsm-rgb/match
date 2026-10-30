@@ -580,16 +580,17 @@ function renderHeroBar() {
         `<span class="st-int">INT ${Math.floor(p.attr('int'))}</span> <span>ARM ${p.armor.toFixed(1)}</span> <span class="st-more">ⓘ</span>`;
     stats.title = heroTooltip();
 
-    // Habilidades activas: 4 casillas (5 desde la ronda de la quinta), se llenan en el draft
+    // Habilidades: 4 casillas (5 desde la ronda de la quinta), se llenan en el draft; en el orden de las teclas
     const skills = document.getElementById('hb-skills'); skills.innerHTML = '';
-    const actives = p.skills.filter(s => s.kind === 'active');
-    const slotCount = Math.max(kitSize(), actives.length);
+    const byKey = s => { const i = SKILL_KEYS.indexOf(p.keyBindings[s.id]); return i < 0 ? SKILL_KEYS.length : i; };
+    const kit = p.skills.slice().sort((a, b) => byKey(a) - byKey(b));
+    const slotCount = Math.max(kitSize(), kit.length);
     for (let i = 0; i < slotCount; i++) {
-        const s = actives[i];
+        const s = kit[i];
         const slot = document.createElement('div');
         if (!s) { slot.className = 'skill-slot empty'; slot.textContent = 'libre'; slot.title = 'Espacio libre: se llena en el draft'; skills.appendChild(slot); continue; }
         const lvl = skillLevel(p, s), max = maxSkillLevel(s);
-        slot.className = 'skill-slot' + (lvl === 0 ? ' locked' : '') + (s.isUltimate ? ' ult' : '');
+        slot.className = 'skill-slot' + (lvl === 0 ? ' locked' : '') + (s.isUltimate ? ' ult' : '') + (s.kind === 'passive' ? ' passive' : '');
         slot.dataset.id = s.id;
         slot.title = `${s.name}${s.isUltimate ? ' (definitiva)' : ''}\n${stripHtml(skillCostLine(s, lvl))}\n${stripHtml(describeSkill(s, lvl))}` +
             (p.skillPoints > 0 && levelUpBlocker(p, s) ? `\n🔒 ${levelUpBlocker(p, s)}` : '');
@@ -599,18 +600,20 @@ function renderHeroBar() {
         const btn = levelButton(s); if (btn) slot.appendChild(btn);
         skills.appendChild(slot);
     }
-    // Innato y pasivas: chips (las pasivas drafteadas también se suben con [+])
+    // Innato: chip (las pasivas drafteadas ya están en las casillas)
     const passives = document.getElementById('hb-passives'); passives.innerHTML = '';
-    [{ a: p.innate, innate: true }, ...p.skills.filter(s => s.kind === 'passive').map(a => ({ a }))].forEach(({ a, innate }) => {
-        if (!a) return;
+    if (p.innate) {
         const chip = document.createElement('span');
-        const lvl = innate ? null : skillLevel(p, a);
-        chip.className = 'passive-chip' + (innate ? ' innate' : '') + (lvl === 0 ? ' locked' : '');
-        chip.innerHTML = innate ? `◆ ${a.name} <span class="badge-innate">Innato</span>` : `◇ ${a.name} ${lvl}/${maxSkillLevel(a)}`;
-        chip.title = `${innate ? 'Innato' : 'Pasiva'}: ${a.name}\n${stripHtml(innate ? a.description : describeSkill(a, lvl))}`;
-        if (!innate) { const btn = levelButton(a); if (btn) chip.appendChild(btn); }
+        chip.className = 'passive-chip innate';
+        chip.innerHTML = `◆ ${p.innate.name} <span class="badge-innate">Innato</span>`;
+        chip.title = `Innato: ${p.innate.name}\n${stripHtml(p.innate.description)}`;
         passives.appendChild(chip);
-    });
+    }
+    const arrange = document.createElement('button');
+    arrange.className = 'passive-chip sk-open'; arrange.textContent = `⌨ Acomodar (${keyName(KEYMAP.skillKeys)})`;
+    arrange.title = 'Arrastrá tus habilidades a la tecla que quieras';
+    arrange.onclick = () => toggleSkillKeys();
+    passives.appendChild(arrange);
 
     // Inventario: 6 casillas + el neutral
     const slots = document.getElementById('hb-slots'); slots.innerHTML = '';

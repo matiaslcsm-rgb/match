@@ -34,6 +34,8 @@ window.addEventListener('keydown', e => {
     keys[k] = true;
     if (keysOpen) { if (k === 'escape') toggleKeys(false); return; } // con la ventana de teclas abierta no se juega (keymap.js)
     const act = actionForKey(k); // teclas configurables (keymap.js)
+    if (skillKeysOpen) { if (k === 'escape' || act === 'skillKeys') toggleSkillKeys(false); return; }
+    if (act === 'skillKeys') { toggleSkillKeys(); return; }
     if (act === 'autopilot') { setAutopilot(!autopilot); return; }
     if (act === 'shop') { toggleShop(); return; }
     if (act === 'map') { toggleBigMap(); return; }
@@ -72,7 +74,7 @@ function selectHero(template, freePick = false) {
 // Comienzo de ronda: los rivales draftean al instante; el jugador, si su kit no está completo.
 function startRoundDraft() {
     quietly(() => aliveHeroes().filter(h => h.isAI && h.skills.length < kitSize()).forEach(h => h.addSkill(aiPickDraft(h, draftOptions(h, DRAFT_OPTIONS.normal)))));
-    if (waveNumber === FIFTH_SKILL_ROUND && !player.eliminated) log(`🃏 Ronda ${FIFTH_SKILL_ROUND}: ¡elegís una quinta habilidad! (si es activa, va en la primera tecla libre: E R T F Q)`);
+    if (waveNumber === FIFTH_SKILL_ROUND && !player.eliminated) log(`🃏 Ronda ${FIFTH_SKILL_ROUND}: ¡elegís una quinta habilidad! (va en la primera tecla libre de su tipo; las acomodás con K)`);
     if (!player.eliminated && player.skills.length < kitSize()) startSkillDraft();
     else startPreparation();
 }
