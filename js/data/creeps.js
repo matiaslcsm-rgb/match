@@ -27,33 +27,33 @@ function speedGoldMultiplier(timeAliveSeconds) {
 const CREEP_TYPES = {
     // --- BÁSICOS ---
     CHUSMA: {
-        key: 'CHUSMA', basic: true, size: 'small', label: 'Chusma', symbol: 'x', color: '#6c757d', hp: 1, atk: 4, atkSpeed: 1.0, moveInterval: 220, range: 1.0, gold: 4, xp: 6, oneHit: true,
+        key: 'CHUSMA', basic: true, size: 'small', label: 'Microdrón', symbol: 'x', color: '#6c757d', hp: 1, atk: 4, atkSpeed: 1.0, moveInterval: 220, range: 1.0, gold: 4, xp: 6, oneHit: true,
         mechanic: 'Muere de un golpe, pero viene en cantidad.', counter: 'Daño en área'
     },
     GRUNT: {
-        key: 'GRUNT', basic: true, label: 'Grunt', symbol: 'g', color: '#ffb703', hp: 35, atk: 8, atkSpeed: 0.8, moveInterval: 260, range: 1.3, gold: 6, xp: 18, armor: 1, bossable: true,
+        key: 'GRUNT', basic: true, label: 'Dron de Piso', symbol: 'g', color: '#ffb703', hp: 35, atk: 8, atkSpeed: 0.8, moveInterval: 260, range: 1.3, gold: 6, xp: 18, armor: 1, bossable: true,
         mechanic: 'Soldado básico cuerpo a cuerpo.', counter: '—'
     },
     ARCHER: {
-        key: 'ARCHER', basic: true, label: 'Arquero', symbol: 'r', color: '#8ecae6', hp: 22, atk: 10, atkSpeed: 0.9, moveInterval: 300, range: 4.5, gold: 7, xp: 18, bossable: true,
+        key: 'ARCHER', basic: true, label: 'Dron Tirador', symbol: 'r', color: '#8ecae6', hp: 22, atk: 10, atkSpeed: 0.9, moveInterval: 300, range: 4.5, gold: 7, xp: 18, bossable: true,
         mechanic: 'Ataca desde lejos (rango 4,5).', counter: 'Más rango, movilidad o ir a buscarlo'
     },
     SCOUT: {
-        key: 'SCOUT', basic: true, label: 'Explorador', symbol: 's', color: '#ff477e', hp: 18, atk: 6, atkSpeed: 1.4, moveInterval: 150, range: 1.2, gold: 5, xp: 14, bossable: true,
+        key: 'SCOUT', basic: true, label: 'Dron Corredor', symbol: 's', color: '#ff477e', hp: 18, atk: 6, atkSpeed: 1.4, moveInterval: 150, range: 1.2, gold: 5, xp: 14, bossable: true,
         mechanic: 'Muy rápido y ataca seguido.', counter: 'Ralentizar o aturdir'
     },
     BRUTE: {
-        key: 'BRUTE', basic: true, label: 'Bruto', symbol: 'b', color: '#e63946', hp: 60, atk: 14, atkSpeed: 0.6, moveInterval: 340, range: 1.4, gold: 10, xp: 28, armor: 3, bossable: true,
+        key: 'BRUTE', basic: true, label: 'Dron de Carga', symbol: 'b', color: '#e63946', hp: 60, atk: 14, atkSpeed: 0.6, moveInterval: 340, range: 1.4, gold: 10, xp: 28, armor: 3, bossable: true,
         mechanic: 'Lento, resistente y pega fuerte.', counter: 'Mantener distancia'
     },
 
     // --- CON MECÁNICA ---
     SHAMAN: {
-        key: 'SHAMAN', label: 'Chamán', symbol: 'c', color: '#c77dff', hp: 26, atk: 12, atkSpeed: 0.8, moveInterval: 300, range: 4, gold: 8, xp: 20, attackType: 'magical', bossable: true,
+        key: 'SHAMAN', label: 'Dron Emisor', symbol: 'c', color: '#c77dff', hp: 26, atk: 12, atkSpeed: 0.8, moveInterval: 300, range: 4, gold: 8, xp: 20, attackType: 'magical', bossable: true,
         mechanic: 'Ataca con daño MÁGICO a distancia (ignora la armadura).', counter: 'Resistencia mágica', counterItem: 'CLOAK'
     },
     HEALER: {
-        key: 'HEALER', label: 'Sanador', symbol: 'h', color: '#80ffdb', hp: 40, atk: 4, atkSpeed: 0.7, moveInterval: 300, range: 3, gold: 9, xp: 22,
+        key: 'HEALER', label: 'Dron de Boxes', symbol: 'h', color: '#80ffdb', hp: 40, atk: 4, atkSpeed: 0.7, moveInterval: 300, range: 3, gold: 9, xp: 22,
         healEvery: 3, healAmount: 20, healRadius: 5, priority: 2,
         // Cura una cantidad fija (crece con la oleada), no un % de la vida del objetivo: con % era imposible matar a un jefe con 2 Sanadores.
         mechanic: 'Cada 3s cura 20 de vida (más en oleadas avanzadas) al creep más herido cerca. Tu ataque automático lo prioriza si está a tiro.',
@@ -67,11 +67,11 @@ const CREEP_TYPES = {
         }
     },
     SPECTER: {
-        key: 'SPECTER', label: 'Espectro', symbol: 'e', color: '#adb5bd', hp: 35, atk: 12, atkSpeed: 1.0, moveInterval: 180, range: 1.2, gold: 8, xp: 18, evasion: 60,
+        key: 'SPECTER', label: 'Dron Fantasma', symbol: 'e', color: '#adb5bd', hp: 35, atk: 12, atkSpeed: 1.0, moveInterval: 180, range: 1.2, gold: 8, xp: 18, evasion: 60,
         mechanic: 'Esquiva el 60% de los ataques básicos.', counter: 'Ataques que no fallan o habilidades', counterItem: 'TRUESTRIKE'
     },
     ARMORED: {
-        key: 'ARMORED', label: 'Acorazado', symbol: 'a', color: '#9a8c98', hp: 110, atk: 14, atkSpeed: 0.7, moveInterval: 380, range: 1.3, gold: 12, xp: 30, armor: 12, bossable: true,
+        key: 'ARMORED', label: 'Dron Blindado', symbol: 'a', color: '#9a8c98', hp: 110, atk: 14, atkSpeed: 0.7, moveInterval: 380, range: 1.3, gold: 12, xp: 30, armor: 12, bossable: true,
         mechanic: 'Armadura 12: recibe 48% menos de daño físico.', counter: 'Daño mágico o puro, o reducir armadura', counterItem: 'HAMMER'
     },
     SWARM: {
@@ -79,7 +79,7 @@ const CREEP_TYPES = {
         mechanic: 'Aparecen de a 4, débiles y rápidos.', counter: 'Daño en área'
     },
     KAMIKAZE: {
-        key: 'KAMIKAZE', label: 'Kamikaze', symbol: 'k', color: '#fb8500', hp: 16, atk: 40, atkSpeed: 1, moveInterval: 150, range: 1.5, gold: 6, xp: 14,
+        key: 'KAMIKAZE', label: 'Dron Bomba', symbol: 'k', color: '#fb8500', hp: 16, atk: 40, atkSpeed: 1, moveInterval: 150, range: 1.5, gold: 6, xp: 14,
         mechanic: 'Corre hacia vos y EXPLOTA al llegar (mucho daño físico).', counter: 'Matarlo a distancia antes de que llegue',
         update(c) {
             const target = creepTarget(c);
@@ -92,7 +92,7 @@ const CREEP_TYPES = {
         }
     },
     STUNNER: {
-        key: 'STUNNER', label: 'Aturdidor', symbol: 't', color: '#ffd166', hp: 55, atk: 8, atkSpeed: 0.9, moveInterval: 280, range: 1.3, gold: 10, xp: 24, bossable: true,
+        key: 'STUNNER', label: 'Dron Picana', symbol: 't', color: '#ffd166', hp: 55, atk: 8, atkSpeed: 0.9, moveInterval: 280, range: 1.3, gold: 10, xp: 24, bossable: true,
         stunEvery: 2, stunDuration: 1.5,
         mechanic: 'Cada 2 golpes te aturde 1,5s.', counter: 'Resistencia al control', counterItem: 'BOOTS',
         onAttack(c, target, result) {
@@ -102,7 +102,7 @@ const CREEP_TYPES = {
         }
     },
     WARLOCK: {
-        key: 'WARLOCK', label: 'Brujo', symbol: 'w', color: '#e0aaff', hp: 30, atk: 8, atkSpeed: 0.7, moveInterval: 320, range: 4, gold: 10, xp: 24,
+        key: 'WARLOCK', label: 'Dron Hacker', symbol: 'w', color: '#e0aaff', hp: 30, atk: 8, atkSpeed: 0.7, moveInterval: 320, range: 4, gold: 10, xp: 24,
         attackType: 'magical', bossable: true, priority: 1,
         boltEvery: 5, boltRange: 5, boltDamage: 20, boltStun: 1.2,
         mechanic: 'Ataca con magia a distancia y cada 5s lanza un rayo que hace daño mágico y te aturde 1,2s.',
@@ -113,12 +113,12 @@ const CREEP_TYPES = {
             if (Math.hypot(c.x - target.x, c.y - target.y) > this.boltRange) return false;
             const { dealt } = dealDamage(c, target, Math.round(this.boltDamage * c.statMult * enrageMult(c.arena)), 'magical');
             const stunned = target.isAlive() && addEffect(target, { id: 'STUN', name: 'Aturdido', duration: this.boltStun, flags: ['stun'] });
-            if (dealt > 0 || stunned) log(`⚡ Un Brujo te lanzó un rayo${stunned ? ' y te aturdió' : ''}.`);
+            if (dealt > 0 || stunned) log(`⚡ Un Dron Hacker te lanzó un rayo${stunned ? ' y te aturdió' : ''}.`);
             return false;
         }
     },
     FROSTCASTER: {
-        key: 'FROSTCASTER', label: 'Escarchador', symbol: 'f', color: '#90e0ef', hp: 28, atk: 7, atkSpeed: 0.9, moveInterval: 300, range: 4, gold: 9, xp: 20,
+        key: 'FROSTCASTER', label: 'Dron Criogénico', symbol: 'f', color: '#90e0ef', hp: 28, atk: 7, atkSpeed: 0.9, moveInterval: 300, range: 4, gold: 9, xp: 20,
         attackType: 'magical', slow: 0.3, slowDuration: 2,
         mechanic: 'Ataques mágicos a distancia que te ralentizan 30% por 2s.', counter: 'Resistencia al control o mágica', counterItem: 'BOOTS',
         onAttack(c, target, result) {
@@ -126,25 +126,25 @@ const CREEP_TYPES = {
         }
     },
     CROSSBOW: {
-        key: 'CROSSBOW', label: 'Ballestero', symbol: 'z', color: '#d4a373', hp: 30, atk: 18, atkSpeed: 0.5, moveInterval: 320, range: 6, gold: 10, xp: 22, bossable: true,
+        key: 'CROSSBOW', label: 'Dron Francotirador', symbol: 'z', color: '#d4a373', hp: 30, atk: 18, atkSpeed: 0.5, moveInterval: 320, range: 6, gold: 10, xp: 22, bossable: true,
         mechanic: 'Dispara desde muy lejos (rango 6) golpes lentos pero fuertes.', counter: 'Vida y armadura, o alcanzarlo rápido', counterItem: 'HEART'
     },
     DRUMMER: {
-        key: 'DRUMMER', label: 'Tamborilero', symbol: 'd', color: '#f4a261', hp: 45, atk: 4, atkSpeed: 0.8, moveInterval: 300, range: 3, gold: 10, xp: 22, priority: 1,
+        key: 'DRUMMER', label: 'Dron Animador', symbol: 'd', color: '#f4a261', hp: 45, atk: 4, atkSpeed: 0.8, moveInterval: 300, range: 3, gold: 10, xp: 22, priority: 1,
         auraRadius: 4, auraAtkSpeed: 0.4,
         mechanic: 'Los creeps cerca de él (radio 4) atacan 40% más rápido. Objetivo prioritario.', counter: 'Matarlo primero',
         update(c, dt) {
             if (!everyInterval(c, 'drum', dt, 0.5)) return false;
             c.arena.creeps.forEach(o => {
                 if (o !== c && o.isAlive() && Math.hypot(o.x - c.x, o.y - c.y) <= this.auraRadius) {
-                    addEffect(o, { id: 'DRUM_AURA', name: 'Tambores de guerra', duration: 0.6, mods: { atkSpeedPct: this.auraAtkSpeed } });
+                    addEffect(o, { id: 'DRUM_AURA', name: 'Arenga', duration: 0.6, mods: { atkSpeedPct: this.auraAtkSpeed } });
                 }
             });
             return false;
         }
     },
     THIEF: {
-        key: 'THIEF', label: 'Ladrón', symbol: '$', color: '#ffe066', hp: 24, atk: 5, atkSpeed: 1.0, moveInterval: 150, range: 1.2, gold: 8, xp: 16,
+        key: 'THIEF', label: 'Dron Carterista', symbol: '$', color: '#ffe066', hp: 24, atk: 5, atkSpeed: 1.0, moveInterval: 150, range: 1.2, gold: 8, xp: 16,
         steal: 20, fleeFor: 3,
         mechanic: 'Te roba 20 de oro por golpe y huye. Si lo matás, recuperás el oro +50%.', counter: 'Ralentizar, aturdir o rango',
         update(c, dt) {
@@ -170,7 +170,7 @@ const CREEP_TYPES = {
     },
     // Contra del Danzante Cinético: frena a los que viven de moverse y esquivar
     ANCHOR: {
-        key: 'ANCHOR', label: 'Ancla', symbol: 'q', color: '#457b9d', hp: 50, atk: 9, atkSpeed: 0.7, moveInterval: 300, range: 3, gold: 10, xp: 22, armor: 2, bossable: true,
+        key: 'ANCHOR', label: 'Dron Anclador', symbol: 'q', color: '#457b9d', hp: 50, atk: 9, atkSpeed: 0.7, moveInterval: 300, range: 3, gold: 10, xp: 22, armor: 2, bossable: true,
         slow: 0.25, evasionLoss: 15, anchorDuration: 3,
         mechanic: 'Lanza un ancla a distancia (rango 3): cada golpe te ralentiza 25% y te quita 15% de evasión por 3s.',
         counter: 'Resistencia al control o no depender de la evasión', counterItem: 'BOOTS',
@@ -189,19 +189,19 @@ const WAVE_THEMES = [
         { name: 'Enjambre', groups: [{ type: 'SWARM', count: 2 }, { type: 'GRUNT', count: 2 }, { type: 'ARCHER', count: 1 }], boss: 'SCOUT' }
     ],
     [ // oleada 2
-        { name: 'Hechiceros', groups: [{ type: 'SHAMAN', count: 3 }, { type: 'GRUNT', count: 3 }, { type: 'HEALER', count: 1 }, { type: 'CHUSMA', count: 2 }], boss: 'SHAMAN' },
-        { name: 'Espectros', groups: [{ type: 'SPECTER', count: 4 }, { type: 'GRUNT', count: 2 }, { type: 'ARCHER', count: 2 }], boss: 'GRUNT' },
-        { name: 'Brujería', groups: [{ type: 'WARLOCK', count: 2 }, { type: 'FROSTCASTER', count: 2 }, { type: 'GRUNT', count: 3 }, { type: 'CHUSMA', count: 2 }], boss: 'WARLOCK' }
+        { name: 'Emisores', groups: [{ type: 'SHAMAN', count: 3 }, { type: 'GRUNT', count: 3 }, { type: 'HEALER', count: 1 }, { type: 'CHUSMA', count: 2 }], boss: 'SHAMAN' },
+        { name: 'Fantasmas', groups: [{ type: 'SPECTER', count: 4 }, { type: 'GRUNT', count: 2 }, { type: 'ARCHER', count: 2 }], boss: 'GRUNT' },
+        { name: 'Hackeo', groups: [{ type: 'WARLOCK', count: 2 }, { type: 'FROSTCASTER', count: 2 }, { type: 'GRUNT', count: 3 }, { type: 'CHUSMA', count: 2 }], boss: 'WARLOCK' }
     ],
     [ // oleada 3
         { name: 'Muralla', groups: [{ type: 'ARMORED', count: 3 }, { type: 'HEALER', count: 2 }, { type: 'ARCHER', count: 3 }], boss: 'ARMORED' },
-        { name: 'Kamikazes', groups: [{ type: 'KAMIKAZE', count: 4 }, { type: 'SCOUT', count: 2 }, { type: 'BRUTE', count: 2 }], boss: 'BRUTE' },
+        { name: 'Bombas', groups: [{ type: 'KAMIKAZE', count: 4 }, { type: 'SCOUT', count: 2 }, { type: 'BRUTE', count: 2 }], boss: 'BRUTE' },
         { name: 'Tiradores', groups: [{ type: 'CROSSBOW', count: 3 }, { type: 'DRUMMER', count: 1 }, { type: 'GRUNT', count: 3 }, { type: 'SCOUT', count: 2 }], boss: 'CROSSBOW' }
     ],
     [ // oleada 4
         { name: 'Emboscada', groups: [{ type: 'THIEF', count: 2 }, { type: 'STUNNER', count: 3 }, { type: 'SPECTER', count: 2 }, { type: 'SHAMAN', count: 2 }], boss: 'STUNNER' },
         { name: 'Asedio', groups: [{ type: 'ARMORED', count: 2 }, { type: 'SHAMAN', count: 3 }, { type: 'HEALER', count: 2 }, { type: 'STUNNER', count: 2 }], boss: 'ARMORED' },
-        { name: 'Tormenta Arcana', groups: [{ type: 'WARLOCK', count: 2 }, { type: 'FROSTCASTER', count: 2 }, { type: 'SHAMAN', count: 2 }, { type: 'HEALER', count: 1 }, { type: 'DRUMMER', count: 1 }], boss: 'WARLOCK' },
+        { name: 'Tormenta de Señal', groups: [{ type: 'WARLOCK', count: 2 }, { type: 'FROSTCASTER', count: 2 }, { type: 'SHAMAN', count: 2 }, { type: 'HEALER', count: 1 }, { type: 'DRUMMER', count: 1 }], boss: 'WARLOCK' },
         { name: 'Abordaje', groups: [{ type: 'ANCHOR', count: 3 }, { type: 'SCOUT', count: 2 }, { type: 'GRUNT', count: 3 }, { type: 'STUNNER', count: 1 }], boss: 'ANCHOR' }
     ]
 ];

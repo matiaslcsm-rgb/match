@@ -108,7 +108,8 @@ Que se sienta un programa de TV (concepto en `docs/CONCEPTO-FUTURISTA.md`).
   arena 3D con espectadores de colores que se mueven solos y saltan cuando cae alguien (más si es un competidor o el
   jefe), con el grito de la tribuna (sonido sintetizado, `crowd` en audio.js).
 - [x] Competidores con robot propio y retratos 3D en toda la interfaz (2026-10-30, `js/m3d/heroes3d.js`).
-- [ ] Creeps con su identidad de MATCH (robots del show, no los de Dota).
+- [x] Creeps con su identidad de MATCH (2026-10-30): los 18 tipos son drones del show, con nombre y robot propio
+  (`js/m3d/creeps3d.js`). Los flacos se parecen entre sí: se distinguen más por color que por silueta.
 
 ## Fase 5 — Balance y versión 1.0
 - [ ] Balance medido con el banco de partidas y de duelos (`index.html?banco=132` para decidir).

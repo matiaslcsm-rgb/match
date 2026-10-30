@@ -16,6 +16,7 @@ import * as THREE from 'three';
 import { buildRobot, animateRobot } from './robot.js';
 import { BOSS_ROBOTS, addExtras } from './bosses3d.js';
 import { HERO_ROBOTS } from './heroes3d.js';
+import { CREEP_ROBOTS } from './creeps3d.js';
 import { RES, setRes, makeRenderer, floorTex, wallTex, mat, ps1Material } from './ps1.js';
 
 const U = 1;                  // una casilla = 1 metro
@@ -24,7 +25,7 @@ const COLS = 20, ROWS = 12;   // = VIEW_COLS, VIEW_ROWS (game.js)
 
 // --- QUÉ ROBOT ES CADA UNO ---
 // Competidores: cada uno con su robot propio, en heroes3d.js.
-// Creeps: por su forma de pelear
+// Creeps: cada tipo con su robot, en creeps3d.js; estos armados quedan para el que no tenga uno propio
 const CREEP_BUILDS = {
     footman: { legs: 'bipedo', core: 'liviano', head: 'sensor', armL: 'pinza', armR: 'pinza' },
     archer: { legs: 'bipedo', core: 'liviano', head: 'sensor', armL: 'pinza', armR: 'ametralladora' },
@@ -264,17 +265,18 @@ function placeCamera(aspect, arena, dt) {
 // --- LAS UNIDADES ---
 const units = new Map(); // unidad del juego → { robot, scale, yaw, last }
 const roundBossRobot = u => u.isRoundBoss && u.type && BOSS_ROBOTS[u.type.key];
+const creepRobot = u => !u.isHero && !u.isRoundBoss && u.type && CREEP_ROBOTS[u.type.key];
 function buildFor(u) {
     if (u.isHero) return (HERO_ROBOTS[u.key] || HERO_ROBOTS.AXE).build;
     if (u.isRoundBoss && roundBossRobot(u)) return roundBossRobot(u).build;
     if (u.isRoundBoss || u.isBoss) return BOSS_BUILD;
-    return CREEP_BUILDS[creepPlan(u)];
+    return (creepRobot(u) || {}).build || CREEP_BUILDS[creepPlan(u)];
 }
 // Los competidores, más anchos: el esqueleto es finito y desde la cámara alta la silueta se perdía
 const bulkOf = u => u.isHero ? 1.25 : 1;
 // El robot pintado y con sus piezas propias. En los competidores la altura se mide sin las piezas: un sombrero o una guadaña no achican al robot.
 function makeRobot(u) {
-    const robot = buildRobot(buildFor(u)), look = roundBossRobot(u) || (u.isHero && HERO_ROBOTS[u.key]);
+    const robot = buildRobot(buildFor(u)), look = roundBossRobot(u) || (u.isHero && HERO_ROBOTS[u.key]) || creepRobot(u);
     const measure = () => { const b = new THREE.Box3().setFromObject(robot); return Math.max(0.1, b.max.y - b.min.y); };
     const bodyH = measure();
     if (look) addExtras(robot, look);

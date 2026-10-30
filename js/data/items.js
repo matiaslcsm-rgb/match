@@ -82,12 +82,12 @@ const ITEMS = {
     // --- Ataque ---
     TRUESTRIKE: {
         key: 'TRUESTRIKE', name: 'Hoja Certera', tier: 'composite', group: 'Ataque', components: ['BLADE', 'QUICK_GLOVES'], recipe: 30,
-        mods: { flatAtk: 15, atkSpeedPct: 0.12 }, flags: ['trueStrike'], special: 'Tus ataques básicos no se pueden esquivar.', counters: 'Espectros y evasión'
+        mods: { flatAtk: 15, atkSpeedPct: 0.12 }, flags: ['trueStrike'], special: 'Tus ataques básicos no se pueden esquivar.', counters: 'Drones Fantasma y evasión'
     },
     HAMMER: {
         key: 'HAMMER', name: 'Martillo Rompecorazas', tier: 'composite', group: 'Ataque', components: ['BLADE', 'BLADE'], recipe: 20,
         armorPerHit: 2, maxStacks: 4, mods: { flatAtk: 22 },
-        special: 'Cada ataque básico quita 2 de armadura al objetivo por 4s (acumula hasta 4 veces).', counters: 'Acorazados y armadura alta',
+        special: 'Cada ataque básico quita 2 de armadura al objetivo por 4s (acumula hasta 4 veces).', counters: 'Drones Blindados y armadura alta',
         hooks: item => ({ onHit(owner, { target }) { applyArmorBreak(target, item.armorPerHit, item.maxStacks, 4); } })
     },
     SWIFT_BLADE: { key: 'SWIFT_BLADE', name: 'Hoja Veloz', tier: 'composite', group: 'Ataque', components: ['FANG', 'QUICK_GLOVES'], recipe: 60, mods: { critChance: 15, atkSpeedPct: 0.22 } },
@@ -112,11 +112,11 @@ const ITEMS = {
     // --- Defensa y tanque ---
     CLOAK: {
         key: 'CLOAK', name: 'Capa Antimagia', tier: 'composite', group: 'Defensa y tanque', components: ['RUNE_CAPE', 'REGEN_RING'], recipe: 20,
-        mods: { magicResist: 25, hpRegen: 3 }, counters: 'Chamanes, Brujos y daño mágico'
+        mods: { magicResist: 25, hpRegen: 3 }, counters: 'Drones Emisores, Hackers y daño mágico'
     },
     BOOTS: {
         key: 'BOOTS', name: 'Botas Firmes', tier: 'composite', group: 'Defensa y tanque', components: ['TRAVEL_BOOTS', 'CHAINMAIL'], recipe: 30,
-        mods: { moveSpeedPct: 0.1, armor: 3, statusResist: 0.4 }, counters: 'Aturdidores, Escarchadores y control'
+        mods: { moveSpeedPct: 0.1, armor: 3, statusResist: 0.4 }, counters: 'Drones Picana, Criogénicos y control'
     },
     THORNS: {
         key: 'THORNS', name: 'Coraza de Espinas', tier: 'composite', group: 'Defensa y tanque', components: ['CHAINMAIL', 'VITALITY'], recipe: 50,
@@ -127,14 +127,14 @@ const ITEMS = {
     },
     HEART: {
         key: 'HEART', name: 'Corazón del Titán', tier: 'composite', group: 'Defensa y tanque', components: ['VITALITY', 'VITALITY', 'REGEN_RING'], recipe: 120,
-        regenPct: 0.015, mods: { maxHp: 250 }, special: 'Regenerás 1,5% de tu vida máxima por segundo.', counters: 'Ballesteros y desgaste',
+        regenPct: 0.015, mods: { maxHp: 250 }, special: 'Regenerás 1,5% de tu vida máxima por segundo.', counters: 'Drones Francotiradores y desgaste',
         hooks: item => ({ onTick(owner, { dt }) { if (owner.isAlive() && everyInterval(owner, 'HEART', dt)) healUnit(owner, owner.maxHp * item.regenPct); } })
     },
     AEGIS: {
         key: 'AEGIS', name: 'Égida Inquebrantable', tier: 'composite', group: 'Defensa y tanque', components: ['RUNE_CAPE', 'VITALITY', 'BRANCH_STR'], recipe: 90,
         threshold: 0.4, immuneFor: 4, cooldown: 35, mods: { magicResist: 15, maxHp: 80, str: 4 },
         special: 'Si quedás por debajo del 40% de vida: INMUNIDAD MÁGICA 4s (no recibís daño mágico ni aturdimientos ni ralentizaciones). Una vez cada 35s.',
-        counters: 'Brujos, magia y control',
+        counters: 'Drones Hackers, magia y control',
         hooks: item => ({ onDamaged(owner) {
             if (!owner.isAlive() || owner.hp / owner.maxHp >= item.threshold || getEffect(owner, 'AEGIS_CD')) return;
             addEffect(owner, { id: 'AEGIS_IMMUNE', name: 'Inmunidad mágica', duration: item.immuneFor, tags: ['MEJORA'], flags: ['magicImmune'] });
