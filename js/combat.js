@@ -130,6 +130,7 @@ function dealDamage(source, target, amount, type = 'physical', opts = {}) {
     final = mitigate(target, final * (1 - effDmgReduction(target)), type);
     let takenPct = sumMod(target, 'dmgTakenPct'); // ej: Condenado
     if (target.isHero && typeof suddenDeathBonus === 'function') takenPct += suddenDeathBonus(); // muerte súbita (roundEconomy.js)
+    if (source && source.isRoundBoss) takenPct += sumMod(target, 'bossDmgTakenPct'); // ej: Placa de Producción
     // La maldición (Condenado) solo amplifica el daño de creeps y de héroes sin maldición
     if (source && source.isHero && isCondemned(source)) takenPct -= (getEffect(target, 'CONDEMNED') || { mods: {} }).mods.dmgTakenPct || 0;
     final = Math.round(final * (1 + takenPct));

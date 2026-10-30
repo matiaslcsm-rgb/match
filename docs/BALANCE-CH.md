@@ -40,3 +40,25 @@ Ronda final promedio 24 (entre 20 y 30; ninguna llegó al tope de 60).
 
 ## Historial
 (Cada ajuste de balance agrega una fila con el antes y el después, medido con el mismo banco.)
+
+### 2026-10-30: primera tanda de ítems para balancear (264 partidas, antes → después)
+Diagnóstico: Alquimista, Bruja y Arcanista no pierden por los duelos (83%, 65% y 74% ganados) sino contra creeps: en las rondas 1 a 4 perdían 32, 20 y 19 vidas cada 44 partidas (Axe 1, Vampiro 0), sobre todo por Arqueros. De la ronda 15 en adelante, las vidas las sacan los jefes.
+Se probó tocar stats (más ataque básico): mejoraba, pero el usuario prefirió ítems ("balanceamos con ítems en vez de tocar stats y skills"), así que se descartó.
+Ítems: Batería de Arranque, Núcleo Evolutivo, Placa de Producción y Carga de Emergencia. La IA compra una build por atributo; ahora suma lo propio de cada competidor (`AI_HERO_ITEMS`). Forzar Núcleo y Placa antes de la build hundió a Axe y Rec (0% y puesto 5,8): van después.
+
+| Héroe | % antes | % después | Puesto antes | Puesto después | Afuera antes | Afuera después |
+|---|---|---|---|---|---|---|
+| Zeus | 29 | 27 | 3,8 | 4,0 | 21 | 21 |
+| Arcanista | 10 | 21 | 4,1 | 3,0 | 17 | 21 |
+| Guerrero Vampiro | 26 | 21 | 4,5 | 4,8 | 21 | 21 |
+| Danzante Cinético | 16 | 20 | 4,7 | 4,5 | 20 | 20 |
+| Asesino | 19 | 19 | 4,3 | 4,2 | 18 | 19 |
+| Nigromante | 14 | 13 | 4,8 | 4,7 | 20 | 19 |
+| Alquimista | 6 | 6 | 4,5 | 3,8 | 15 | 18 |
+| Bruja del Hielo | 2 | 4 | 5,6 | 5,6 | 14 | 15 |
+| Sabio del Vacío | 9 | 3 | 4,4 | 4,9 | 18 | 17 |
+| Rec | 3 | 2 | 4,5 | 4,8 | 18 | 18 |
+| Axe | 4 | 2 | 4,3 | 5,2 | 18 | 17 |
+
+Lectura: el Arcanista subió de más y el Alquimista llega más lejos, pero sigue sin ganar partidas. Bruja, Sabio, Rec y Axe siguen casi en 0 (Sabio y Axe bajaron): esta tanda no los resuelve. Ojo con el ruido: a 132 partidas, un ajuste mínimo movió al Arcanista de 18 a 31% y al Alquimista de 25 a 5%. Para decidir, mirar puesto y 264 partidas.
+

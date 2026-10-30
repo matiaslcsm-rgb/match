@@ -212,6 +212,18 @@ const AI_BUILDS = {
     INT: ['ARCANE_STAFF', 'ECLIPSE_STAFF', 'TOME', 'AEGIS']
 };
 
+// Lo que cada competidor necesita además de la build de su atributo (medido con el banco, docs/BALANCE-CH.md).
+// early: solo hasta AI_EARLY_LAST_ROUND; después deja de ser objetivo y se puede vender. late: con la build armada.
+const AI_EARLY_LAST_ROUND = 7;
+const AI_HERO_ITEMS = {
+    ALCHEMIST: { early: ['STARTER_CELL'], late: ['EMERGENCY_CELL'] },
+    FROSTWITCH: { early: ['STARTER_CELL'], late: ['BOSS_PLATE'] },
+    ARCANIST: { early: ['STARTER_CELL'] },
+    AXE: { late: ['BOSS_PLATE', 'EVO_CORE'] },
+    REC: { late: ['BOSS_PLATE', 'EVO_CORE'] },
+    VOIDSAGE: { late: ['EMERGENCY_CELL'] }
+};
+
 function aiNeededCounters(wave) {
     // Solo contras que valen la pena: tipos que vienen de a 2 o más, o el tipo del jefe
     return [...new Set(waveSummary(wave).filter(({ type, count }) => type.counterItem && (count >= 2 || type.key === wave.boss)).map(({ type }) => type.counterItem))];
@@ -237,7 +249,8 @@ function aiWorkToward(hero, key, targets) {
 function aiShop(hero) {
     if (itemAvailable(ITEMS.GREED, hero) && hero.gold >= itemCost(ITEMS.GREED, hero)) buyItem(ITEMS.GREED, hero);
     const counters = aiBuysCounters && nextWave ? aiNeededCounters(nextWave) : [];
-    const targets = [...counters, ...AI_BUILDS[hero.primaryAttr]];
+    const own = AI_HERO_ITEMS[hero.key] || {}, early = waveNumber <= AI_EARLY_LAST_ROUND && own.early || [];
+    const targets = [...counters, ...early, ...AI_BUILDS[hero.primaryAttr], ...(own.late || [])]; // lo propio va después de la build: antes los hundía
     // Siempre intenta primero el objetivo más prioritario; cuando no puede avanzar en ninguno, termina
     for (let guard = 0; guard < 30; guard++) {
         if (!targets.some(key => aiWorkToward(hero, key, targets))) break;

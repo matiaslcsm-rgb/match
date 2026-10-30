@@ -112,6 +112,8 @@ Que se sienta un programa de TV (concepto en `docs/CONCEPTO-FUTURISTA.md`).
 
 ## Fase 5 — Balance y versión 1.0
 - [ ] Balance medido con el banco de partidas y de duelos (`index.html?banco=132` para decidir).
+  - [x] Primera tanda de ítems (2026-10-30, pedido del usuario: balancear con ítems y no con stats): Batería de Arranque, Núcleo
+    Evolutivo, Placa de Producción y Carga de Emergencia. Números en `docs/BALANCE-CH.md`. Bruja, Sabio, Rec y Axe siguen abajo.
 - [ ] Tutorial al día con todo lo nuevo.
 - [ ] Rendimiento: el 3D fluido en una compu común. Medido el 2026-10-28 (con tribunas, columnas y drones): 7,7 ms por
   cuadro en una oleada de 10 creeps y 6,6 ms en un duelo, lógica y dibujo, con una GTX 1650 (~130 cuadros por segundo).

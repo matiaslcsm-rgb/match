@@ -1917,6 +1917,74 @@ test('Repetición: la cinta del duelo guarda la jugada y el cartel la muestra, s
     checkEq(card.innerHTML, '', 'se limpia con la partida');
 });
 
+test('Ítems nuevos: Batería de Arranque solo pega más a los creeps', () => {
+    resetGame();
+    selectHero(HERO_TEMPLATES.ALCHEMIST);
+    learnSkill(currentDraft.options[0]);
+    giveItem(player, 'STARTER_CELL');
+    const hit = target => { const ctx = { target, dmg: 10 }; emit(player, 'beforeAttack', ctx); return ctx.dmg; };
+    checkEq(hit({ isHero: false }), 10 + ITEMS.STARTER_CELL.creepDmg, 'contra un creep');
+    checkEq(hit(heroes[1]), 10, 'contra un competidor no cambia');
+    check(ITEM_ICONS.STARTER_CELL && ITEM_ICONS.EVO_CORE && ITEM_ICONS.BOSS_PLATE && ITEM_ICONS.EMERGENCY_CELL, 'los cuatro tienen ícono');
+});
+
+test('Ítems nuevos: Núcleo Evolutivo escala con los creeps, no con los competidores', () => {
+    resetGame();
+    selectHero(HERO_TEMPLATES.AXE);
+    learnSkill(currentDraft.options[0]);
+    giveItem(player, 'EVO_CORE');
+    const str = player.str, n = ITEMS.EVO_CORE.killsPerPoint;
+    for (let i = 0; i < n - 1; i++) emit(player, 'onKill', { victim: { isHero: false } });
+    checkEq(player.str, str, 'todavía no');
+    emit(player, 'onKill', { victim: heroes[1] });
+    checkEq(player.str, str, 'un competidor no cuenta');
+    emit(player, 'onKill', { victim: { isHero: false } });
+    checkEq(player.str, str + 1, 'suma su atributo principal');
+});
+
+test('Ítems nuevos: Placa de Producción baja el daño de los jefes y de nadie más', () => {
+    resetGame();
+    selectHero(HERO_TEMPLATES.AXE);
+    learnSkill(currentDraft.options[0]);
+    const hurt = source => { player.hp = player.maxHp; const hp = player.hp; dealDamage(source, player, 100, 'pure'); return hp - player.hp; };
+    const other = heroes[1], boss = other, grunt = other; // cualquier fuente sirve: lo que cuenta es la marca de jefe
+    other.isRoundBoss = true;
+    const before = hurt(boss);
+    giveItem(player, 'BOSS_PLATE');
+    checkEq(hurt(boss), Math.round(before * 0.7), '30% menos del jefe');
+    other.isRoundBoss = false;
+    checkEq(hurt(grunt), before, 'de otro, igual');
+});
+
+test('Ítems nuevos: Carga de Emergencia salva una vez y después recarga', () => {
+    resetGame();
+    selectHero(HERO_TEMPLATES.ALCHEMIST);
+    learnSkill(currentDraft.options[0]);
+    giveItem(player, 'EMERGENCY_CELL');
+    player.mana = 0;
+    player.hp = Math.round(player.maxHp * 0.5);
+    emit(player, 'onDamaged', {});
+    checkEq(player.mana, 0, 'con vida de sobra no salta');
+    player.hp = Math.round(player.maxHp * 0.2);
+    const hp = player.hp;
+    emit(player, 'onDamaged', {});
+    check(player.hp > hp && player.mana > 0, 'salta y recupera');
+    const after = player.hp = Math.round(player.maxHp * 0.2);
+    emit(player, 'onDamaged', {});
+    checkEq(player.hp, after, 'una sola vez');
+});
+
+test('La IA: la Batería solo temprano y lo propio de cada competidor existe', () => {
+    Object.values(AI_HERO_ITEMS).forEach(o => [...(o.early || []), ...(o.late || [])].forEach(k => check(ITEMS[k], `existe ${k}`)));
+    resetGame();
+    selectHero(HERO_TEMPLATES.ALCHEMIST);
+    learnSkill(currentDraft.options[0]);
+    waveNumber = 1; player.gold = ITEMS.STARTER_CELL.cost;
+    aiShop(player);
+    checkEq(countItem(player, 'STARTER_CELL'), 1, 'temprano la compra primero');
+    resetGame();
+});
+
 test('Zócalo de TV: en combate muestra la tabla y un clic mira la arena de ese competidor', () => {
     resetGame();
     selectHero(HERO_TEMPLATES.AXE);

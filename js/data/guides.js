@@ -6,11 +6,11 @@
 const BUILD_GUIDES = {
     AXE: {
         why: 'Tanque que pega cuando lo golpean: vida y armadura para aguantar y devolver daño con Contraataque y Espinas.',
-        early: ['CHAINMAIL', 'VITALITY'], core: ['THORNS', 'HEART', 'BOOTS'], late: ['AEGIS', 'CRIMSON']
+        early: ['CHAINMAIL', 'VITALITY'], core: ['EVO_CORE', 'THORNS', 'HEART', 'BOSS_PLATE'], late: ['AEGIS', 'CRIMSON']
     },
     REC: {
         why: 'Sus drones pegan en cada ataque: velocidad de ataque y daño (el aéreo es su golpe básico); maná para Acople y Cámara Fija.',
-        early: ['QUICK_GLOVES', 'BLADE'], core: ['SWIFT_BLADE', 'GLOVES', 'MANA_CRYSTAL'], late: ['HAMMER', 'SKADI']
+        early: ['QUICK_GLOVES', 'BLADE'], core: ['BOSS_PLATE', 'SWIFT_BLADE', 'GLOVES', 'MANA_CRYSTAL'], late: ['EVO_CORE', 'HAMMER', 'SKADI']
     },
     ASSASSIN: {
         why: 'Críticos enormes cuerpo a cuerpo: más crítico y velocidad, y robo de vida para sostenerse.',
@@ -22,11 +22,11 @@ const BUILD_GUIDES = {
     },
     ARCANIST: {
         why: 'Ráfagas mágicas: maná, inteligencia y amplificación de hechizos; defensa mágica para los duelos.',
-        early: ['MANA_CRYSTAL', 'BRANCH_INT'], core: ['ARCANE_STAFF', 'ECLIPSE_STAFF', 'TOME'], late: ['AEGIS', 'DIADEM']
+        early: ['STARTER_CELL', 'MANA_CRYSTAL'], core: ['ARCANE_STAFF', 'ECLIPSE_STAFF', 'TOME'], late: ['AEGIS', 'DIADEM']
     },
     FROSTWITCH: {
         why: 'Control en área: hechizos más fuertes, resistencia al control y ralentizar también con el ataque.',
-        early: ['MANA_CRYSTAL', 'RUNE_CAPE'], core: ['ARCANE_STAFF', 'ECLIPSE_STAFF', 'TOME'], late: ['SKADI', 'AEGIS']
+        early: ['STARTER_CELL', 'MANA_CRYSTAL'], core: ['BOSS_PLATE', 'ARCANE_STAFF', 'ECLIPSE_STAFF'], late: ['SKADI', 'AEGIS']
     },
     NECROMANCER: {
         why: 'Desgaste y ejecución: vida y maná para sostener el aura y el Manto Fantasma, y amplificación para rematar con la Guadaña.',
@@ -34,11 +34,11 @@ const BUILD_GUIDES = {
     },
     VOIDSAGE: {
         why: 'Entra y sale con teletransportes: movilidad, maná y amplificación para la ráfaga en área.',
-        early: ['TRAVEL_BOOTS', 'MANA_CRYSTAL'], core: ['ARCANE_STAFF', 'ECLIPSE_STAFF', 'BOOTS'], late: ['AEGIS', 'CLOAK']
+        early: ['TRAVEL_BOOTS', 'MANA_CRYSTAL'], core: ['EMERGENCY_CELL', 'ARCANE_STAFF', 'ECLIPSE_STAFF', 'BOOTS'], late: ['AEGIS', 'CLOAK']
     },
     ALCHEMIST: {
         why: 'Ácido que baja la armadura: anticuración y rompe corazas para que su daño y el de sus ataques rindan.',
-        early: ['SERRATED', 'MANA_CRYSTAL'], core: ['ARCANE_STAFF', 'ECLIPSE_STAFF', 'SPEAR'], late: ['HAMMER', 'HEART']
+        early: ['STARTER_CELL', 'SERRATED'], core: ['EMERGENCY_CELL', 'ARCANE_STAFF', 'ECLIPSE_STAFF', 'SPEAR'], late: ['HAMMER', 'HEART']
     },
     DANCER: {
         why: 'Pega mientras se mueve: velocidad de ataque y movimiento para cargar la Danza, y Hoja Certera contra la evasión.',

@@ -109,7 +109,8 @@ const MOD_LABELS = {
     flatAtk: v => `+${v} daño`, atkSpeedPct: v => `+${Math.round(v * 100)}% vel. de ataque`, critChance: v => `+${v}% crítico`,
     armor: v => `+${v} armadura`, magicResist: v => `+${v}% resistencia mágica`, maxHp: v => `+${v} vida`, hpRegen: v => `+${v} vida/s`,
     maxMana: v => `+${v} maná`, manaRegen: v => `+${v} maná/s`, lifesteal: v => `+${v}% robo de vida`, spellAmp: v => `+${v}% amplificación de hechizo`,
-    moveSpeedPct: v => `+${Math.round(v * 100)}% vel. de movimiento`, statusResist: v => `${Math.round(v * 100)}% menos duración de control`
+    moveSpeedPct: v => `+${Math.round(v * 100)}% vel. de movimiento`, statusResist: v => `${Math.round(v * 100)}% menos duración de control`,
+    bossDmgTakenPct: v => `${Math.round(-v * 100)}% menos daño de los jefes de ronda`
 };
 function describeItem(item) {
     if (!isEquip(item)) return item.desc;

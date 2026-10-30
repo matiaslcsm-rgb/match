@@ -48,12 +48,29 @@ const ITEMS = {
         hooks: () => ({ onHit(owner, { target }) { applyAttackSlow(target, 0.15, 1.5); } })
     },
 
+    // Para los que arrancan flojos: solo pega más a los creeps, así no cambia los duelos.
+    STARTER_CELL: {
+        key: 'STARTER_CELL', name: 'Batería de Arranque', tier: 'basic', cost: 80, creepDmg: 12,
+        special: 'Tus ataques básicos hacen +12 de daño a los creeps (a los competidores, no).', counters: 'Las primeras rondas',
+        hooks: item => ({ beforeAttack(owner, ctx) { if (!ctx.target.isHero) ctx.dmg += item.creepDmg; } })
+    },
+
     // ============================================================ COMPUESTOS
     // --- Atributos ---
     BELT: { key: 'BELT', name: 'Cinturón de Fuerza', tier: 'composite', group: 'Atributos', components: ['BRANCH_STR', 'BRANCH_STR'], recipe: 40, mods: { str: 14 } },
     GLOVES: { key: 'GLOVES', name: 'Guantes de Celeridad', tier: 'composite', group: 'Atributos', components: ['BRANCH_AGI', 'BRANCH_AGI'], recipe: 40, mods: { agi: 14 } },
     TOME: { key: 'TOME', name: 'Túnica del Mago', tier: 'composite', group: 'Atributos', components: ['BRANCH_INT', 'BRANCH_INT'], recipe: 40, mods: { int: 14 } },
     DIADEM: { key: 'DIADEM', name: 'Diadema del Equilibrio', tier: 'composite', group: 'Atributos', components: ['BRANCH_STR', 'BRANCH_AGI', 'BRANCH_INT'], recipe: 60, mods: { str: 8, agi: 8, int: 8 } },
+    // Escala con la partida: da poco al comprarlo y mucho si lo comprás temprano.
+    EVO_CORE: {
+        key: 'EVO_CORE', name: 'Núcleo Evolutivo', tier: 'composite', group: 'Atributos', components: ['BRANCH_STR', 'BRANCH_AGI', 'BRANCH_INT'], recipe: 180,
+        killsPerPoint: 10, mods: { str: 2, agi: 2, int: 2 }, special: 'Cada 10 creeps que matás: +1 permanente a tu atributo principal.',
+        hooks: item => ({ onKill(owner, { victim }) {
+            if (victim.isHero) return;
+            owner.evoKills = (owner.evoKills || 0) + 1;
+            if (owner.evoKills % item.killsPerPoint === 0) grantPermanent(owner, owner.primaryAttr.toLowerCase(), 1, item.name);
+        } })
+    },
 
     // --- Ataque ---
     TRUESTRIKE: {
@@ -116,6 +133,22 @@ const ITEMS = {
             addEffect(owner, { id: 'AEGIS_IMMUNE', name: 'Inmunidad mágica', duration: item.immuneFor, tags: ['MEJORA'], flags: ['magicImmune'] });
             addEffect(owner, { id: 'AEGIS_CD', name: 'Égida (recargando)', duration: item.cooldown });
             log('🛡️ ¡Égida Inquebrantable! Inmunidad mágica por 4s.');
+        } })
+    },
+
+    BOSS_PLATE: {
+        key: 'BOSS_PLATE', name: 'Placa de Producción', tier: 'composite', group: 'Defensa y tanque', components: ['VITALITY', 'RUNE_CAPE'], recipe: 110,
+        mods: { maxHp: 120, bossDmgTakenPct: -0.3 }, counters: 'Los jefes de ronda'
+    },
+    EMERGENCY_CELL: {
+        key: 'EMERGENCY_CELL', name: 'Carga de Emergencia', tier: 'composite', group: 'Defensa y tanque', components: ['REGEN_RING', 'MANA_CRYSTAL'], recipe: 90,
+        threshold: 0.35, refill: 0.3, cooldown: 45, mods: { hpRegen: 3, manaRegen: 1 },
+        special: 'Si quedás por debajo del 35% de vida: recuperás 30% de tu vida y tu maná máximos. Una vez cada 45s.', counters: 'Peleas largas y ráfagas',
+        hooks: item => ({ onDamaged(owner) {
+            if (!owner.isAlive() || owner.hp / owner.maxHp >= item.threshold || getEffect(owner, 'EMERGENCY_CD')) return;
+            addEffect(owner, { id: 'EMERGENCY_CD', name: 'Carga (recargando)', duration: item.cooldown, flags: ['persistent'] });
+            healUnit(owner, owner.maxHp * item.refill);
+            owner.mana = Math.min(owner.maxMana, owner.mana + owner.maxMana * item.refill);
         } })
     },
 
