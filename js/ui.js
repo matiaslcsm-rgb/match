@@ -992,8 +992,9 @@ function renderTitle() {
     Object.values(HERO_TEMPLATES).sort((a, b) => order[a.primaryAttr] - order[b.primaryAttr]).forEach((t, i, all) => {
         ctx.fillStyle = ATTR_INFO[t.primaryAttr].color;
         const x = MAP_W / 2 + (i - (all.length - 1) / 2) * TILE * 1.4, y = MAP_H / 2 + 55;
-        const s = spritesOn ? spriteFor({ isHero: true, key: t.key }) : null;
-        if (s) drawSprite(s, x, y + Math.sin(fxClock * 4 + i) * 2, 30, 1, false); else ctx.fillText(t.symbol, x, y);
+        const s = spritesOn ? spriteFor({ isHero: true, key: t.key }) : null, shot = spritesOn ? portraitImg('hero:' + t.key, { isHero: true, key: t.key }) : null;
+        if (shot) ctx.drawImage(shot, x - 26, y - 26 + Math.sin(fxClock * 4 + i) * 2, 52, 52);
+        else if (s) drawSprite(s, x, y + Math.sin(fxClock * 4 + i) * 2, 30, 1, false); else ctx.fillText(t.symbol, x, y);
     });
 }
 

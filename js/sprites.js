@@ -142,10 +142,30 @@ function spriteFor(u) {
     return spriteCache[key];
 }
 
+// El retrato del robot en 3D (m3d/match3d.js), o nada si no hay 3D (sin WebGL, en las pruebas): ahí queda el sprite.
+function robotPortrait(u, key, full) {
+    try { return window.M3D && M3D.portrait ? M3D.portrait(u, key, full) : null; } catch (e) { return null; }
+}
+// Lo mismo como imagen, para dibujar en el canvas. Null hasta que esté cargada.
+const portraitImgs = {};
+function portraitImg(key, u, full) {
+    const url = robotPortrait(u, key, full);
+    if (!url) return null;
+    if (!portraitImgs[key]) { portraitImgs[key] = new Image(); portraitImgs[key].src = url; }
+    return portraitImgs[key].complete ? portraitImgs[key] : null;
+}
+// Cuando llega el 3D: lo que se armó antes con los sprites se vuelve a armar con los robots
+function refreshPortraits() {
+    if (typeof renderHeroCodex === 'function' && document.getElementById('hero-codex')) { renderHeroCodex(); renderCreepCodex(); }
+    if (typeof tsCardArt === 'function') tsCardArt();
+    if (typeof lastScoreboardSignature !== 'undefined') lastScoreboardSignature = '';
+}
 // Imagen (data URL) de un héroe para la interfaz (retrato, ranking).
 const spriteUrlCache = {};
 function heroSpriteUrl(hero) {
     if (!spritesOn) return null;
+    const shot = robotPortrait({ isHero: true, key: hero.key }, 'hero:' + hero.key);
+    if (shot) return shot;
     const s = spriteFor(hero);
     if (!s) return null;
     return spriteUrlCache[hero.key] || (spriteUrlCache[hero.key] = s.img.toDataURL());
@@ -155,6 +175,8 @@ function heroSpriteUrl(hero) {
 const unitUrlCache = {};
 function unitSpriteUrl(u, cacheKey) {
     if (!spritesOn) return null;
+    const shot = robotPortrait(u, cacheKey);
+    if (shot) return shot;
     if (!unitUrlCache[cacheKey]) { const s = spriteFor(u); if (!s) return null; unitUrlCache[cacheKey] = s.img.toDataURL(); }
     return unitUrlCache[cacheKey];
 }

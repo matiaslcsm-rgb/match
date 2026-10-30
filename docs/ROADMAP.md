@@ -103,6 +103,7 @@ Que se sienta un programa de TV (concepto en `docs/CONCEPTO-FUTURISTA.md`).
 - [x] El público reacciona (sonido y gradas). Hecho 2026-10-28: tribunas de hormigón atrás y a los costados de la
   arena 3D con espectadores de colores que se mueven solos y saltan cuando cae alguien (más si es un competidor o el
   jefe), con el grito de la tribuna (sonido sintetizado, `crowd` en audio.js).
+- [x] Competidores con robot propio y retratos 3D en toda la interfaz (2026-10-30, `js/m3d/heroes3d.js`).
 - [ ] Creeps con su identidad de MATCH (robots del show, no los de Dota).
 
 ## Fase 5 — Balance y versión 1.0

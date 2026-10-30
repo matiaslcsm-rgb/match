@@ -15,6 +15,7 @@
 import * as THREE from 'three';
 import { buildRobot, animateRobot } from './robot.js';
 import { BOSS_ROBOTS, addExtras } from './bosses3d.js';
+import { HERO_ROBOTS } from './heroes3d.js';
 import { RES, setRes, makeRenderer, floorTex, wallTex, mat, ps1Material } from './ps1.js';
 
 const U = 1;                  // una casilla = 1 metro
@@ -22,20 +23,7 @@ const PIXEL = 2;              // cada píxel del 3D ocupa 2 píxeles de la panta
 const COLS = 20, ROWS = 12;   // = VIEW_COLS, VIEW_ROWS (game.js)
 
 // --- QUÉ ROBOT ES CADA UNO ---
-// Competidores: piernas, núcleo, cabeza y los dos brazos según su forma de pelear (Rec, con su cabeza de cámara y ruedas).
-const HERO_BUILDS = {
-    AXE: { legs: 'oruga', core: 'pesado', head: 'domo', armL: 'pinza', armR: 'pinza' },
-    VAMPIRE: { legs: 'bipedo', core: 'pesado', head: 'sensor', armL: 'pinza', armR: 'pinza' },
-    REC: { legs: 'ruedas', core: 'estandar', head: 'camara', armL: 'pinza', armR: 'pinza' }, // el camarógrafo: cabeza de cámara, trípode de ruedas, brazo de herramientas
-    ASSASSIN: { legs: 'bipedo', core: 'liviano', head: 'domo', armL: 'pinza', armR: 'ametralladora' },
-    DANCER: { legs: 'ruedas', core: 'liviano', head: 'sensor', armL: 'pinza', armR: 'pinza' },
-    ARCANIST: { legs: 'bipedo', core: 'estandar', head: 'camara', armL: 'canon', armR: 'canon' },
-    FROSTWITCH: { legs: 'ruedas', core: 'estandar', head: 'domo', armL: 'ametralladora', armR: 'ametralladora' },
-    NECROMANCER: { legs: 'oruga', core: 'liviano', head: 'camara', armL: 'canon', armR: 'pinza' },
-    VOIDSAGE: { legs: 'ruedas', core: 'pesado', head: 'sensor', armL: 'canon', armR: 'ametralladora' },
-    ALCHEMIST: { legs: 'oruga', core: 'estandar', head: 'sensor', armL: 'ametralladora', armR: 'pinza' },
-    ZEUS: { legs: 'bipedo', core: 'pesado', head: 'camara', armL: 'canon', armR: 'ametralladora' }
-};
+// Competidores: cada uno con su robot propio, en heroes3d.js.
 // Creeps: por su forma de pelear
 const CREEP_BUILDS = {
     footman: { legs: 'bipedo', core: 'liviano', head: 'sensor', armL: 'pinza', armR: 'pinza' },
@@ -65,7 +53,7 @@ function creepPlan(u) {
     return 'footman';
 }
 // Altura (en casillas) de cada uno
-const sizeOf = u => u.isRoundBoss ? 3.4 : u.isBoss ? 2.6 : u.isHero ? 2.2 : u.type && u.type.key === 'SWARM' ? 1.1 : u.type && ['BRUTE', 'ARMORED', 'STUNNER'].includes(u.type.key) ? 2.0 : 1.6;
+const sizeOf = u => u.isRoundBoss ? 3.4 : u.isBoss ? 2.6 : u.isHero ? 2.5 * ((HERO_ROBOTS[u.key] || {}).size || 1) : u.type && u.type.key === 'SWARM' ? 1.1 : u.type && ['BRUTE', 'ARMORED', 'STUNNER'].includes(u.type.key) ? 2.0 : 1.6;
 
 // --- PINTURA: cada robot con el color de su competidor o de su tipo de creep ---
 const PAINT = ['gris', 'oliva', 'hueso'];
@@ -75,9 +63,9 @@ function paintRobot(robot, color) {
         if (!o.isMesh) return;
         const name = Object.keys(MAT_NAMES).find(n => MAT_NAMES[n] === o.material);
         if (!PAINT.includes(name)) return;
-        const key = name + color;
-        if (!tinted[key]) { const m = o.material.clone(); m.color.set(color); tinted[key] = ps1Material(m); }
-        o.material = tinted[key];
+        // siempre sobre la chapa clara: el color se multiplica por la textura, y sobre la oliva quedaba casi negro
+        if (!tinted[color]) { const m = MAT_NAMES.hueso.clone(); m.color.set(color); tinted[color] = ps1Material(m); }
+        o.material = tinted[color];
     });
 }
 const MAT_NAMES = Object.fromEntries(PAINT.map(n => [n, mat(n)]));
@@ -260,24 +248,28 @@ function placeCamera(aspect) {
 const units = new Map(); // unidad del juego → { robot, scale, yaw, last }
 const roundBossRobot = u => u.isRoundBoss && u.type && BOSS_ROBOTS[u.type.key];
 function buildFor(u) {
-    if (u.isHero) return HERO_BUILDS[u.key] || HERO_BUILDS.AXE;
+    if (u.isHero) return (HERO_ROBOTS[u.key] || HERO_ROBOTS.AXE).build;
     if (u.isRoundBoss && roundBossRobot(u)) return roundBossRobot(u).build;
     if (u.isRoundBoss || u.isBoss) return BOSS_BUILD;
     return CREEP_BUILDS[creepPlan(u)];
 }
-const heroPaint = u => {
-    const attr = u.isHero && typeof HERO_TEMPLATES !== 'undefined' && HERO_TEMPLATES[u.key] ? ATTR_INFO[HERO_TEMPLATES[u.key].primaryAttr].color : null;
-    return attr ? lighten(attr, 0.25) : lighten(u.color || '#9aa0a6', 0.15);
-};
+// Los competidores, más anchos: el esqueleto es finito y desde la cámara alta la silueta se perdía
+const bulkOf = u => u.isHero ? 1.25 : 1;
+// El robot pintado y con sus piezas propias. En los competidores la altura se mide sin las piezas: un sombrero o una guadaña no achican al robot.
+function makeRobot(u) {
+    const robot = buildRobot(buildFor(u)), look = roundBossRobot(u) || (u.isHero && HERO_ROBOTS[u.key]);
+    const measure = () => { const b = new THREE.Box3().setFromObject(robot); return Math.max(0.1, b.max.y - b.min.y); };
+    const bodyH = measure();
+    if (look) addExtras(robot, look);
+    paintRobot(robot, look ? look.paint : lighten(u.color || (u.type && u.type.color) || '#9aa0a6', 0.15));
+    return { robot, h: u.isHero ? bodyH : measure() };
+}
 function unitObj(u) {
     let o = units.get(u);
     if (o) return o;
-    const robot = buildRobot(buildFor(u)), boss = roundBossRobot(u);
-    if (boss) addExtras(robot, boss);
-    paintRobot(robot, boss ? boss.paint : heroPaint(u));
-    const box = new THREE.Box3().setFromObject(robot), h = Math.max(0.1, box.max.y - box.min.y);
+    const { robot, h } = makeRobot(u);
     const scale = sizeOf(u) / h;
-    robot.scale.setScalar(scale);
+    robot.scale.set(scale * bulkOf(u), scale, scale * bulkOf(u));
     const g = new THREE.Group(); g.add(robot);
     if (u.isHero) { const ring = ringMesh(0.36, 0.46, u === (typeof player !== 'undefined' ? player : null) ? '#00f5d4' : '#ffb703', 0.9); g.add(ring); g.userData.ring = ring; }
     scene.add(g);
@@ -559,6 +551,35 @@ function screenToTile(clientX, clientY) {
     return { x: hitP.x / U - 0.5, y: hitP.z / U - 0.5 };
 }
 
+// --- RETRATOS: el robot de verdad, en una foto chica, para la interfaz (ranking, tienda, glosarios, carteles) ---
+const PORTRAIT = 88, portraits = {};
+let portraitGl = null, portraitScene = null;
+// full: el robot entero (la portada). Si no, de la cintura para arriba, que es lo que se reconoce en chico.
+function portrait(u, key, full = false) {
+    if (!enabled) return null;
+    if (portraits[key]) return portraits[key];
+    if (!portraitGl) {
+        const c = document.createElement('canvas'); c.width = c.height = PORTRAIT;
+        portraitGl = new THREE.WebGLRenderer({ canvas: c, alpha: true, antialias: false, preserveDrawingBuffer: true });
+        portraitGl.setPixelRatio(1); portraitGl.setSize(PORTRAIT, PORTRAIT, false);
+        portraitScene = new THREE.Scene();
+        const lamp = new THREE.DirectionalLight('#fff1d6', 3.4); lamp.position.set(-3, 5, 6);
+        portraitScene.add(new THREE.HemisphereLight('#dfe6f2', '#4a443a', 2.6), lamp);
+    }
+    const { robot, h } = makeRobot(u);
+    robot.scale.set(bulkOf(u), 1, bulkOf(u));
+    animateRobot(robot, 0, 0, false);
+    portraitScene.add(robot); robot.updateMatrixWorld(true);
+    const b = new THREE.Box3().setFromObject(robot), mid = b.getCenter(new THREE.Vector3()), size = b.getSize(new THREE.Vector3());
+    const reach = full ? Math.max(size.y, size.x, size.z * 0.8) * 0.56 + 0.05 : h * 0.3;
+    if (!full) mid.y = b.min.y + h * 0.74;
+    const cam = new THREE.OrthographicCamera(-reach, reach, reach, -reach, 0.1, 40);
+    cam.position.set(mid.x + 2.4, mid.y + 1.4, mid.z + 8); cam.lookAt(mid);
+    portraitGl.render(portraitScene, cam);
+    portraitScene.remove(robot);
+    return (portraits[key] = portraitGl.domElement.toDataURL());
+}
+
 // --- CUÁNDO SE USA ---
 // Siempre, salvo en las pruebas (index.html?test: corren sin dibujar) o con ?view3d=0 (para revisar el 2D)
 const enabled = !/[?&]test/.test(location.search) && !/[?&]view3d=0/.test(location.search);
@@ -567,5 +588,7 @@ window.M3D = {
     wants: arena => enabled && arena && ['wave', 'duel', 'boss'].includes(arena.kind),
     // los boxes (el descanso) también: ui.js arma una arena de mentira { kind: 'rest', heroes, creeps: [], projectiles: [], fx: [] }
     enabled: () => enabled,
-    frame, hide, project, headHeight, screenToTile, active: false
+    frame, hide, project, headHeight, screenToTile, portrait, active: false
 };
+// Este módulo carga después que la interfaz: lo que ya se dibujó con los retratos viejos se vuelve a armar con los robots
+if (enabled && typeof refreshPortraits === 'function') refreshPortraits();

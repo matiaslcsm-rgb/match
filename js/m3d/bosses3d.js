@@ -9,10 +9,10 @@ import * as THREE from 'three';
 import { mat } from './ps1.js';
 
 const LIMBS = ['shoulder', 'upperArm', 'forearm', 'hand', 'thigh', 'shin', 'foot'];
-const both = s => { const side = k => LIMBS.includes(s.b) ? s.b + k : s.b; // en el pecho o la cabeza: el mismo hueso, del otro lado
+export const both = s => { const side = k => LIMBS.includes(s.b) ? s.b + k : s.b; // en el pecho o la cabeza: el mismo hueso, del otro lado
     return [{ ...s, b: side('L') }, { ...s, b: side('R'), p: [-s.p[0], s.p[1], s.p[2]], r: s.r && [s.r[0], -s.r[1], -s.r[2]] }]; };
-const box = (b, s, p, m, r) => ({ t: 'box', b, s, p, m, r });
-const cyl = (b, rad, h, p, m, r) => ({ t: 'cyl', b, rad, h, p, m, r });
+export const box = (b, s, p, m, r) => ({ t: 'box', b, s, p, m, r });
+export const cyl = (b, rad, h, p, m, r) => ({ t: 'cyl', b, rad, h, p, m, r });
 
 export const BOSS_ROBOTS = {
     // Gólem Ancestral → "La Prensa": orugas, hombros de bloque y puños enormes (pisa y aturde)
@@ -105,7 +105,7 @@ const GEO = {}, GLOW = {};
 export function addExtras(robot, def) {
     const bones = robot.userData.bones;
     def.extras.forEach(s => {
-        if (!bones[s.b]) throw new Error(`Jefe: el hueso "${s.b}" no existe`);
+        if (!bones[s.b]) throw new Error(`Robot: el hueso "${s.b}" no existe`);
         const k = s.t + (s.s || [s.rad, s.h]).join(',');
         const g = GEO[k] || (GEO[k] = s.t === 'box' ? new THREE.BoxGeometry(...s.s) : new THREE.CylinderGeometry(s.rad, s.rad, s.h, 8));
         const m = new THREE.Mesh(g, s.m === 'glow' ? (GLOW[def.glow] || (GLOW[def.glow] = new THREE.MeshBasicMaterial({ color: def.glow }))) : mat(s.m));
