@@ -33,6 +33,23 @@ function lineOfSight(arena, a, b) {
     return true;
 }
 
+// Mueve a una unidad a la fuerza, de a una casilla, en la dirección (dx, dy) que venga normalizada. Los jefes no se mueven, ni
+// el que está anclado ('anchored'). Se frena antes de una pared o de otro cuerpo. wall: chocó una columna.
+function dragUnit(unit, dx, dy, cells) {
+    if (unit.isBoss || unit.isRoundBoss || hasFlag(unit, 'anchored')) return { moved: 0, wall: false };
+    const x0 = unit.x, y0 = unit.y;
+    let moved = 0, wall = false;
+    for (let i = 1; i <= cells; i++) {
+        const x = Math.round(x0 + dx * i), y = Math.round(y0 + dy * i);
+        if (x === unit.x && y === unit.y) continue;
+        if (!walkable(unit.arena, x, y)) { wall = !!(unit.arena && unit.arena.walls) && x >= 0 && y >= 0 && x < COLS && y < ROWS; break; }
+        if (bodiesAt(unit.arena, x, y, unit).length) break;
+        unit.x = x; unit.y = y; moved++;
+    }
+    if (moved) unit.moveTarget = null;
+    return { moved, wall };
+}
+
 // Unidades vivas de la arena que ocupan una casilla (sin contar a `self`).
 function bodiesAt(arena, x, y, self) {
     if (!arena) return [];

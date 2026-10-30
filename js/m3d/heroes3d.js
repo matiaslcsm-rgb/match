@@ -7,16 +7,17 @@ import { box, cyl, both } from './bosses3d.js';
 const PI = Math.PI;
 
 export const HERO_ROBOTS = {
-    // Axe: tanque de orugas, ancho, con un hacha enorme en la derecha y púas en los hombros
-    AXE: {
-        build: { legs: 'oruga', core: 'pesado', head: 'domo', armL: 'pinza', armR: 'pinza' }, paint: '#b0452e', glow: '#ffb347', size: 1.15,
+    // Grúa: orugas anchas, torso de cabina amarilla, baliza de precaución y un brazo-grúa enorme con gancho
+    CRANE: {
+        build: { legs: 'oruga', core: 'pesado', head: 'sensor', armL: 'pinza', armR: 'pinza' }, paint: '#d9a521', glow: '#ff9a2e', size: 1.15,
         extras: [
-            cyl('handR', 0.05, 1.5, [0, -0.3, 0.45], 'carbon', [PI / 2, 0, 0]),                 // el mango
-            box('handR', [0.08, 0.95, 0.42], [0, -0.3, 1.1], 'metal'),                          // la hoja
-            box('handR', [0.1, 0.6, 0.14], [0, -0.3, 0.86], 'nar'),
-            ...both(box('shoulder', [0.1, 0.5, 0.1], [0.2, 0.42, 0], 'metal', [0, 0, -0.5])),
-            ...both(box('shoulder', [0.46, 0.2, 0.5], [0.14, 0.16, 0], 'carbon')),
-            box('head', [0.34, 0.05, 0.02], [0, 0.17, 0.23], 'glow')
+            cyl('handR', 0.07, 1.7, [0, 0, 0.75], 'carbon', [PI / 2, 0, 0]),       // el brazo-grúa
+            box('handR', [0.1, 0.5, 0.06], [0, -0.26, 1.6], 'metal'),               // el cable
+            box('handR', [0.34, 0.1, 0.26], [0, -0.55, 1.62], 'nar'),               // el gancho
+            box('handR', [0.08, 0.26, 0.08], [0.14, -0.66, 1.62], 'metal'),
+            box('chest', [0.72, 0.5, 0.05], [0, 0.32, 0.45], 'glow'),               // el vidrio de la cabina
+            cyl('head', 0.09, 0.14, [0, 0.27, 0], 'nar'),                           // la baliza
+            ...both(box('shoulder', [0.42, 0.14, 0.48], [0.12, 0.18, 0], 'carbon'))
         ]
     },
     // Guerrero Vampiro: alto y oscuro, cuello alzado, capa, alas de chapa y colmillos

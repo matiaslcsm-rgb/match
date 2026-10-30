@@ -122,6 +122,7 @@ function aiWantsToCast(hero, skill, nearCount, bossNear, nearestDist = Infinity,
     // Cuerpo a cuerpo: los saltos y teletransportes se guardan para cuando el enemigo está fuera de su alcance
     // (antes los usaba apenas estaban listos, aunque ya estuviera pegado, y después no podía alcanzar a los que se alejaban).
     if (skill.aiMinDist && nearestDist < skill.aiMinDist) return false; // no con el enemigo encima (ej: canalizar)
+    if (skill.aiMaxDist && nearestDist > skill.aiMaxDist) return false; // solo con el enemigo encima (ej: anclarse)
     if (skill.tags.includes('ESCAPE')) return nearestDist <= 2.5; // para alejarse (Travelling de Rec): cuando lo alcanzan
     if (skill.tags.includes('MOVILIDAD') && !isRanged(hero)) return nearestDist > hero.attackRange + 0.5 && nearestDist <= 8;
     // En un duelo (o contra el jefe de ronda) hay un enemigo principal: definitiva y área apenas lo tiene cerca
@@ -226,13 +227,13 @@ const AI_BUILDS = {
 
 // Lo que cada competidor necesita además de la build de su atributo (medido con el banco, docs/BALANCE-CH.md).
 // early: solo hasta AI_EARLY_LAST_ROUND; después deja de ser objetivo y se puede vender. late: con la build
-// armada (antes de la build los hunde: medido con Axe, Rec, Bruja y Sabio).
+// armada (antes de la build los hunde: medido con Rec, Bruja y Sabio).
 const AI_EARLY_LAST_ROUND = 7;
 const AI_HERO_ITEMS = {
     ALCHEMIST: { early: ['STARTER_CELL'], late: ['EMERGENCY_CELL'] },
     FROSTWITCH: { early: ['STARTER_CELL'], late: ['STASIS_DOME', 'BOSS_PLATE'] },
     ARCANIST: { early: ['STARTER_CELL'] },
-    AXE: { late: ['PULSE_WAVE', 'SHOCK_MACE'] },
+    CRANE: { early: ['STARTER_CELL'], late: ['PULSE_WAVE', 'SHOCK_MACE'] },
     REC: { late: ['JET_PACK', 'NET_GUN'] },
     VOIDSAGE: { late: ['STASIS_DOME', 'EMERGENCY_CELL'] },
     VAMPIRE: { late: ['CLAMP'] },

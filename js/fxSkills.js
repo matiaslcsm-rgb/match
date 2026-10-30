@@ -18,7 +18,7 @@ const SKILL_VFX = {
     ALCHEMIST_ACID: { el: 'poison', shape: 'cone' }, ALCHEMIST_BREW: { el: 'fire', shape: 'proj' }, ALCHEMIST_CHEMICAL: { el: 'poison', shape: 'aura' },
     ARCANIST_BOLT: { el: 'arcane', shape: 'proj' }, ARCANIST_SHIELD: { el: 'arcane', shape: 'shield' }, ARCANIST_OVERLOAD: { el: 'arcane', shape: 'meteor' },
     ASSASSIN_BLINK: { el: 'shadow', shape: 'blink' }, ASSASSIN_LETHALSPEED: { el: 'blood', shape: 'aura' }, ASSASSIN_MASACRE: { el: 'blood', shape: 'whirl' },
-    AXE_PROVOCACION: { el: 'steel', shape: 'shout' }, AXE_GIRO: { el: 'steel', shape: 'whirl' }, AXE_FURIA: { el: 'blood', shape: 'aura' },
+    CRANE_HOOK: { el: 'steel', shape: 'proj' }, CRANE_BEAM: { el: 'steel', shape: 'whirl' }, CRANE_ANCHOR: { el: 'steel', shape: 'shield' }, CRANE_DEMOLITION: { el: 'steel', shape: 'meteor' },
     DANCER_CUT: { el: 'steel', shape: 'dash' }, DANCER_GHOSTSTEP: { el: 'shadow', shape: 'blink' }, DANCER_STORM: { el: 'steel', shape: 'whirl' },
     FROSTWITCH_BLAST: { el: 'ice', shape: 'proj' }, FROSTWITCH_ARMOR: { el: 'ice', shape: 'shield' }, FROSTWITCH_ZERO: { el: 'ice', shape: 'nova' },
     NECROMANCER_PULSE: { el: 'shadow', shape: 'nova' }, NECROMANCER_SHROUD: { el: 'shadow', shape: 'aura' }, NECROMANCER_REAP: { el: 'shadow', shape: 'reap' },
@@ -155,7 +155,7 @@ function fxSkill(hero, skill, from) {
 
 // --- Ataque básico según el arma de cada competidor ---
 const WEAPON_FX = {
-    AXE: { el: 'steel', kind: 'heavy' }, VAMPIRE: { el: 'blood', kind: 'slash' }, ASSASSIN: { el: 'shadow', kind: 'twin' },
+    CRANE: { el: 'steel', kind: 'heavy' }, VAMPIRE: { el: 'blood', kind: 'slash' }, ASSASSIN: { el: 'shadow', kind: 'twin' },
     DANCER: { el: 'steel', kind: 'twin' }, ARCANIST: { el: 'arcane', kind: 'orb' }, FROSTWITCH: { el: 'ice', kind: 'orb' }, NECROMANCER: { el: 'shadow', kind: 'scythe' },
     VOIDSAGE: { el: 'void', kind: 'orb' }, ALCHEMIST: { el: 'poison', kind: 'orb' }, ZEUS: { el: 'lightning', kind: 'zap' }, REC: { el: 'steel', kind: 'shot' }, FISTS: { el: 'steel', kind: 'punch' }
 };
@@ -298,7 +298,6 @@ function drawStatusFx(u, cx, cy, half) {
         if (style === 'bubble') { ctx.beginPath(); ctx.arc(x, y, 2.6, 0, Math.PI * 2); ctx.stroke(); } else if (style === 'flame') { ctx.beginPath(); ctx.moveTo(x - 3, y + 3); ctx.quadraticCurveTo(x, y - 7, x + 3, y + 3); ctx.fill(); } else { ctx.beginPath(); ctx.arc(x, cy - half * 0.5 + k * half, 2, 0, Math.PI * 2); ctx.fill(); } } ctx.globalAlpha = 1; };
     dot('POISON', '#7ac74f', 'bubble'); dot('BURN', '#e85d04', 'flame'); dot('BLEED', '#c1121f', 'drop');
     if (effDmgReduction(u) > 0 || flag('invulnerable')) { ctx.strokeStyle = flag('invulnerable') ? '#ffd166' : 'rgba(157,78,221,0.7)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(cx, cy - half * 0.3, half * 0.85, 0, Math.PI * 2); ctx.stroke(); }
-    if (flag('taunt')) { ctx.fillStyle = '#9b2226'; ctx.font = 'bold 14px Georgia, serif'; ctx.textAlign = 'center'; ctx.fillText('!', cx + 12, head); }
     ctx.restore();
 }
 // --- SENSACIÓN DE JUEGO (pedido del usuario, 2026-10-07: "los hechizos se sienten planos y los controles raros") ---

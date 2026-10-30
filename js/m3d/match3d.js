@@ -267,7 +267,7 @@ const units = new Map(); // unidad del juego → { robot, scale, yaw, last }
 const roundBossRobot = u => u.isRoundBoss && u.type && BOSS_ROBOTS[u.type.key];
 const creepRobot = u => !u.isHero && !u.isRoundBoss && u.type && CREEP_ROBOTS[u.type.key];
 function buildFor(u) {
-    if (u.isHero) return (HERO_ROBOTS[u.key] || HERO_ROBOTS.AXE).build;
+    if (u.isHero) return (HERO_ROBOTS[u.key] || HERO_ROBOTS.CRANE).build;
     if (u.isRoundBoss && roundBossRobot(u)) return roundBossRobot(u).build;
     if (u.isRoundBoss || u.isBoss) return BOSS_BUILD;
     return (creepRobot(u) || {}).build || CREEP_BUILDS[creepPlan(u)];

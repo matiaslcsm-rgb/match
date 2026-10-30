@@ -30,7 +30,7 @@ function roundBossOf() {
 
 
 // Crecimiento de los jefes: como los creeps (+10% por ronda) hasta la ronda 20; desde ahí, +4% por ronda. Medido: con el
-// +10% de siempre, desde la ronda 20 los que dependen de hechizos (magos, Zeus, Nigromante) o de aguantar (Axe) quedaban
+// +10% de siempre, desde la ronda 20 los que dependen de hechizos (magos, Zeus, Nigromante) o de aguantar quedaban
 // eliminados contra el jefe el 32-64% de las veces, contra 9-15% de los de ataque (ver DISEÑO.md §9 bis).
 const BOSS_LATE = { fromRound: 20, growth: 1.04 };
 function bossStatMult(round = waveNumber) {

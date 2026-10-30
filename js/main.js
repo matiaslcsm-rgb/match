@@ -1,7 +1,7 @@
 ﻿// Punto de entrada: conecta los botones y arranca el bucle principal.
 
 // Versión visible en el menú: si no coincide con la última subida, el navegador muestra una copia vieja (Ctrl+F5).
-const GAME_VERSION = '2026-10-30 · MATCH: la IA compra sus contras con el inventario lleno';
+const GAME_VERSION = '2026-10-30 · MATCH: Grúa reemplaza a Axe';
 document.getElementById('game-version').textContent = `Versión ${GAME_VERSION}`;
 // Se actualiza solo (2026-10-17, "no se actualizó"): GitHub Pages deja el juego en la caché del navegador hasta 10 min.
 // Si el main.js del servidor trae otra versión, se vuelven a bajar la página y sus archivos y se recarga (una vez por versión).
@@ -96,7 +96,7 @@ function validateContent() {
         else checkAbility(t.innate, `${t.key} (innato)`);
         const skills = Object.values(HERO_SKILLS[t.key] || {});
         const ults = skills.filter(s => s.isUltimate);
-        if (skills.length - ults.length !== 3) problems.push(`${t.key}: tiene ${skills.length - ults.length} habilidades normales (deben ser 3)`);
+        if (![3, 4].includes(skills.length - ults.length)) problems.push(`${t.key}: tiene ${skills.length - ults.length} habilidades normales (deben ser 3, o 4 como Grúa)`);
         if (ults.length !== 1) problems.push(`${t.key}: tiene ${ults.length} definitivas (debe ser 1)`);
         skills.forEach(s => {
             const where = `${t.key}/${s.id}`;

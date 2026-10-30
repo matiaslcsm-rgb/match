@@ -4,9 +4,9 @@
 // why: por qué esa build, en una línea.
 
 const BUILD_GUIDES = {
-    AXE: {
-        why: 'Tanque que pega cuando lo golpean: vida y armadura para aguantar y devolver daño con Contraataque y Espinas.',
-        early: ['CHAINMAIL', 'VITALITY'], core: ['PULSE_WAVE', 'EVO_CORE', 'THORNS', 'HEART', 'BOSS_PLATE'], late: ['SHOCK_MACE', 'AEGIS', 'CRIMSON']
+    CRANE: {
+        why: 'Engancha y castiga: vida y armadura para aguantar pegada al rival, y control para que el gancho no falle.',
+        early: ['CHAINMAIL', 'VITALITY'], core: ['THORNS', 'HEART', 'BOSS_PLATE', 'EVO_CORE'], late: ['NET_GUN', 'PULSE_WAVE', 'AEGIS']
     },
     REC: {
         why: 'Sus drones pegan en cada ataque: velocidad de ataque y daño (el aéreo es su golpe básico); maná para Acople y Cámara Fija.',

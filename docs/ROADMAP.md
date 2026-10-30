@@ -83,10 +83,11 @@ copiado de Dota.
   - [x] Ajustar a Rec (2026-10-28): los drones suman 130% del daño (60/45/25%). Banco de 66: puesto 4,7 (el grupo va
     de 4,0 a 5,6), 55% de sus duelos. Medido junto con los ajustes de la ficha: Reflejos 22 (+3), daño 8, rango 5,
     velocidad 2,3 y la IA no tira el Acople ni la Cámara Fija con el rival encima.
+- [x] **Grúa** reemplaza a Axe (2026-10-30, ficha `docs/competidores/grua.md`): gancho, viga, contrapeso, cabina y demolición. Piezas nuevas
+  del motor: mover a la fuerza (`dragUnit`), inamovible (`anchored`) y escudo (`addShield`). Gana 40% de sus duelos; puesto 6,3 con la IA.
 - [ ] Los otros siete del show (borrador en `docs/MATCH.md` §4): Grúa, Eco, Flash, Kilo, Parche, Vector, Viral, Glitch.
   Antes de cada uno, su ficha para aprobar.
-  **(decisión)** Fichas listas para aprobar (2026-10-30): `docs/competidores/grua.md` (reemplaza a Axe) y
-  `docs/competidores/vector.md` (reemplaza al Asesino).
+  **(decisión)** Ficha lista para aprobar (2026-10-30): `docs/competidores/vector.md` (reemplaza al Asesino).
 - [ ] El Danzante, el Arcanista y el Sabio del Vacío pasados al estilo nuevo (su lectura y su respuesta).
 
 **Cierra cuando:** no queda ningún héroe de Dota y ningún cruce de competidores gana más del 65% de las veces.

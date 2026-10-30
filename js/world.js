@@ -48,7 +48,7 @@ function setPlayerName(name) {
 }
 
 // Crea los rivales: cada uno elige entre sus opciones de la fase de elección (ver menu.js), sin repetir héroes.
-// Cada bot tiene un nombre de jugador: "Axe (Tano)".
+// Cada bot tiene un nombre de jugador: "Grúa (Tano)".
 function createRivals(playerTemplate) {
     const names = shuffle(BOT_NAMES.filter(n => n !== playerName()));
     pickRivalTemplates(playerTemplate).forEach((template, i) => {

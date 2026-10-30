@@ -793,7 +793,7 @@ function renderCenterTimer(combatText, cls) {
     lastBeepSecond = countdown ? secs : null;
 }
 
-// Cartel de apuestas ganadas: pasa de derecha a izquierda, del que más ganó al que menos ("Axe (Tano) +120g").
+// Cartel de apuestas ganadas: pasa de derecha a izquierda, del que más ganó al que menos ("Grúa (Tano) +120g").
 function showBetBanner(winners) {
     const banner = document.getElementById('bet-banner');
     if (!banner || !winners.length) return;

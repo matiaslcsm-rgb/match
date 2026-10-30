@@ -133,7 +133,7 @@ function dealDamage(source, target, amount, type = 'physical', opts = {}) {
     if (source && source.isRoundBoss) takenPct += sumMod(target, 'bossDmgTakenPct'); // ej: Placa de Producción
     // La maldición (Condenado) solo amplifica el daño de creeps y de héroes sin maldición
     if (source && source.isHero && isCondemned(source)) takenPct -= (getEffect(target, 'CONDEMNED') || { mods: {} }).mods.dmgTakenPct || 0;
-    final = Math.round(final * (1 + takenPct));
+    final = absorbShield(target, Math.round(final * (1 + takenPct)));
     if (target.oneHit) final = target.hp;
     const floor = hasFlag(target, 'preventDeath') ? 1 : 0;
     const hpLost = Math.max(0, Math.min(final, target.hp - floor));
@@ -147,6 +147,20 @@ function dealDamage(source, target, amount, type = 'physical', opts = {}) {
     if (source && hpLost > 0) emit(source, 'onDealDamage', { target, dealt: hpLost, type, isCrit: opts.isCrit, relic: opts.relic });
     if (!target.isAlive()) onUnitDeath(target, source);
     return { dealt: hpLost, evaded: false };
+}
+
+// Escudo: un efecto que se come el daño hasta que se gasta o se termina. En duelo vale menos, como las curaciones.
+function addShield(unit, amount, duration, name) {
+    if (unit.arena && unit.arena.kind === 'duel') amount *= 1 - DUEL_HEAL_REDUCTION;
+    addEffect(unit, { id: 'SHIELD', name: name || 'Escudo', duration, tags: ['MEJORA'], data: { left: Math.round(amount) } });
+}
+function absorbShield(target, dmg) {
+    const shield = dmg > 0 && target.effects && getEffect(target, 'SHIELD');
+    if (!shield) return dmg;
+    const taken = Math.min(shield.data.left, dmg);
+    shield.data.left -= taken;
+    if (shield.data.left <= 0) removeEffect(target, 'SHIELD');
+    return dmg - taken;
 }
 
 // Anota un golpe entre héroes en las cuentas del duelo; el más fuerte sale en el cartel del resultado (ui.js).

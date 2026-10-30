@@ -82,12 +82,12 @@ test('El contenido del juego es válido (validador)', () => {
 
 // ============================================================ ATRIBUTOS
 test('Atributos de nivel 1 salen de la plantilla del héroe', () => {
-    const h = new Hero(HERO_TEMPLATES.AXE);
+    const h = new Hero(HERO_TEMPLATES.CRANE);
     checkEq(h.str, 24, 'Fuerza base');
-    checkEq(h.maxHp, HERO_TEMPLATES.AXE.baseHp + 24 * 5, 'HP = base + 5 por Fuerza');
-    checkEq(h.atk, Math.round(13 + 24 * 0.8), 'daño = base + 0.8 por atributo principal');
-    checkNear(h.armor, 2 + 12 * 0.08, 'armadura = base + 0.08 por Agilidad');
-    checkNear(h.magicResist, 15 + 14 * 0.1, 'resistencia mágica = base + 0.1 por Inteligencia');
+    checkEq(h.maxHp, HERO_TEMPLATES.CRANE.baseHp + 24 * 5, 'HP = base + 5 por Fuerza');
+    checkEq(h.atk, Math.round(HERO_TEMPLATES.CRANE.baseAtk + 24 * 0.8), 'daño = base + 0.8 por atributo principal');
+    checkNear(h.armor, HERO_TEMPLATES.CRANE.baseArmor + 12 * 0.08, 'armadura = base + 0.08 por Agilidad');
+    checkNear(h.magicResist, HERO_TEMPLATES.CRANE.baseMagicResist + 14 * 0.1, 'resistencia mágica = base + 0.1 por Inteligencia');
 });
 
 test('Subir de nivel suma atributos (más en el principal)', () => {
@@ -101,7 +101,7 @@ test('Subir de nivel suma atributos (más en el principal)', () => {
 
 // ============================================================ DAÑO
 test('Daño físico: la armadura reduce 4% por punto', () => {
-    newGame('AXE');
+    newGame('CRANE');
     const c = dummy({ armor: 5, hp: 9999, maxHp: 9999 });
     checkEq(dealDamage(player, c, 100, 'physical').dealt, 80, 'daño con 5 de armadura');
     const c2 = dummy({ armor: 50, hp: 9999, maxHp: 9999 });
@@ -109,7 +109,7 @@ test('Daño físico: la armadura reduce 4% por punto', () => {
 });
 
 test('Daño mágico: resistencia mágica y amplificación de hechizo', () => {
-    newGame('AXE');
+    newGame('CRANE');
     const c = dummy({ magicResist: 20, hp: 9999, maxHp: 9999 });
     const expected = Math.round(100 * (1 + player.spellAmp / 100) * 0.8);
     checkEq(dealDamage(player, c, 100, 'magical').dealt, expected, 'daño mágico');
@@ -117,7 +117,7 @@ test('Daño mágico: resistencia mágica y amplificación de hechizo', () => {
 });
 
 test('El esquive solo afecta a los ataques básicos', () => {
-    newGame('AXE');
+    newGame('CRANE');
     const c = dummy();
     player.evasion = 100;
     check(dealDamage(c, player, 10, 'physical', { isAttack: true }).evaded, 'un ataque básico se esquiva');
@@ -125,7 +125,7 @@ test('El esquive solo afecta a los ataques básicos', () => {
 });
 
 test('Invulnerable no recibe daño; los creeps de un golpe mueren con cualquier golpe', () => {
-    newGame('AXE');
+    newGame('CRANE');
     addEffect(player, { id: 'T', duration: 5, flags: ['invulnerable'] });
     const hp = player.hp;
     dealDamage(creeps[0], player, 500, 'pure');
@@ -139,7 +139,7 @@ test('Invulnerable no recibe daño; los creeps de un golpe mueren con cualquier 
 
 // ============================================================ HABILIDADES Y NIVELES
 test('Habilidad en nivel 0 no se lanza; en nivel 1 cobra maná y enfriamiento', () => {
-    newGame('AXE');
+    newGame('CRANE');
     const s = learn('VAMP_CLAW', 0);
     const d = dummy({ hp: 9999, maxHp: 9999 });
     const mana = player.mana;
@@ -163,7 +163,7 @@ test('Sin objetivo en rango no se cobra maná ni enfriamiento', () => {
 });
 
 test('Teclas por tipo: definitivas en R, D y F; pasivas en W y E; activas en Q', () => {
-    newGame('AXE');
+    newGame('CRANE');
     const fake = (id, kind, isUltimate) => { const s = { id, kind, isUltimate, values: {} }; player.addSkill(s); return player.keyBindings[id]; };
     checkEq(fake('A1', 'active'), 'q', 'la activa');
     checkEq(fake('P1', 'passive'), 'w', 'la pasiva');
@@ -175,7 +175,7 @@ test('Teclas por tipo: definitivas en R, D y F; pasivas en W y E; activas en Q',
 });
 
 test('Acomodar habilidades: se mueven e intercambian', () => {
-    newGame('AXE');
+    newGame('CRANE');
     const fake = (id, kind) => { player.addSkill({ id, kind, values: {} }); };
     fake('A1', 'active'); fake('P1', 'passive');
     assignSkillKey(player, 'A1', 'w');
@@ -191,8 +191,8 @@ test('Acomodar habilidades: se mueven e intercambian', () => {
 });
 
 test('Definitiva: niveles 1/2/3 recién en los niveles 6/12/18 del héroe', () => {
-    newGame('AXE');
-    const ult = learn('AXE_FURIA', 0);
+    newGame('CRANE');
+    const ult = learn('CRANE_DEMOLITION', 0);
     player.skillPoints = 10;
     player.level = 5; check(!levelUpSkill(player, ult), 'nivel 5 no alcanza');
     player.level = 6; check(levelUpSkill(player, ult), 'nivel 6 sube a 1');
@@ -203,13 +203,13 @@ test('Definitiva: niveles 1/2/3 recién en los niveles 6/12/18 del héroe', () =
 });
 
 test('Puntos sin gastar se guardan; con el kit al máximo se vuelven atributos', () => {
-    newGame('AXE');
-    ['AXE_HACHAZO', 'AXE_PROVOCACION', 'AXE_GIRO'].forEach(id => learn(id, 4));
-    learn('AXE_FURIA', 1);
+    newGame('CRANE');
+    ['CRANE_CABIN', 'CRANE_ANCHOR', 'CRANE_BEAM'].forEach(id => learn(id, 4));
+    learn('CRANE_DEMOLITION', 1);
     player.level = 10; player.skillPoints = 3;
     resolveExcessPoints(player);
     checkEq(player.skillPoints, 3, 'puntos guardados esperando nivel 12');
-    player.level = 18; levelUpSkill(player, SKILL_INDEX.AXE_FURIA); levelUpSkill(player, SKILL_INDEX.AXE_FURIA);
+    player.level = 18; levelUpSkill(player, SKILL_INDEX.CRANE_DEMOLITION); levelUpSkill(player, SKILL_INDEX.CRANE_DEMOLITION);
     const str0 = player.str;
     checkEq(player.skillPoints, 0, 'el punto sobrante se convirtió');
     checkNear(str0 - 24, 1, 'Fuerza +1 por el punto sobrante');
@@ -224,12 +224,12 @@ test('Experiencia: cada nivel da 1 punto de habilidad', () => {
 
 // ============================================================ DRAFT Y DESTINO
 test('Draft: 3 opciones distintas y siempre al menos 1 natural', () => {
-    newGame('AXE');
+    newGame('CRANE');
     for (let i = 0; i < 200; i++) {
         const o = draftOptions(player, 3);
         checkEq(o.length, 3, 'cantidad de opciones');
         checkEq(new Set(o.map(s => s.id)).size, 3, 'opciones repetidas');
-        check(o.some(s => s.heroKey === 'AXE'), 'falta la habilidad natural');
+        check(o.some(s => s.heroKey === 'CRANE'), 'falta la habilidad natural');
     }
 }, { random: true });
 
@@ -252,7 +252,7 @@ test('Fragmento del Destino: quita una, devuelve puntos, ofrece 4 sin la quitada
 // Antes, el botón de la tienda le pasaba el clic a startWave como si fuera el plan del duelo: la ronda se cortaba sin
 // oleada y volvía al draft (2026-10-13)
 test('El botón "Comenzar oleada" de la tienda arranca la oleada', () => {
-    newGame('AXE');
+    newGame('CRANE');
     gameState = 'PREP'; waveNumber = 1;
     document.getElementById('start-wave-btn').click();
     checkEq(gameState, 'WAVE', 'empieza la oleada');
@@ -272,7 +272,7 @@ test('Libro del Destino: elegís cuál cambiar y ofrece 6', () => {
 });
 
 test('Vender un Fragmento del Destino', () => {
-    newGame('AXE');
+    newGame('CRANE');
     gameState = 'PREP'; player.destiny.fragments = 1;
     const gold = player.gold;
     sellFragment();
@@ -281,16 +281,6 @@ test('Vender un Fragmento del Destino', () => {
 });
 
 // ============================================================ INNATOS Y SINERGIAS
-test('Contraataque: 20% base, +20% provocando', () => {
-    newGame('AXE');
-    const c = dummy({ hp: 9999, maxHp: 9999 });
-    withRandom(0.3, () => dealDamage(c, player, 5, 'physical'));
-    checkEq(c.hp, 9999, 'sin provocar (30% > 20%) no contraataca');
-    learn('AXE_PROVOCACION', 1).cast(player);
-    withRandom(0.3, () => dealDamage(c, player, 5, 'physical'));
-    checkEq(9999 - c.hp, player.atk, 'provocando (30% < 40%) contraataca con 100% del daño');
-});
-
 test('Hambre + Sangre Oscura multiplican el robo de vida', () => {
     newGame('VAMPIRE');
     const c = dummy({ hp: 10, maxHp: 100 }); // <30% HP
@@ -320,18 +310,6 @@ test('Velocidad Letal: +5% por golpe al mismo objetivo, se reinicia al cambiar',
 });
 
 // ============================================================ DEFINITIVAS Y ASCENSO
-test('Furia: +2 de daño por golpe recibido hasta el tope, y armadura por baja', () => {
-    newGame('AXE');
-    const ult = learn('AXE_FURIA', 2);
-    ult.cast(player);
-    const c = dummy({ hp: 9999, maxHp: 9999 });
-    for (let i = 0; i < 25; i++) dealDamage(c, player, 1, 'physical');
-    checkEq(getEffect(player, 'AXE_FURIA').mods.flatAtk, valueAt(ult, 'stackCap', 2), 'tope de daño acumulado');
-    const armor = player.armor;
-    dealDamage(player, dummy(), 99999, 'pure');
-    checkNear(player.armor - armor, valueAt(ult, 'armorPerKill', 2), 'armadura permanente por baja');
-});
-
 test('Masacre: cada baja extiende la duración y da crítico permanente', () => {
     newGame('ASSASSIN');
     const ult = learn('ASSASSIN_MASACRE', 2);
@@ -361,7 +339,7 @@ test('Forma Inmortal: no baja de 1, paga al terminar y da HP máximo por curaci�
 
 // ============================================================ MUERTE
 test('Morir: 3s muerto, los creeps pierden el agro y vuelven a su lugar', () => {
-    newGame('AXE');
+    newGame('CRANE');
     const c = dummy({ atk: 9999, attackTimer: 99, spawnX: 15, spawnY: 5 });
     player.hp = 1;
     updateCreep(c, 0.016);
@@ -377,8 +355,8 @@ test('Morir: 3s muerto, los creeps pierden el agro y vuelven a su lugar', () => 
 });
 
 test('Voluntad de Titán: revive en el lugar, inmortal, x2 vel. ataque y sin maná', () => {
-    newGame('AXE');
-    const s = learn('AXE_GIRO', 1);
+    newGame('CRANE');
+    const s = learn('CRANE_BEAM', 1);
     const c = dummy({ atk: 9999, attackTimer: 99 });
     player.hp = 1;
     updateCreep(c, 0.016);
@@ -395,7 +373,7 @@ test('Voluntad de Titán: revive en el lugar, inmortal, x2 vel. ataque y sin man
 });
 
 test('Sin vidas contra creeps: queda eliminado (espectador)', () => {
-    newGame('AXE');
+    newGame('CRANE');
     player.lives = 1; player.hp = 1;
     const c = dummy({ atk: 9999, attackTimer: 99 });
     updateCreep(c, 0.016);
@@ -404,7 +382,7 @@ test('Sin vidas contra creeps: queda eliminado (espectador)', () => {
 });
 
 test('Los creeps nunca maldicen (aunque queden 3 héroes)', () => {
-    newGame('AXE');
+    newGame('CRANE');
     heroes.slice(3).forEach(h => { h.eliminated = true; });
     player.hp = 1;
     updateCreep(dummy({ atk: 9999, attackTimer: 99 }), 0.016);
@@ -413,7 +391,7 @@ test('Los creeps nunca maldicen (aunque queden 3 héroes)', () => {
 });
 
 test('Condenado: si lo mata un creep queda eliminado (una sola vez aunque peguen varios)', () => {
-    newGame('AXE');
+    newGame('CRANE');
     player.lives = 0; setCondemned(player, 0.1); player.hp = 1;
     const attackers = [[4, 5], [6, 5], [5, 4], [5, 6]].map(([x, y]) => dummy({ x, y, attackTimer: 99, atk: 999 }));
     attackers.forEach(c => updateCreep(c, 0.016));
@@ -422,7 +400,7 @@ test('Condenado: si lo mata un creep queda eliminado (una sola vez aunque peguen
 });
 
 test('Condenado: cada duelo perdido suma +10% de daño recibido', () => {
-    newGame('AXE');
+    newGame('CRANE');
     setCondemned(player, CONDEMNED.initialPct);
     registerDuelLoss(player); registerDuelLoss(player);
     checkNear(player.condemnPct, 0.30, '10% + 2 duelos');
@@ -430,7 +408,7 @@ test('Condenado: cada duelo perdido suma +10% de daño recibido', () => {
 });
 
 test('Libro de talento: +5 permanentes al atributo, sin espacio, y cada libro encarece el siguiente', () => {
-    newGame('AXE');
+    newGame('CRANE');
     gameState = 'PREP'; player.gold = 5000;
     const str = player.str, hp = player.maxHp, slots = player.inventory.length;
     checkEq(itemCost(ITEMS.TALENT_STR, player), 500, 'primer precio');
@@ -445,7 +423,7 @@ test('Libro de talento: +5 permanentes al atributo, sin espacio, y cada libro en
 });
 
 test('Injusticia de los Codiciosos: solo Condenado, vida y precio doble', () => {
-    newGame('AXE');
+    newGame('CRANE');
     check(!itemAvailable(ITEMS.GREED, player), 'no aparece sin estar Condenado');
     player.lives = 1; setCondemned(player, 0.3);
     check(itemAvailable(ITEMS.GREED, player), 'aparece estando Condenado');
@@ -458,7 +436,7 @@ test('Injusticia de los Codiciosos: solo Condenado, vida y precio doble', () => 
 });
 
 test('Oleada: pasado el límite los creeps se enfurecen', () => {
-    newGame('AXE');
+    newGame('CRANE');
     checkEq(enrageMult(), 1, 'sin enfurecer al empezar');
     tickWaveTimer(WAVE_TIME.limit + 10);
     checkNear(enrageMult(), 1 + 10 * WAVE_TIME.enragePerSecond, '10s de más');
@@ -482,8 +460,8 @@ test('Temporizadores: al vencer, el juego elige por vos', () => {
 });
 
 test('Usar un Fragmento no reinicia el tiempo de preparación', () => {
-    newGame('AXE');
-    learn('AXE_GIRO', 0);
+    newGame('CRANE');
+    learn('CRANE_BEAM', 0);
     gameState = 'PREP'; setPhaseTimer(12); player.destiny.fragments = 1;
     useFragment();
     document.querySelector('#draft-options .skill-card').click();
@@ -492,8 +470,8 @@ test('Usar un Fragmento no reinicia el tiempo de preparación', () => {
 });
 
 test('Magos (Inteligencia): amplificación de hechizo extra respecto a un no-mago', () => {
-    const mage = new Hero({ ...HERO_TEMPLATES.AXE, primaryAttr: 'INT' });
-    const warrior = new Hero(HERO_TEMPLATES.AXE);
+    const mage = new Hero({ ...HERO_TEMPLATES.CRANE, primaryAttr: 'INT' });
+    const warrior = new Hero(HERO_TEMPLATES.CRANE);
     checkNear(mage.spellAmp - warrior.spellAmp, ATTRIBUTE_RULES.mageSpellAmp, 'amplificación extra');
 });
 
@@ -811,7 +789,7 @@ function spawnType(key, props = {}) {
 }
 
 test('Oleadas: tema sorteado, cantidades correctas y el aviso coincide con lo que aparece', () => {
-    newGame('AXE');
+    newGame('CRANE');
     waveNumber = 1;
     const wave = { name: 'Enjambre', groups: [{ type: 'SWARM', count: 2 }, { type: 'GRUNT', count: 2 }], boss: 'SCOUT' };
     spawnWave(player.arena, wave);
@@ -819,7 +797,7 @@ test('Oleadas: tema sorteado, cantidades correctas y el aviso coincide con lo qu
     checkEq(creeps.length, 8 + 2 + 1, 'total con el jefe');
     check(boss.isBoss && boss.key === 'SCOUT', 'jefe del tipo del tema');
     checkEq(new Set(creeps.map(c => c.x + ',' + c.y)).size, creeps.length, 'cada uno en su casilla');
-    resetGame(); selectHero(HERO_TEMPLATES.AXE); learnSkill(SKILL_INDEX.AXE_GIRO);
+    resetGame(); selectHero(HERO_TEMPLATES.CRANE); learnSkill(SKILL_INDEX.CRANE_BEAM);
     const preview = nextWave;
     check(!!preview && document.getElementById('wave-preview').textContent.includes(preview.name), 'el aviso muestra el tema');
     startWave();
@@ -828,7 +806,7 @@ test('Oleadas: tema sorteado, cantidades correctas y el aviso coincide con lo qu
 }, { random: true });
 
 test('Chamán: su daño es mágico (lo frena la resistencia mágica, no la armadura)', () => {
-    newGame('AXE');
+    newGame('CRANE');
     const c = spawnType('SHAMAN', { attackTimer: 99 });
     player.armor = 50; player.magicResist = 0;
     let hp = player.hp; updateCreep(c, 0.016);
@@ -840,7 +818,7 @@ test('Chamán: su daño es mágico (lo frena la resistencia mágica, no la armad
 });
 
 test('Sanador: cura al más herido cada 3s; la Lanza Cortacuras lo reduce a la mitad', () => {
-    newGame('AXE');
+    newGame('CRANE');
     player.x = 12; // el Sanador (rango 3) ya está a distancia de ataque y no se mueve
     const healer = spawnType('HEALER', { x: 15, y: 5 });
     const hurt = spawnType('GRUNT', { x: 16, y: 5 }); hurt.hp = 5;
@@ -854,7 +832,7 @@ test('Sanador: cura al más herido cada 3s; la Lanza Cortacuras lo reduce a la m
 });
 
 test('Espectro: esquiva ataques básicos; la Hoja Certera no falla', () => {
-    newGame('AXE');
+    newGame('CRANE');
     const e = spawnType('SPECTER', { hp: 9999, maxHp: 9999 });
     check(withRandom(0.3, () => dealDamage(player, e, 10, 'physical', { isAttack: true })).evaded, 'con 50% de evasión esquiva (azar 0.3)');
     giveItem(player, 'TRUESTRIKE');
@@ -862,7 +840,7 @@ test('Espectro: esquiva ataques básicos; la Hoja Certera no falla', () => {
 });
 
 test('Acorazado: armadura alta; el Martillo Rompecorazas se la baja golpe a golpe', () => {
-    newGame('AXE');
+    newGame('CRANE');
     const armor = CREEP_TYPES.ARMORED.armor;
     const a = spawnType('ARMORED', { hp: 9999, maxHp: 9999 });
     checkEq(dealDamage(player, a, 100, 'physical').dealt, Math.round(100 * (1 - armor * 0.04)), 'reducción por armadura');
@@ -873,7 +851,7 @@ test('Acorazado: armadura alta; el Martillo Rompecorazas se la baja golpe a golp
 });
 
 test('Kamikaze: explota al llegar, muere y no da oro', () => {
-    newGame('AXE');
+    newGame('CRANE');
     const k = spawnType('KAMIKAZE');
     const hp = player.hp, gold = player.gold;
     updateCreep(k, 0.016);
@@ -883,8 +861,8 @@ test('Kamikaze: explota al llegar, muere y no da oro', () => {
 });
 
 test('Aturdidor: aturde cada N golpes; aturdido no te movés ni lanzás; las Botas Firmes lo acortan', () => {
-    newGame('AXE');
-    const s = learn('AXE_GIRO', 1);
+    newGame('CRANE');
+    const s = learn('CRANE_BEAM', 1);
     const { stunEvery, stunDuration } = CREEP_TYPES.STUNNER;
     const t = spawnType('STUNNER', { atk: 1 });
     for (let i = 0; i < stunEvery - 1; i++) { t.attackTimer = 99; updateCreep(t, 0.016); }
@@ -904,7 +882,7 @@ test('Aturdidor: aturde cada N golpes; aturdido no te movés ni lanzás; las Bot
 });
 
 test('Inmunidad tras aturdimiento: un héroe no puede quedar aturdido para siempre', () => {
-    newGame('AXE');
+    newGame('CRANE');
     addEffect(player, { id: 'STUN', duration: 1, flags: ['stun'] });
     gameClock += 1.1; tickEffects(player, 0.016);
     check(!addEffect(player, { id: 'STUN', duration: 1, flags: ['stun'] }), 'recién salido del aturdimiento, es inmune');
@@ -916,7 +894,7 @@ test('Inmunidad tras aturdimiento: un héroe no puede quedar aturdido para siemp
 });
 
 test('Ladrón: roba oro y huye; si lo matás recuperás el oro +50%', () => {
-    newGame('AXE');
+    newGame('CRANE');
     player.gold = 100;
     const steal = CREEP_TYPES.THIEF.steal;
     const t = spawnType('THIEF', { attackTimer: 99, hp: 9999, maxHp: 9999 });
@@ -930,7 +908,7 @@ test('Ladrón: roba oro y huye; si lo matás recuperás el oro +50%', () => {
 });
 
 test('Recetas: un compuesto usa los básicos que ya tenés y cobra solo lo que falta', () => {
-    newGame('AXE');
+    newGame('CRANE');
     gameState = 'PREP'; player.gold = 1000;
     const hoja = ITEMS.TRUESTRIKE;
     checkEq(itemCost(hoja, player), itemTotalCost(hoja), 'sin componentes cuesta el total');
@@ -946,7 +924,7 @@ test('Recetas: un compuesto usa los básicos que ya tenés y cobra solo lo que f
 });
 
 test('Recetas con componentes repetidos (Martillo = 2 Espadas) y básicos que se acumulan', () => {
-    newGame('AXE');
+    newGame('CRANE');
     gameState = 'PREP'; player.gold = 1000;
     const atk0 = effAttack(player);
     buyItem(ITEMS.BLADE); buyItem(ITEMS.BLADE);
@@ -958,7 +936,7 @@ test('Recetas con componentes repetidos (Martillo = 2 Espadas) y básicos que se
 });
 
 test('Inventario: 6 casillas + 3 de reserva; un compuesto entra si libera los espacios de sus componentes', () => {
-    newGame('AXE');
+    newGame('CRANE');
     gameState = 'PREP'; player.gold = 5000;
     ['BLADE', 'QUICK_GLOVES', 'CHAINMAIL', 'RUNE_CAPE', 'VITALITY', 'VITALITY', 'FANG', 'FANG', 'FANG'].forEach(k => buyItem(ITEMS[k]));
     checkEq(player.inventory.length, INVENTORY_SLOTS + RESERVE_SLOTS, 'inventario y reserva llenos');
@@ -969,7 +947,7 @@ test('Inventario: 6 casillas + 3 de reserva; un compuesto entra si libera los es
 });
 
 test('Reserva: no da stats, sirve para armar, y los ítems se mueven a donde quieras', () => {
-    newGame('AXE');
+    newGame('CRANE');
     gameState = 'PREP'; player.gold = 5000;
     const atk = effAttack(player);
     giveItem(player, 'BLADE');
@@ -994,7 +972,7 @@ test('Reserva: no da stats, sirve para armar, y los ítems se mueven a donde qui
 
 test('La IA y el piloto no usan la reserva', () => {
     resetGame();
-    selectHero(HERO_TEMPLATES.AXE);
+    selectHero(HERO_TEMPLATES.CRANE);
     learnSkill(currentDraft.options[0]);
     const rival = heroes[1];
     checkEq(inventoryCap(rival), INVENTORY_SLOTS, 'la IA, 6');
@@ -1017,7 +995,7 @@ test('Paneles retráctiles: el mapa ocupa lo que dejan', () => {
 });
 
 test('Ítem de atributo: suma al atributo y a sus stats; venderlo devuelve la mitad y lo quita', () => {
-    newGame('AXE');
+    newGame('CRANE');
     gameState = 'PREP'; player.gold = 1000;
     const str0 = player.attr('str'), hp0 = player.maxHp;
     buyItem(ITEMS.BELT);
@@ -1031,7 +1009,7 @@ test('Ítem de atributo: suma al atributo y a sus stats; venderlo devuelve la mi
 });
 
 test('Égida Inquebrantable: por debajo del 40% da inmunidad mágica (sin daño mágico ni aturdimientos)', () => {
-    newGame('AXE');
+    newGame('CRANE');
     giveItem(player, 'AEGIS');
     const c = dummy();
     player.hp = player.maxHp;
@@ -1046,7 +1024,7 @@ test('Égida Inquebrantable: por debajo del 40% da inmunidad mágica (sin daño 
 });
 
 test('Coraza de Espinas devuelve daño cuerpo a cuerpo; Corazón del Titán regenera por segundo', () => {
-    newGame('AXE');
+    newGame('CRANE');
     giveItem(player, 'THORNS');
     const c = dummy({ hp: 9999, maxHp: 9999 });
     const { dealt } = dealDamage(c, player, 100, 'physical');
@@ -1058,13 +1036,13 @@ test('Coraza de Espinas devuelve daño cuerpo a cuerpo; Corazón del Titán rege
 });
 
 test('Brujo: rayo cada 5s con daño mágico y aturdimiento; Escarchador ralentiza; Tamborilero acelera', () => {
-    newGame('AXE');
+    newGame('CRANE');
     const w = spawnType('WARLOCK', { x: player.x + 3 });
     const hp = player.hp;
     for (let i = 0; i < CREEP_TYPES.WARLOCK.boltEvery * 60 + 1; i++) updateCreep(w, 1 / 60);
     check(player.hp < hp, 'el rayo hizo daño');
     check(hasFlag(player, 'stun'), 'y aturdió');
-    newGame('AXE');
+    newGame('CRANE');
     const f = spawnType('FROSTCASTER', { attackTimer: 99 });
     updateCreep(f, 0.016);
     checkNear(effMoveMult(player), 1 - CREEP_TYPES.FROSTCASTER.slow, 'ralentizado');
@@ -1097,7 +1075,7 @@ test('Cuerpos físicos: entrar a una casilla ocupada tarda más según el tamañ
 });
 
 test('Cuerpos físicos: un creep bloqueado prueba el otro camino si está libre', () => {
-    newGame('AXE');
+    newGame('CRANE');
     const a = spawnType('GRUNT', { x: 10, y: 5 }), b = spawnType('GRUNT', { x: 12, y: 6 });
     // b va hacia (10, 4): su camino principal (x) está libre
     b.moveTimer = 0; stepCreepToward(b, 9, 5, 5);
@@ -1107,14 +1085,7 @@ test('Cuerpos físicos: un creep bloqueado prueba el otro camino si está libre'
     checkEq([b.x, b.y].join(), '11,4', 'rodea por y');
 });
 
-test('Pasivas nuevas: Golpe de Hacha, Trípode, Golpe Crítico y Sangre Oscura', () => {
-    newGame('AXE');
-    const hacha = learn('AXE_HACHAZO', 1);
-    const c = dummy({ hp: 5000, maxHp: 5000 });
-    for (let i = 0; i < 3; i++) resolveBasicHit(player, c, 10, false);
-    checkEq(c.hp, 5000 - 30, 'tres golpes normales');
-    resolveBasicHit(player, c, 10, false);
-    checkEq(c.hp, 5000 - 40 - Math.round(player.atk * val(hacha, player, 'dmgMult')), 'el cuarto suma el hachazo');
+test('Pasivas nuevas: Trípode, Golpe Crítico y Sangre Oscura', () => {
     newGame('REC');
     const tri = learn('REC_TRIPODE', 2), as0 = effAtkSpeed(player);
     gameClock += 2; // quieto hace más de 1 s
@@ -1158,7 +1129,7 @@ test('Jefes de ronda: desde la ronda 20 crecen +4% por ronda en vez de +10%', ()
 });
 
 test('Banco de duelos: cada duelo anota cuánto duró, si fue por tiempo, los cambios de quién va ganando y el daño evitable', () => {
-    newGame('AXE');
+    newGame('CRANE');
     const a = heroes[1], b = heroes[2];
     const [arena] = makeDuelArenas({ pairs: [[a, b]], bye: null }); arenas.push(arena);
     duelLog = [];
@@ -1190,7 +1161,7 @@ test('Teclas configurables: cambiar, intercambiar y reservadas (las de las habil
 }, { random: true });
 
 test('Ancla: cada golpe ralentiza y quita evasión', () => {
-    newGame('AXE');
+    newGame('CRANE');
     const ev = effEvasion(player);
     const a = spawnType('ANCHOR', { x: player.x + 3, attackTimer: 99 });
     updateCreep(a, 0.016);
@@ -1242,8 +1213,8 @@ test('Tormenta Cinética: onda cada N ataques y +vel. de ataque permanente por b
 });
 
 test('Área de Descanso: al terminar la oleada vas ahí y volvés con vida, maná completos y sin mejoras temporales', () => {
-    newGame('AXE');
-    const giro = learn('AXE_GIRO', 1);
+    newGame('CRANE');
+    const giro = learn('CRANE_BEAM', 1);
     waveNumber = 1;
     creeps.forEach(c => { c.hp = 0; });
     player.hp = 5; player.mana = 0;
@@ -1266,7 +1237,7 @@ test('Área de Descanso: al terminar la oleada vas ahí y volvés con vida, man�
 });
 
 test('IA: con el inventario lleno vende un contra que no sirve para comprar el que necesita', () => {
-    newGame('AXE');
+    newGame('CRANE');
     gameState = 'PREP'; player.gold = 500;
     ['BELT', 'TRUESTRIKE', 'SPEAR', 'BOOTS', 'CLOAK', 'THORNS'].forEach(k => giveItem(player, k));
     nextWave = { name: 'Muralla', groups: [{ type: 'ARMORED', count: 3 }], boss: 'ARMORED' };
@@ -1297,14 +1268,14 @@ test('IA: el contra desplaza a lo propio de su build tardía, y lo propio no des
 });
 
 test('IA: arma los contras de la próxima oleada (de a componentes si no le alcanza)', () => {
-    newGame('AXE');
+    newGame('CRANE');
     gameState = 'PREP'; player.gold = 1000;
     nextWave = { name: 'Muralla', groups: [{ type: 'ARMORED', count: 2 }, { type: 'SHAMAN', count: 3 }, { type: 'SPECTER', count: 1 }], boss: 'ARMORED' };
     aiShop(player);
     checkEq(countItem(player, 'HAMMER'), 1, 'Martillo contra Acorazados');
     checkEq(countItem(player, 'CLOAK'), 1, 'Capa contra Chamanes');
     checkEq(countItem(player, 'TRUESTRIKE'), 0, 'no compra contra un solo Espectro');
-    newGame('AXE');
+    newGame('CRANE');
     gameState = 'PREP'; player.gold = 120;
     nextWave = { name: 'Muralla', groups: [{ type: 'ARMORED', count: 3 }], boss: 'ARMORED' };
     aiShop(player);
@@ -1341,15 +1312,15 @@ test('IA a distancia acorralada en una esquina se queda quieta', () => {
 });
 
 test('IA cuerpo a cuerpo: va al enemigo más cercano', () => {
-    newGame('AXE');
+    newGame('CRANE');
     dummy({ x: 10, y: 8 });
     const dir = aiMoveDirection(player);
     checkEq(`${dir.dx},${dir.dy}`, '1,1', 'dirección');
 });
 
 test('IA: habilidades de área solo con 2+ enemigos cerca, sin ensuciar el registro', () => {
-    newGame('AXE');
-    const giro = learn('AXE_GIRO', 1);
+    newGame('CRANE');
+    const giro = learn('CRANE_BEAM', 1);
     dummy({ hp: 9999, maxHp: 9999 });
     aiCastSkills(player);
     checkEq(player.cooldowns[giro.id], 0, 'con 1 enemigo no la usa');
@@ -1365,22 +1336,22 @@ test('IA: habilidades de área solo con 2+ enemigos cerca, sin ensuciar el regis
 });
 
 test('IA: definitiva primero al repartir puntos y prefiere habilidades naturales en el draft', () => {
-    newGame('AXE');
-    const ult = learn('AXE_FURIA', 0), giro = learn('AXE_GIRO', 0);
+    newGame('CRANE');
+    const ult = learn('CRANE_DEMOLITION', 0), giro = learn('CRANE_BEAM', 0);
     player.level = 6; player.skillPoints = 2;
     aiSpendPoints(player);
     checkEq(skillLevel(player, ult), 1, 'definitiva');
     checkEq(skillLevel(player, giro), 1, 'y el resto');
-    const pick = aiPickDraft(player, [SKILL_INDEX.REC_TRIPODE, SKILL_INDEX.AXE_HACHAZO, SKILL_INDEX.VAMP_CLAW]);
-    checkEq(pick.id, 'AXE_HACHAZO', 'natural');
+    const pick = aiPickDraft(player, [SKILL_INDEX.REC_TRIPODE, SKILL_INDEX.CRANE_CABIN, SKILL_INDEX.VAMP_CLAW]);
+    checkEq(pick.id, 'CRANE_CABIN', 'natural');
 });
 
 // ============================================================ MUNDO DE 8 HÉROES (fase F1)
 test('Partida de 8: el jugador + 7 rivales con otros héroes, cada uno en su arena', () => {
     resetGame();
-    selectHero(HERO_TEMPLATES.AXE);
+    selectHero(HERO_TEMPLATES.CRANE);
     checkEq(heroes.length, MAX_HEROES, 'héroes');
-    check(heroes.slice(1).every(h => h.isAI && h.key !== 'AXE'), 'rivales con otros héroes');
+    check(heroes.slice(1).every(h => h.isAI && h.key !== 'CRANE'), 'rivales con otros héroes');
     check(heroes.slice(1).every(h => h.skills.length === 1), 'los rivales ya draftearon');
     learnSkill(currentDraft.options[0]);
     startWave();
@@ -1412,7 +1383,7 @@ test('Las arenas se juegan en paralelo; al terminar todas, la ronda suma puntos 
 });
 
 test('Solo se ven los mensajes de la arena que estás mirando', () => {
-    newGame('AXE');
+    newGame('CRANE');
     const rival = heroes[1];
     rival.inRest = false;
     arenas.push(makeArena('wave', [rival]));
@@ -1428,7 +1399,7 @@ test('Solo se ven los mensajes de la arena que estás mirando', () => {
 
 test('Rival Condenado que muere contra creeps queda eliminado y no juega la ronda siguiente', () => {
     resetGame();
-    selectHero(HERO_TEMPLATES.AXE);
+    selectHero(HERO_TEMPLATES.CRANE);
     learnSkill(currentDraft.options[0]);
     startWave();
     const rival = heroes[3];
@@ -1448,7 +1419,7 @@ test('Rival Condenado que muere contra creeps queda eliminado y no juega la rond
 
 test('Espectador: si el jugador queda eliminado, la partida sigue y mira a otro héroe', () => {
     resetGame();
-    selectHero(HERO_TEMPLATES.AXE);
+    selectHero(HERO_TEMPLATES.CRANE);
     learnSkill(currentDraft.options[0]);
     startWave();
     player.lives = 0; setCondemned(player, 0.1);
@@ -1467,7 +1438,7 @@ test('Fin de partida al llegar al máximo de rondas: gana el primero del ranking
     try {
         MAX_ROUNDS = 1;
         resetGame();
-        selectHero(HERO_TEMPLATES.AXE);
+        selectHero(HERO_TEMPLATES.CRANE);
         learnSkill(currentDraft.options[0]);
         startWave();
         heroes[2].points = 10;
@@ -1481,7 +1452,7 @@ test('Fin de partida al llegar al máximo de rondas: gana el primero del ranking
 // ============================================================ DUELOS (fase F2)
 // Deja la partida lista en el duelo de la ronda (todas las oleadas limpias). Por defecto el jugador pelea contra heroes[1]
 // (la rotación elige a los que menos duelos pelearon).
-function toDuels(heroKey = 'AXE', playerFights = true) {
+function toDuels(heroKey = 'CRANE', playerFights = true) {
     resetGame();
     selectHero(HERO_TEMPLATES[heroKey]);
     learnSkill(currentDraft.options[0]);
@@ -1504,7 +1475,7 @@ test('Un duelo por ronda: pelean los que menos pelearon, sin repetir la pareja a
         const pair = pickDuelPair(heroes.slice(2, 5));
         check(!(pair.includes(heroes[2]) && pair.includes(heroes[3])), 'no repite la pareja anterior');
     }
-    toDuels('AXE', false);
+    toDuels('CRANE', false);
     check(!arenas[0].heroes.includes(player) && viewedHero === player, 'si no peleás, la cámara sigue en tu héroe');
     check(arenas[0].heroes.every(h => heroStatusIcon(h) === '🔥') && heroStatusIcon(player) === '🏕', 'el 🔥 marca a los duelistas');
 }, { random: true });
@@ -1533,7 +1504,7 @@ test('Duelo con 3 héroes o menos: el perdedor queda maldito (aunque tenga vidas
 });
 
 test('La maldición amplifica el daño de creeps y héroes sin maldición, no el de otro maldito', () => {
-    newGame('AXE');
+    newGame('CRANE');
     const cursed = heroes[1], clean = heroes[2];
     setCondemned(player, 0.5);
     const c = dummy();
@@ -1545,7 +1516,7 @@ test('La maldición amplifica el daño de creeps y héroes sin maldición, no el
 });
 
 test('Maldito con vidas: un creep lo mata y pierde una vida (no queda eliminado)', () => {
-    newGame('AXE');
+    newGame('CRANE');
     setCondemned(player, 0.1);
     player.hp = 1;
     updateCreep(dummy({ atk: 9999, attackTimer: 99 }), 0.016);
@@ -1604,7 +1575,7 @@ test('Duelo: la IA usa su definitiva y habilidades de área contra un solo rival
     const arena = arenas[0];
     const [a, b] = arena.heroes;
     a.skills.slice().forEach(s => a.removeSkill(s));
-    const ult = SKILL_INDEX.AXE_GIRO; // de área
+    const ult = SKILL_INDEX.CRANE_BEAM; // de área
     a.addSkill(ult); a.skillLevels[ult.id] = 1; a.mana = a.maxMana;
     b.x = a.x + 1; b.y = a.y;
     aiCastSkills(a);
@@ -1626,7 +1597,7 @@ test('Coraza de Espinas también devuelve daño a héroes cuerpo a cuerpo en los
 // que se pida lo contrario.
 function toBetting(gold = 400, playerFights = false) {
     resetGame();
-    selectHero(HERO_TEMPLATES.AXE);
+    selectHero(HERO_TEMPLATES.CRANE);
     learnSkill(currentDraft.options[0]);
     waveNumber = DUEL_START_ROUND + 1;
     heroes.forEach((h, i) => { h.duelWins = playerFights ? (i < 2 ? 0 : 5) : (i === 0 ? 5 : 0); });
@@ -1720,8 +1691,8 @@ test('Premios: la mitad de abajo de los que siguen en juego recibe un Fragmento;
 });
 
 test('IA: usa el Libro en una habilidad que no es natural y vende el Fragmento si su kit es casi todo natural', () => {
-    const h = new Hero(HERO_TEMPLATES.AXE);
-    const natural = Object.values(HERO_SKILLS.AXE).filter(s => !s.isUltimate);
+    const h = new Hero(HERO_TEMPLATES.CRANE);
+    const natural = Object.values(HERO_SKILLS.CRANE).filter(s => !s.isUltimate);
     const foreign = Object.values(HERO_SKILLS.REC).find(s => !s.isUltimate);
     natural.forEach(s => h.addSkill(s));
     h.addSkill(foreign);
@@ -1729,7 +1700,7 @@ test('IA: usa el Libro en una habilidad que no es natural y vende el Fragmento s
     const gold = h.gold;
     aiUseDestiny(h);
     check(!h.skills.includes(foreign), 'cambió la habilidad ajena');
-    checkEq(h.skills.length, KIT_SIZE, 'kit completo');
+    checkEq(h.skills.length, natural.length + 1, 'kit completo');
     checkEq(h.destiny.books + h.destiny.fragments, 0, 'usó todo');
     checkEq(h.gold, gold + FRAGMENT_SELL_PRICE, 'vendió el Fragmento');
 });
@@ -1738,7 +1709,7 @@ test('IA: usa el Libro en una habilidad que no es natural y vende el Fragmento s
 // Deja la partida en la pelea contra el jefe de la ronda 5 (cada héroe en su arena).
 function toBoss() {
     resetGame();
-    selectHero(HERO_TEMPLATES.AXE);
+    selectHero(HERO_TEMPLATES.CRANE);
     learnSkill(currentDraft.options[0]);
     waveNumber = ROUND_BOSS_EVERY;
     startWave();
@@ -1811,7 +1782,7 @@ test('Jefes: cada uno se pone más difícil a su manera', () => {
 });
 
 test('Neutrales: uno solo, da sus stats; al cambiarlo el anterior se vende solo', () => {
-    newGame('AXE');
+    newGame('CRANE');
     const armor = effArmor(player);
     player.neutralOffer = ['BRUTE_AMULET', 'WOLF_FANG', 'STALKER_DAGGER'];
     check(equipNeutral(player, 'BRUTE_AMULET'), 'equipado');
@@ -1895,7 +1866,7 @@ test('Tutorial: se abre, avanza y se cierra', () => {
 
 test('Rondas 1 a 4 sin duelos: al terminar las oleadas se pasa directo a la ronda siguiente', () => {
     resetGame();
-    selectHero(HERO_TEMPLATES.AXE);
+    selectHero(HERO_TEMPLATES.CRANE);
     learnSkill(currentDraft.options[0]);
     startWave();
     clearAllWaves(false);
@@ -1905,7 +1876,7 @@ test('Rondas 1 a 4 sin duelos: al terminar las oleadas se pasa directo a la rond
 
 test('Tienda en ventana: se abre sola en la preparación, se cierra y se vuelve a abrir con B', () => {
     resetGame();
-    selectHero(HERO_TEMPLATES.AXE);
+    selectHero(HERO_TEMPLATES.CRANE);
     learnSkill(currentDraft.options[0]);
     checkEq(gameState, 'PREP', 'preparación');
     checkEq(document.getElementById('shop-container').style.display, 'block', 'abierta');
@@ -1919,7 +1890,7 @@ test('Tienda en ventana: se abre sola en la preparación, se cierra y se vuelve 
 
 test('Cartel del duelo: presenta a los dos y la frase del presentador sale de cómo llegan', () => {
     resetGame();
-    selectHero(HERO_TEMPLATES.AXE);
+    selectHero(HERO_TEMPLATES.CRANE);
     learnSkill(currentDraft.options[0]);
     const [a, b] = heroes;
     check(duelTagline(a, b).includes('Se estrenan'), 'sin duelos jugados');
@@ -1942,7 +1913,7 @@ test('Cartel del duelo: presenta a los dos y la frase del presentador sale de c�
 
 test('Cartel del resultado: cuenta cómo terminó el duelo, con el golpe más fuerte y su habilidad', () => {
     resetGame();
-    selectHero(HERO_TEMPLATES.AXE);
+    selectHero(HERO_TEMPLATES.CRANE);
     learnSkill(currentDraft.options[0]);
     const [a, b] = heroes;
     const stats = { dmg: 0, avoidable: 0, changes: 0, tape: [] };
@@ -1975,7 +1946,7 @@ test('Cartel del resultado: cuenta cómo terminó el duelo, con el golpe más fu
 
 test('Repetición: la cinta del duelo guarda la jugada y el cartel la muestra, sin tocar el combate', () => {
     resetGame();
-    selectHero(HERO_TEMPLATES.AXE);
+    selectHero(HERO_TEMPLATES.CRANE);
     learnSkill(currentDraft.options[0]);
     const [a, b] = heroes, arena = makeDuelArenas({ pairs: [[a, b]], bye: null })[0];
     const hpA = a.hp, hpB = b.hp;
@@ -2019,7 +1990,7 @@ test('Ítems nuevos: Batería de Arranque solo pega más a los creeps', () => {
 
 test('Ítems nuevos: Núcleo Evolutivo escala con los creeps, no con los competidores', () => {
     resetGame();
-    selectHero(HERO_TEMPLATES.AXE);
+    selectHero(HERO_TEMPLATES.CRANE);
     learnSkill(currentDraft.options[0]);
     giveItem(player, 'EVO_CORE');
     const str = player.str, n = ITEMS.EVO_CORE.killsPerPoint;
@@ -2033,7 +2004,7 @@ test('Ítems nuevos: Núcleo Evolutivo escala con los creeps, no con los competi
 
 test('Ítems nuevos: Placa de Producción baja el daño de los jefes y de nadie más', () => {
     resetGame();
-    selectHero(HERO_TEMPLATES.AXE);
+    selectHero(HERO_TEMPLATES.CRANE);
     learnSkill(currentDraft.options[0]);
     const hurt = source => { player.hp = player.maxHp; const hp = player.hp; dealDamage(source, player, 100, 'pure'); return hp - player.hp; };
     const other = heroes[1], boss = other, grunt = other; // cualquier fuente sirve: lo que cuenta es la marca de jefe
@@ -2106,7 +2077,7 @@ test('Atrapado: no camina pero sigue pegando; la Tenaza atrapa cada 5 golpes', (
 test('Una Bobina se arma en cuatro ítems y la tienda lo dice', () => {
     checkEq(itemBuildsInto('COIL').length, 4, 'cuatro caminos');
     resetGame();
-    selectHero(HERO_TEMPLATES.AXE);
+    selectHero(HERO_TEMPLATES.CRANE);
     learnSkill(currentDraft.options[0]);
     player.gold = 1000;
     buyItem(ITEMS.COIL);
@@ -2194,9 +2165,76 @@ test('La IA: la Batería solo temprano y lo propio de cada competidor existe', (
     resetGame();
 });
 
+test('Grúa: el gancho arrastra y contra una columna aturde; los jefes y el anclado no se mueven', () => {
+    toDuels('CRANE');
+    const [a, b] = arenas[0].heroes;
+    a.x = 3; a.y = 6; b.x = 9; b.y = 6;
+    check(dragUnit(b, -1, 0, 5).moved === 5 && b.x === 4, 'arrastra hasta pegarlo');
+    b.x = 9; b.y = 3; a.x = 3; a.y = 3; // la columna (7, 3) queda en el medio
+    const r = dragUnit(b, -1, 0, 5);
+    check(r.wall && b.x === 8, 'la columna lo frena');
+    addEffect(b, { id: 'X', name: 'x', duration: 5, flags: ['anchored'] });
+    b.x = 9; b.y = 6;
+    checkEq(dragUnit(b, -1, 0, 3).moved, 0, 'el anclado no se mueve');
+    removeEffect(b, 'X');
+    b.isRoundBoss = true;
+    checkEq(dragUnit(b, -1, 0, 3).moved, 0, 'el jefe tampoco');
+    b.isRoundBoss = false;
+});
+
+test('Grúa: Carga Pesada suma al próximo golpe, una vez', () => {
+    toDuels('CRANE');
+    const [a, b] = arenas[0].heroes;
+    emit(a, 'onForcedMove', { target: b });
+    const hit = () => { const ctx = { target: b, dmg: 100 }; emit(a, 'beforeAttack', ctx); return ctx.dmg; };
+    checkNear(hit(), 140, 'el primero +40%');
+    checkEq(hit(), 100, 'el segundo, normal');
+});
+
+test('Grúa: Viga empuja y el gancho en vano la deja expuesta', () => {
+    toDuels('CRANE');
+    const [a, b] = arenas[0].heroes;
+    a.x = 3; a.y = 6; b.x = 4; b.y = 6;
+    const hp = b.hp;
+    a.mana = a.maxMana;
+    HERO_SKILLS.CRANE.CRANE_BEAM.cast(a);
+    check(b.hp < hp, 'pega');
+    checkEq(b.x, 6, 'empuja 2');
+    a.skills = [HERO_SKILLS.CRANE.CRANE_HOOK]; a.skillLevels.CRANE_HOOK = 1;
+    b.x = 16; b.y = 11;
+    a.aimPoint = { x: 8, y: 6 };
+    a.exposedUntil = 0;
+    HERO_SKILLS.CRANE.CRANE_HOOK.cast(a);
+    a.aimPoint = null;
+    for (let i = 0; i < 20; i++) updateProjectiles(a.arena, 0.05);
+    check(a.exposedUntil > gameClock, 'expuesta al fallar');
+});
+
+test('Escudo: se come el daño, en duelo vale menos y Cabina Reforzada salta una vez por pelea', () => {
+    resetGame();
+    selectHero(HERO_TEMPLATES.CRANE);
+    learnSkill(currentDraft.options[0]);
+    addShield(player, 50, 5);
+    checkEq(absorbShield(player, 30), 0, 'se lo come');
+    checkEq(absorbShield(player, 30), 10, 'lo que sobra pasa');
+    check(!getEffect(player, 'SHIELD'), 'gastado, se va');
+    toDuels('CRANE');
+    const [a, b] = arenas[0].heroes;
+    addShield(a, 100, 5);
+    checkEq(getEffect(a, 'SHIELD').data.left, Math.round(100 * (1 - DUEL_HEAL_REDUCTION)), 'en duelo, menos');
+    removeEffect(a, 'SHIELD');
+    a.skills = [HERO_SKILLS.CRANE.CRANE_CABIN]; a.skillLevels.CRANE_CABIN = 1;
+    a.hp = Math.round(a.maxHp * 0.3);
+    emit(a, 'onDamaged', {});
+    check(getEffect(a, 'SHIELD'), 'salta');
+    removeEffect(a, 'SHIELD');
+    emit(a, 'onDamaged', {});
+    check(!getEffect(a, 'SHIELD'), 'una vez por pelea');
+});
+
 test('Zócalo de TV: en combate muestra la tabla y un clic mira la arena de ese competidor', () => {
     resetGame();
-    selectHero(HERO_TEMPLATES.AXE);
+    selectHero(HERO_TEMPLATES.CRANE);
     learnSkill(currentDraft.options[0]);
     renderScoreboard();
     check(!document.body.classList.contains('tv-rank-on'), 'en la preparación no está');
@@ -2226,8 +2264,8 @@ test('Habilidades automáticas: con H prendido el jugador lanza sus habilidades 
     try {
         for (const on of [true, false]) {
             autoCast = on;
-            newGame('AXE');
-            const skill = learn(Object.values(HERO_SKILLS.AXE).find(s => s.kind === 'active' && !s.isUltimate).id, 1);
+            newGame('CRANE');
+            const skill = learn('CRANE_ANCHOR', 1);
             player.mana = player.maxMana;
             const c = creeps[0]; c.x = player.x + 1; c.y = player.y; c.hp = c.maxHp = 1e6;
             creeps.slice(1).forEach(o => { o.hp = 0; });
@@ -2241,7 +2279,7 @@ test('Apuntar con el mouse: la habilidad va al enemigo más cercano al cursor (d
     newGame('VAMPIRE');
     const skill = learn('VAMP_LEAP', 1);
     check(isAimedSkill(skill), 'se apunta');
-    check(!isAimedSkill(SKILL_INDEX.AXE_GIRO), 'el Giro (área alrededor) no se apunta');
+    check(!isAimedSkill(SKILL_INDEX.CRANE_ANCHOR), 'el Contrapeso (sobre uno mismo) no se apunta');
     const near = dummy(), far = dummy();
     creeps.forEach(c => { if (c !== near && c !== far) c.hp = 0; });
     [near, far].forEach(c => { c.hp = c.maxHp = 5000; });
@@ -2300,7 +2338,7 @@ test('Golpe anunciado: se prepara con la marca en el piso, sale al punto fijado 
 
 test('La IA lee los golpes anunciados: con tiempo de persona sale de la marca; si no la ve, se la come', () => {
     newGame('ZEUS');
-    const skill = learn('ZEUS_BOLT', 1), ai = new Hero(HERO_TEMPLATES.AXE);
+    const skill = learn('ZEUS_BOLT', 1), ai = new Hero(HERO_TEMPLATES.CRANE);
     gameState = 'DUEL'; arenas = [makeArena('duel', [player, ai])];
     player.x = 5; player.y = 5; ai.x = player.x + 3; ai.y = player.y;
     const sawIt = Math.random; Math.random = () => 0.99; // la ve y tarda lo máximo (0,5 s)
@@ -2320,7 +2358,7 @@ test('La IA lee los golpes anunciados: con tiempo de persona sale de la marca; s
 
 test('Arena de duelo con columnas: no se pisan, frenan los proyectiles, sin verlo no se le tira y la IA rodea para verlo', () => {
     newGame('REC');
-    const rival = new Hero(HERO_TEMPLATES.AXE);
+    const rival = new Hero(HERO_TEMPLATES.CRANE);
     gameState = 'DUEL'; arenas = makeDuelArenas({ pairs: [[player, rival]] });
     const a = player.arena, [cx, cy] = DUEL_COLUMNS[0];
     check(a.walls && !walkable(a, cx, cy), 'la columna no se pisa');
@@ -2393,12 +2431,12 @@ test('Rec: Travelling rueda alejándose y da rango; Cámara Fija canaliza (quiet
 });
 
 test('Los mensajes nombran a los competidores (no "undefined")', () => {
-    newGame('AXE');
+    newGame('CRANE');
     checkEq(player.label, player.displayName, 'un competidor se llama por su nombre de jugador');
 });
 
 test('Clic derecho: el héroe camina hasta el destino; el teclado lo cancela', () => {
-    newGame('AXE');
+    newGame('CRANE');
     creeps.forEach(c => { c.hp = 0; });
     creeps[0].hp = 1; creeps[0].x = 19; creeps[0].y = 0; // que la oleada no termine
     player.x = 2; player.y = 2;
@@ -2409,7 +2447,7 @@ test('Clic derecho: el héroe camina hasta el destino; el teclado lo cancela', (
 });
 
 test('Pausa: congela la partida y Esc la abre y la cierra', () => {
-    newGame('AXE');
+    newGame('CRANE');
     setPaused(true);
     check(paused, 'en pausa');
     checkEq(document.getElementById('pause-menu').style.display, 'block', 'menú de pausa visible');
@@ -2425,7 +2463,7 @@ test('Pausa: congela la partida y Esc la abre y la cierra', () => {
 });
 
 test('Presión al líder: los creeps se adaptan al poder del héroe (entre −15% y +25%)', () => {
-    newGame('AXE');
+    newGame('CRANE');
     heroes.forEach(h => { h.level = 5; h.inventory = []; });
     checkNear(pressureMult(player), 1, 'igual al promedio: sin cambio');
     player.level = 20;
@@ -2451,7 +2489,7 @@ test('Íconos: cada ítem y cada neutral tiene el suyo, con formas de 12×12', (
 });
 
 test('Guía de ítems: cada héroe tiene la suya y la tienda la muestra primero', () => {
-    newGame('AXE');
+    newGame('CRANE');
     startPreparation();
     shopTab = 'guide'; renderShop();
     const cards = [...document.querySelectorAll('#shop-options .skill-card h4')].map(h => h.textContent);
@@ -2469,7 +2507,7 @@ test('Estadísticas debajo del ranking', () => {
 
 test('Sala de espera: el jugador camina con el teclado y no pisa la fuente', () => {
     resetGame();
-    selectHero(HERO_TEMPLATES.AXE);
+    selectHero(HERO_TEMPLATES.CRANE);
     check(player.inRest, 'en la sala de espera');
     player.x = REST_SPOT.x; player.y = REST_SPOT.y - 2; // justo debajo de la fuente
     keys['arrowup'] = true;
@@ -2674,17 +2712,17 @@ test('Custom Hero: pantalla de fin de partida — puesto, rondas, duelos, oro, b
     const rsum = document.getElementById('round-summary'); check(!rsum || rsum.style.display === 'none', 'sin la tarjeta de la última ronda');
     check(box.style.display === 'none', 'y cierra el resumen');
     // eliminado a mitad de partida: el resumen con "seguir mirando"
-    newGame('AXE'); eliminateHero(player, 'Prueba');
+    newGame('CRANE'); eliminateHero(player, 'Prueba');
     check(box.style.display === 'block' && box.querySelector('#ms-watch'), 'eliminado: resumen con "seguir mirando"');
     box.querySelector('#ms-watch').click();
     check(box.style.display === 'none', 'seguir mirando lo cierra');
     endGame(); // la partida termina después: no se cuenta dos veces
-    // el perfil: 2 partidas, una con el héroe 1 y otra con Axe (eliminado), sin contar dos veces
+    // el perfil: 2 partidas, una con el héroe 1 y otra con Grúa (eliminada), sin contar dos veces
     const p = chProfile(), k0 = Object.keys(HERO_TEMPLATES)[1];
     checkEq(p.games, 2, 'el perfil cuenta las 2 partidas');
-    checkEq(p.heroes.AXE.games, 1, 'Axe, una sola vez aunque después terminó la partida');
+    checkEq(p.heroes.CRANE.games, 1, 'Grúa, una sola vez aunque después terminó la partida');
     check(p.heroes[k0].best >= 1 && p.heroes[k0].best <= 8, 'guarda el mejor puesto con cada héroe');
-    check(chProfileSummary().includes('2 partidas') && chProfileHeroesHtml().includes(chHeroName('AXE')), 'y se resume para el menú');
+    check(chProfileSummary().includes('2 partidas') && chProfileHeroesHtml().includes(chHeroName('CRANE')), 'y se resume para el menú');
     resetGame(); chProfileMemory = null;
 });
 
@@ -2699,7 +2737,7 @@ test('Banco de balance: la misma semilla juega la misma partida y la tabla cuent
 }, { random: true });
 
 test('Economía de la ronda — interés al terminar la ronda, racha (ganada o perdida) y la cuenta de dónde salió el oro', () => {
-    newGame('AXE');
+    newGame('CRANE');
     player.gold = 40; player.streak = 1; ledgerStart();
     player.gold += 12; player.diedThisRound = false; // 12 de bajas
     endRoundEconomy();
@@ -2716,7 +2754,7 @@ test('Economía de la ronda — interés al terminar la ronda, racha (ganada o p
     player.gold = 999; checkEq(interestFor(player), ECON.interestMax, 'el interés tiene tope');
 }, { random: true });
 test('Nueva Partida deja todo como al empezar', () => {
-    newGame('AXE');
+    newGame('CRANE');
     resetGame();
     checkEq(player, null, 'jugador');
     checkEq(gameState, 'MENU', 'estado');

@@ -111,3 +111,7 @@ Arreglo (`aiWorkToward`/`aiShop`, ai.js, sin tocar stats ni ítems): el contra d
 
 Lectura: arregla una falla de la IA, no el balance. El Alquimista sube y **el Nigromante cae de 23 a 8%** (sin explicar; la hipótesis es que ganaba más cuando los otros morían a los Emisores). Bruja, Rec y Axe siguen en 1-2%: llegan más lejos (Axe de puesto 5,0 a 4,6), pero no ganan.
 Duelos: mediana 16 → 13,4 s, debajo de la meta de 15-30 s, pero **no es que peleen distinto:** ronda final 22,6 → 24,2, así que hay más duelos en las rondas 20+ (769 → 1017, con muerte súbita duran menos de 15 s). Dentro de las rondas 10 a 19 no cambió. Por tiempo 12%, 0,83 cambios de ventaja.
+### 2026-10-30: Grúa reemplaza a Axe (264 partidas)
+% de victorias y puesto: Arcanista 32 / 2,4 · Asesino 23 / 4,2 · Zeus 21 / 4,2 · Vampiro 17 / 4,9 · Nigromante 15 / 4,5 · Alquimista 12 / 3,2 · Danzante 10 / 4,9 · Rec 3 / 4,6 · Sabio 3 / 4,7 · Bruja 0 / 5,6 · Grúa 0 / 6,3.
+Duelos: mediana 16,6 s, 14% por tiempo, 0,9 cambios de ventaja, la IA esquiva 43% de los golpes anunciados (meta 30-70 ✔; antes 32%). El Arcanista volvió a subir (24 → 32%): sin Axe tiene menos rivales que aguanten. Ahora Grúa y Bruja son los que quedan abajo.
+
