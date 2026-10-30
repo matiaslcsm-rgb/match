@@ -91,7 +91,8 @@ copiado de Dota.
 
 ## Fase 4 — El show "En Vivo"
 Que se sienta un programa de TV (concepto en `docs/CONCEPTO-FUTURISTA.md`).
-- [ ] Menús con la estética del show (portada, elección de competidor, tienda, apuestas).
+- [x] Menús con la estética del show (portada, elección de competidor, tienda, apuestas). Hecho 2026-10-30, con el
+  resumen de fin de partida y los glosarios: paleta industrial y colores de atributo dentro de la paleta.
 - [ ] El presentador y los carteles del programa (presentación de cada duelo, repeticiones, ranking como zócalo de TV).
 - [x] El público reacciona (sonido y gradas). Hecho 2026-10-28: tribunas de hormigón atrás y a los costados de la
   arena 3D con espectadores de colores que se mueven solos y saltan cuando cae alguien (más si es un competidor o el

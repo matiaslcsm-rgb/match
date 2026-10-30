@@ -33,6 +33,7 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
   y **el Sniper se retiró**. Banco sin el Sniper: el que más gana, 25% (antes 75%); Rec, puesto 4,7 y 55% de duelos.
   Piezas nuevas del motor: silencio, canalización, disparo propio del innato, `aiMinDist`, etiqueta ESCAPE.
 - Estética de todo MATCH: ciencia ficción industrial (2026-10-26).
+- **Interfaz industrial completa (2026-10-30):** tienda, apuestas, fin de partida, glosarios y elección de competidor con la paleta de `docs/CONCEPTO-FUTURISTA.md` ("Interfaz industrial, parte 2" al final de `style.css`). Los glosarios se veían distinto desde la portada (sin `body.pixel-ui`): ahora son iguales y ocupan todo el ancho. Colores de atributo dentro de la paleta: Fuerza naranja, Agilidad amarillo, Inteligencia hueso (el rojo queda para el peligro). Las ventanas bajan para que el contador no tape el título. Los colores de rareza de los ítems siguen igual.
 - **Para medir:** `docs/correr-pruebas.py`; el banco (`index.html?banco=66`) ahora también da la ronda en que queda
   afuera cada uno, sus duelos ganados y los golpes anunciados esquivados.
 

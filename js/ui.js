@@ -37,7 +37,7 @@ function renderHeroPick() {
             card.className = 'skill-card';
             card.style.borderLeft = `4px solid ${info.color}`;
             const scalingText = `Escalado: +${t.scaling.perKillsAmount} ${scalingStatLabel(t.scaling.stat)} cada ${t.scaling.perKills} bajas &middot; +${t.scaling.perHeroKill} al ganar un duelo.`;
-            card.innerHTML = `<h4 class="pick-title">${heroIconHtml(t, 'md')}<span style="color:${info.color}">${t.name}</span> <span class="item-meta">${t.role}</span></h4><p>${t.description}</p><p style="color:#ffb703; margin-top:4px;">${scalingText}</p>`;
+            card.innerHTML = `<h4 class="pick-title">${heroIconHtml(t, 'md')}<span style="color:${info.color}">${t.name}</span> <span class="item-meta">${t.role}</span></h4><p>${t.description}</p><p style="color:#f2c230; margin-top:4px;">${scalingText}</p>`;
             card.onclick = () => selectHero(t);
             container.appendChild(card);
         });
@@ -53,9 +53,9 @@ function renderHeroPick() {
 // Mismo formato que los códices de ítems y creeps: nombre en el color de su atributo, texto en blanco, secciones por
 // atributo principal con botones para saltar. Cada carta: stats de nivel 1, escalado, innato, habilidades y guía de ítems.
 const ATTR_INFO = {
-    STR: { label: 'Fuerza', color: '#ff6b6b', note: 'Más vida y regeneración. Aguantan al frente y pegan cuerpo a cuerpo.' },
-    AGI: { label: 'Agilidad', color: '#69db7c', note: 'Más velocidad de ataque y armadura. Daño con ataques básicos y críticos.' },
-    INT: { label: 'Inteligencia', color: '#74c0fc', note: 'Más maná y amplificación de hechizos (+25% para magos, el resto lo dan los ítems). El daño fuerte viene de las habilidades.' }
+    STR: { label: 'Fuerza', color: '#ff9a2e', note: 'Más vida y regeneración. Aguantan al frente y pegan cuerpo a cuerpo.' },
+    AGI: { label: 'Agilidad', color: '#f2c230', note: 'Más velocidad de ataque y armadura. Daño con ataques básicos y críticos.' },
+    INT: { label: 'Inteligencia', color: '#c9ccb8', note: 'Más maná y amplificación de hechizos (+25% para magos, el resto lo dan los ítems). El daño fuerte viene de las habilidades.' }
 };
 
 function heroAbilityHtml(a, kind) {
@@ -131,7 +131,7 @@ function creepTag(t, size = 'sm') { return unitIconHtml(t, size); }
 
 // Mismo formato que el códice de ítems: nombre en el color del creep, descripción en blanco, secciones con botones
 // para saltar: básicos, con mecánica, temas de oleada y jefes de ronda.
-const CREEP_SECTION_COLORS = { basic: '#adb5bd', mechanic: '#c77dff', themes: '#8ecae6', bosses: '#ff0055' };
+const CREEP_SECTION_COLORS = { basic: '#c9ccb8', mechanic: '#f2c230', themes: '#ff9a2e', bosses: '#d9402c' };
 
 function creepNameHtml(t) { return `<span class="item-name" style="color:${t.color}">${t.label}</span>`; }
 

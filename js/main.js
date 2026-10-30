@@ -1,7 +1,7 @@
 ﻿// Punto de entrada: conecta los botones y arranca el bucle principal.
 
 // Versión visible en el menú: si no coincide con la última subida, el navegador muestra una copia vieja (Ctrl+F5).
-const GAME_VERSION = '2026-10-30 · MATCH: barra EN VIVO y fondo industrial';
+const GAME_VERSION = '2026-10-30 · MATCH: interfaz industrial en tienda, apuestas y glosarios';
 document.getElementById('game-version').textContent = `Versión ${GAME_VERSION}`;
 // Se actualiza solo (2026-10-17, "no se actualizó"): GitHub Pages deja el juego en la caché del navegador hasta 10 min.
 // Si el main.js del servidor trae otra versión, se vuelven a bajar la página y sus archivos y se recarga (una vez por versión).

@@ -172,7 +172,7 @@ button.secondary-btn:hover { background: #2f342c; }
 #hb-name-line { display: flex; justify-content: space-between; align-items: baseline; font-size: 0.8rem; }
 #hb-name { color: #a9bd6a; font-weight: bold; }
 #hb-stats { font-size: 0.7rem; color: #bbb; cursor: help; }
-#hb-stats .st-str { color: #ff6b6b; } #hb-stats .st-agi { color: #69db7c; } #hb-stats .st-int { color: #8fb3c9; } #hb-stats .st-more { color: #a3b5a0; }
+#hb-stats .st-str { color: #ff9a2e; } #hb-stats .st-agi { color: #f2c230; } #hb-stats .st-int { color: #c9ccb8; } #hb-stats .st-more { color: #a3b5a0; }
 .hb-bar { position: relative; height: 14px; background: #252923; border: 1px solid #111; }
 .hb-bar.mana { height: 10px; }
 .hb-bar > div { height: 100%; }
@@ -278,7 +278,7 @@ body.big-map #left-col { display: none; }
 .hs-row { display: flex; justify-content: space-between; font-size: 0.74rem; padding: 1px 2px; color: #bbb; }
 .hs-row b { color: #fff; font-weight: bold; }
 .hs-row.main span { color: #ffc457; }
-.hs-row .st-str { color: #ff6b6b; } .hs-row .st-agi { color: #69db7c; } .hs-row .st-int { color: #8fb3c9; }
+.hs-row .st-str { color: #ff9a2e; } .hs-row .st-agi { color: #f2c230; } .hs-row .st-int { color: #c9ccb8; }
 .hs-scaling { font-size: 0.68rem; color: #ff9a2e; margin-top: 6px; }
 .badge-innate { font-size: 0.6rem; color: #1c1226; background: #b9cbd3; padding: 0 4px; margin-left: 4px; font-weight: bold; vertical-align: middle; }
 .badge-ult { font-size: 0.6rem; color: #2a1600; background: #ff9a2e; padding: 0 4px; margin-left: 4px; font-weight: bold; vertical-align: middle; }
@@ -527,9 +527,9 @@ body.pixel-ui #hero-stats b, body.pixel-ui #combat-log, body.pixel-ui .modal-box
 body.pixel-ui .subtitle, body.pixel-ui .pm-toggle span, body.pixel-ui #center-timer .ct-label { color: var(--px-dim) !important; }
 body.pixel-ui h3, body.pixel-ui h4, body.pixel-ui .modal-head h3, body.pixel-ui #game-state-text, body.pixel-ui #map-hud .mh-gold,
 body.pixel-ui #hb-name, body.pixel-ui .skill-card h4, body.pixel-ui #center-timer .ct-time { color: var(--px-title) !important; font-variant: normal !important; letter-spacing: 0.5px; }
-body.pixel-ui .st-str, body.pixel-ui #left-col .st-str { color: #ff7a6a !important; }
-body.pixel-ui .st-agi, body.pixel-ui #left-col .st-agi { color: #7ad08a !important; }
-body.pixel-ui .st-int, body.pixel-ui #left-col .st-int { color: #7fb0ff !important; }
+body.pixel-ui .st-str, body.pixel-ui #left-col .st-str { color: #ff9a2e !important; }
+body.pixel-ui .st-agi, body.pixel-ui #left-col .st-agi { color: #f2c230 !important; }
+body.pixel-ui .st-int, body.pixel-ui #left-col .st-int { color: #c9ccb8 !important; }
 body.pixel-ui .passive-chip, body.pixel-ui .passive-chip * { color: #7fd0d8 !important; }
 
 body.pixel-ui .passive-chip .badge-innate { background: #2f6a72 !important; color: #fff2dc !important; }
@@ -667,3 +667,94 @@ body.pixel-ui #live-bar {
 #live-bar .lb-title { color: #a3a595; }
 #live-bar .lb-info { color: #ff9a2e; }
 body.pixel-ui { background: repeating-linear-gradient(135deg, #121412 0 14px, #141714 14px 28px); }
+
+/* ===== Interfaz industrial, parte 2 (2026-10-30): tienda, apuestas, fin de partida, glosarios y elección de competidor.
+   Los glosarios también se abren desde la portada, donde todavía no está body.pixel-ui: por eso esto no depende de esa clase. ===== */
+:root { --in-panel: #1d201c; --in-cell: #262a24; --in-cell2: #31362f; --in-line: #0a0b0a; --in-edge: #4f554a; --in-bone: #e6e3d3; --in-dim: #a3a595; --in-orange: #ff9a2e; --in-yellow: #f2c230; }
+.modal-timer, .ct-label { color: var(--in-dim); }
+.modal-gold, .bet-value, .bet-total, .bd-pot, .bd-chosen, .item-price, .suggested { color: var(--in-yellow); }
+.modal-close { border-radius: 0; }
+
+/* Tienda */
+#shop-tabs button { background: var(--in-cell2); color: var(--in-bone); border: 2px solid var(--in-line); text-transform: uppercase; letter-spacing: 1px; padding: 6px 4px; }
+#shop-tabs button:hover { background: #3c4238; }
+#shop-tabs button.active { background: #c96a12; color: #fff4dc; border-color: var(--in-line); box-shadow: inset 0 -3px 0 var(--in-yellow); }
+.shop-category { color: var(--in-orange); border-bottom: 2px solid var(--in-edge); text-transform: uppercase; letter-spacing: 1px; padding-bottom: 2px; }
+#wave-preview { background: var(--in-line); border: 2px solid var(--in-edge); border-left: 6px solid var(--in-yellow); padding: 8px 10px; }
+#wave-preview h3 { color: var(--in-yellow) !important; }
+#wave-preview em { color: var(--in-dim); }
+#destiny-panel .destiny-row, #inventory-panel .destiny-row { background: var(--in-cell); border: 2px solid var(--in-line); box-shadow: inset 0 0 0 1px var(--in-edge); }
+#destiny-panel button, #inventory-panel button { background: var(--in-cell2); color: var(--in-yellow); border: 2px solid var(--in-line); }
+#destiny-panel button:hover, #inventory-panel button:hover { background: #3c4238; border-color: var(--in-line); }
+.guide-why { color: var(--in-bone); border-left: 4px solid var(--in-yellow); padding-left: 8px; }
+.neutral-offer { border: 2px solid var(--in-orange); }
+
+/* Apuestas */
+.bet-duelist { background: var(--in-cell); border: 2px solid var(--in-line); box-shadow: inset 0 0 0 2px var(--in-edge); }
+.bet-duelist.chosen { border-color: var(--in-line); box-shadow: inset 0 0 0 2px var(--in-yellow); }
+.bd-name { color: var(--in-bone); text-transform: uppercase; letter-spacing: 1px; }
+.bd-stats { color: var(--in-dim); }
+.bd-vs { color: var(--in-orange); }
+.bd-bet { background: #c96a12; color: #fff4dc; border: 2px solid var(--in-line); }
+.bd-bet:hover:not(:disabled) { background: #e07d1a; }
+.bd-bet:disabled { background: var(--in-cell2); color: var(--in-dim); }
+.bet-rule { color: var(--in-dim); }
+.bet-slider input { accent-color: var(--in-orange); }
+.bet-quick button { background: var(--in-cell2); color: var(--in-bone); border: 2px solid var(--in-line); text-transform: uppercase; }
+.bet-quick button:hover { background: #3c4238; }
+.bet-banner-line { color: var(--in-yellow); background: rgba(10,11,10,0.85); border-color: var(--in-yellow); }
+.bet-banner-line .bb-entry b { color: var(--in-orange); }
+
+/* Fin de partida y tarjeta de la ronda */
+.run-summary h2 { color: var(--in-orange); }
+.run-summary .rs-row { border-bottom: 2px solid var(--in-cell2); padding: 3px 0; }
+.run-summary .rs-row b { color: var(--in-yellow); }
+.run-summary .ms-chip { background: var(--in-cell); border: 2px solid var(--in-line); border-left: 4px solid var(--in-edge); }
+.run-summary button + button { margin-left: 0; }
+.ban-row small { color: var(--in-dim); }
+.ban-row select, .name-field input, #bet-pairs .bet-amount input { background: var(--in-line); color: var(--in-bone); border: 2px solid var(--in-edge); }
+.ban-row select:focus, .name-field input:focus { outline: none; border-color: var(--in-orange); }
+#round-summary { background: var(--in-panel); border-radius: 0; box-shadow: inset 0 0 0 2px var(--in-edge), 0 6px 20px rgba(0,0,0,0.5); }
+#round-summary .rsum-tip { color: var(--in-yellow); }
+#round-summary .up { color: var(--in-yellow); }
+
+/* Elección de competidor */
+#hero-any-drawer { background: var(--in-panel); border-right: 3px solid var(--in-orange); }
+#hero-any-drawer .hero-grid-card { background: var(--in-cell); }
+#hero-any-drawer .hero-grid-card:hover { background: var(--in-cell2); }
+.skill-card:hover, body.pixel-ui .skill-card:hover { border-color: var(--in-orange) !important; background: var(--in-cell2) !important; }
+.skill-card.disabled:hover, body.pixel-ui .skill-card.disabled:hover { border-color: var(--in-line) !important; background: var(--in-cell) !important; }
+.skill-card.random-pick, body.pixel-ui .skill-card.random-pick { border: 2px dashed var(--in-yellow) !important; }
+.skill-card.random-pick h4, body.pixel-ui .skill-card.random-pick h4 { color: var(--in-yellow) !important; }
+.draft-card:hover { box-shadow: 0 4px 14px rgba(255, 154, 46, 0.25); }
+
+/* Glosarios */
+.codex-view, .codex-view *, #hero-any-drawer, #hero-any-drawer * { font-family: 'Tiny5', Consolas, monospace !important; }
+.codex-view { background: rgba(14, 16, 14, 0.98); color: var(--in-bone); }
+.codex-view img { image-rendering: pixelated; }
+.codex-view .codex-layout { grid-template-columns: minmax(0, 1fr); background: var(--in-panel); border: 3px solid var(--in-line); box-shadow: inset 0 0 0 2px var(--in-edge); position: relative; }
+.codex-view .codex-layout::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 7px; background: var(--in-hazard); }
+.codex-back { background: rgba(14, 16, 14, 0.98); }
+.codex-back span { color: var(--in-dim); text-transform: uppercase; letter-spacing: 2px; }
+.codex-view h3 { color: var(--in-orange); }
+.codex-view .subtitle { color: var(--in-dim); }
+.item-jump { background: var(--in-panel); }
+.item-jump button { background: var(--in-cell2); border: 2px solid var(--in-line); text-transform: uppercase; letter-spacing: 1px; }
+.item-jump button:hover { background: #3c4238; }
+.item-section > h3 { border-bottom: 2px solid var(--in-edge); }
+.item-group { color: var(--in-yellow); text-transform: uppercase; letter-spacing: 1px; }
+.item-card { background: var(--in-cell); border: 2px solid var(--in-line); border-left: 5px solid; box-shadow: inset 0 0 0 1px var(--in-cell2); }
+.item-stats, .item-text { color: var(--in-bone); }
+.item-stats li::before { color: var(--in-orange); }
+.item-meta { color: var(--in-dim); }
+.item-counter { color: var(--in-yellow); }
+.hc-sub { color: var(--in-dim); border-bottom: 2px solid var(--in-edge); }
+.hc-ability { background: var(--in-panel); border: 2px solid var(--in-line); }
+.hc-ability.ult { border-color: var(--in-orange); }
+.hc-ability.innate { border-color: var(--in-edge); }
+.hc-ability-name { color: var(--in-bone); }
+.hc-ability.innate .hc-ability-name { color: var(--in-yellow); }
+.tag { color: var(--in-dim); border: 1px solid var(--in-edge); }
+.badge-innate { background: var(--in-yellow); color: var(--in-line); }
+.hs-scaling, .counter-item { color: var(--in-orange); }
+.modal { padding-top: 78px; } /* que el contador grande no tape el título de la ventana */
