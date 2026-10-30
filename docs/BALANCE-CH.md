@@ -115,3 +115,7 @@ Duelos: mediana 16 → 13,4 s, debajo de la meta de 15-30 s, pero **no es que pe
 % de victorias y puesto: Arcanista 32 / 2,4 · Asesino 23 / 4,2 · Zeus 21 / 4,2 · Vampiro 17 / 4,9 · Nigromante 15 / 4,5 · Alquimista 12 / 3,2 · Danzante 10 / 4,9 · Rec 3 / 4,6 · Sabio 3 / 4,7 · Bruja 0 / 5,6 · Grúa 0 / 6,3.
 Duelos: mediana 16,6 s, 14% por tiempo, 0,9 cambios de ventaja, la IA esquiva 43% de los golpes anunciados (meta 30-70 ✔; antes 32%). El Arcanista volvió a subir (24 → 32%): sin Axe tiene menos rivales que aguanten. Ahora Grúa y Bruja son los que quedan abajo.
 
+### 2026-10-30: Grúa más los contras con inventario lleno (264 partidas, con todo integrado)
+% de victorias y puesto: Arcanista 23 / 3,0 · Zeus 21 / 4,4 · Vampiro 21 / 4,6 · Asesino 18 / 4,3 · Nigromante 15 / 4,7 · Alquimista 14 / 2,8 · Danzante 13 / 4,9 · Sabio 7 / 4,4 · Bruja 4 / 5,2 · Rec 1 / 4,5 · Grúa 0 / 6,6.
+Duelos: mediana 14,4 s (meta 15-30, apenas abajo), 13% por tiempo, 0,8 cambios de ventaja, esquive de la IA 40%. Nadie pasa de 23%. Grúa gana 38% de sus duelos y sale en la ronda 16: sigue siendo la última con la IA.
+
