@@ -112,7 +112,7 @@ const TUTORIAL_PAGES = [
         <div class="tut-cards">
             ${tutCard('🏆', 'Cómo se gana', 'Quedando último en pie. Los creeps se hacen más fuertes cada ronda, así que la partida siempre termina.')}
             ${tutCard('⭐', 'Puntos', 'Ganar un duelo da <b>+3</b>; superar la oleada sin morir, <b>+1</b>. El oro desempata.')}
-            ${tutCard('🧩', 'Tu kit', 'Armás 4 habilidades mezclando las de cualquier héroe. Cada partida es distinta.')}
+            ${tutCard('🧩', 'Tu kit', 'Armás 4 habilidades mezclando las de cualquier héroe, y una quinta más adelante. Cada partida es distinta.')}
             ${tutCard('🔓', 'Elegir a mano', 'Si no te convencen tus 3 opciones, el botón "Elegir cualquier héroe" te deja elegir cualquiera de los 11 — pero arrancás sin oro (en vez de 100g).')}
         </div>` },
     { icon: '🔁', color: '#8aa05a', title: 'Una ronda', body: `
@@ -127,8 +127,10 @@ const TUTORIAL_PAGES = [
         <p class="tut-note">⏱ Cada fase tiene tiempo: si se acaba, el juego decide por vos.</p>` },
     { icon: '⌨️', color: '#7fa43f', title: 'Teclado', body: `
         <div class="tut-keys">
-            ${tutKey(['E', 'R', 'T', 'F', 'Q'], 'Tus habilidades, en el orden en que las aprendiste. Las que se apuntan se confirman con clic.')}
-            ${tutKey(['W', 'A', 'S', 'D'], 'Moverte con el teclado: solo si lo prendés en Opciones (Esc). Como en Dota, se juega con el mouse.')}
+            ${tutKey(['Q', 'W', 'E', 'R', 'D', 'F'], 'Tus habilidades: definitivas en R (si no, D o F), pasivas en W o E y activas en Q. Las que se apuntan se confirman con clic.')}
+            ${tutKey(['K'], 'Acomodar habilidades: las arrastrás a la tecla que quieras.')}
+            ${tutKey(['1', '2', '3', '4', '5', '6'], 'Los ítems activos, según su casilla del inventario.')}
+            ${tutKey(['WASD'], 'Moverte con el teclado: solo si lo prendés en Opciones (Esc), y las habilidades dejan libres W y D. Como en Dota, se juega con el mouse.')}
             ${tutKey(['H'], 'Habilidades automáticas: se lanzan solas y vos solo te movés.')}
             ${tutKey(['B'], 'Abrir o cerrar la tienda (en la preparación).')}
             ${tutKey(['M'], 'Agrandar el mapa.')}
@@ -148,13 +150,15 @@ const TUTORIAL_PAGES = [
         <div class="tut-cards">
             ${tutCard('🃏', 'Draft', 'En cada draft una de las 3 opciones es de tu héroe (natural, ★); las otras pueden ser de cualquiera.')}
             ${tutCard('➕', 'Puntos', 'Llegan en nivel 0: con el botón <b>[+]</b> les ponés puntos (1 por nivel del héroe). Normales hasta 4, la <u>definitiva</u> hasta 3 (niveles 6, 12 y 18).')}
-            ${tutCard('◆', 'Innato y pasivas', 'El innato está siempre activo. Las pasivas no usan tecla: funcionan solas.')}
+            ${tutCard('◆', 'Innato y pasivas', 'El innato está siempre activo. Las pasivas ocupan su casilla, pero funcionan solas: no hace falta apretarlas.')}
             ${tutCard('🔮', 'Rehacer el kit', '<b>Fragmento del Destino</b>: cambia una habilidad al azar por una de 4. <b>Libro</b>: elegís cuál, entre 6.')}
         </div>` },
     { icon: '🛒', color: '#ffc457', title: 'Tienda e ítems', body: `
         <div class="tut-cards">
             ${tutCard('⭐', 'Guía de tu héroe', 'La primera pestaña de la tienda te sugiere qué comprar: inicio, núcleo y final.')}
             ${tutCard('🧱', 'Básicos y mejoras', 'Los básicos se pueden repetir; las mejoras se arman con básicos + una receta y pagás solo lo que falta.')}
+            ${tutCard('🔀', 'Armá según lo que venga', 'Cada básico dice en qué se arma: la misma pieza te lleva a ítems distintos. Decidí según tu rival y la ronda.')}
+            ${tutCard('⚡', 'Ítems activos', 'Algunos se usan con las teclas <b>1 a 6</b>: silenciar, aturdir, atrapar, saltar, protegerte. Los ves con su número en el inventario.')}
             ${tutCard('🛡️', 'Contras', 'Mirá el aviso de la próxima oleada: hay ítems que contrarrestan a cada tipo de creep.')}
             ${tutCard('🎒', 'Inventario', '6 espacios + 1 para el objeto neutral. Vender devuelve la mitad.')}
         </div>` },
@@ -166,7 +170,7 @@ const TUTORIAL_PAGES = [
         </div>` },
     { icon: '⚔️', color: '#e63946', title: 'Duelos y apuestas', body: `
         <div class="tut-cards">
-            ${tutCard('🤺', 'Un duelo por ronda', 'Desde la ronda 5 pelean 2 héroes (primero los que menos pelearon) y los demás miran. En duelo se hacen menos daño, se curan menos y los aturdimientos duran menos. A los 45s gana el de más % de vida.')}
+            ${tutCard('🤺', 'Un duelo por ronda', 'Desde la ronda 5 pelean 2 héroes (primero los que menos pelearon) y los demás miran. En duelo se hacen menos daño, se curan menos y los aturdimientos duran menos. A los 60s gana el de más % de vida. Al terminar, el cartel repite la jugada.')}
             ${tutCard('☠', 'Perder', 'Con 4 o más en juego no pasa nada. Con 3, suma una instancia de maldición. Con 2 (el mano a mano final), cuesta una vida y suma una instancia.')}
             ${tutCard('🎲', 'Pozo de apuestas', 'Todos los que no pelean apuestan (hasta la mitad de su oro). Los que aciertan recuperan lo suyo y se reparten lo apostado al perdedor: apostar a la sorpresa paga más.')}
             ${tutCard('🤝', 'Respaldo', 'El que gana el duelo cobra además el 25% de lo que le apostaron.')}

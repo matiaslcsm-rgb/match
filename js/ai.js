@@ -152,13 +152,15 @@ function aiCastSkills(hero) {
     });
     aiUseItems(hero, winding);
 }
+const AI_ITEM_LOW_HP = 0.35;
 // Los ítems activos no se gastan en creeps comunes: contra competidores y jefes, o para cortar un golpe anunciado.
 function aiUseItems(hero, winding) {
     hero.inventory.forEach((inv, slot) => {
         const item = ITEMS[inv.key];
         if (!item.active || (hero.cooldowns[itemCooldownId(item)] || 0) > 0) return;
         const t = nearestEnemy(hero, item.active.range);
-        if (t && (t.isHero || t.isBoss || t.isRoundBoss || winding)) useItem(hero, slot, { quiet: true });
+        if (!t || (item.active.aiLow && hero.hp / hero.maxHp >= AI_ITEM_LOW_HP)) return;
+        if (item.active.aiLow || t.isHero || t.isBoss || t.isRoundBoss || winding) useItem(hero, slot, { quiet: true });
     });
 }
 
@@ -223,15 +225,16 @@ const AI_BUILDS = {
 };
 
 // Lo que cada competidor necesita además de la build de su atributo (medido con el banco, docs/BALANCE-CH.md).
-// early: solo hasta AI_EARLY_LAST_ROUND; después deja de ser objetivo y se puede vender. late: con la build armada.
+// early: solo hasta AI_EARLY_LAST_ROUND; después deja de ser objetivo y se puede vender. late: con la build
+// armada (antes de la build los hunde: medido con Axe, Rec, Bruja y Sabio).
 const AI_EARLY_LAST_ROUND = 7;
 const AI_HERO_ITEMS = {
     ALCHEMIST: { early: ['STARTER_CELL'], late: ['EMERGENCY_CELL'] },
-    FROSTWITCH: { early: ['STARTER_CELL'], late: ['BOSS_PLATE'] },
-    ARCANIST: { early: ['STARTER_CELL'], late: ['NET_GUN'] },
-    AXE: { late: ['SHOCK_MACE', 'BOSS_PLATE'] },
-    REC: { late: ['NET_GUN', 'BOSS_PLATE'] },
-    VOIDSAGE: { late: ['EMERGENCY_CELL', 'INHIBITOR'] },
+    FROSTWITCH: { early: ['STARTER_CELL'], late: ['STASIS_DOME', 'BOSS_PLATE'] },
+    ARCANIST: { early: ['STARTER_CELL'] },
+    AXE: { late: ['PULSE_WAVE', 'SHOCK_MACE'] },
+    REC: { late: ['JET_PACK', 'NET_GUN'] },
+    VOIDSAGE: { late: ['STASIS_DOME', 'EMERGENCY_CELL'] },
     VAMPIRE: { late: ['CLAMP'] },
     DANCER: { late: ['CLAMP'] },
     ASSASSIN: { late: ['SHOCK_MACE'] },

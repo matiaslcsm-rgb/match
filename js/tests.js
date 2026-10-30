@@ -2067,6 +2067,62 @@ test('La IA usa los activos contra un competidor en rango', () => {
     check(hasFlag(b, 'stun'), 'lo usó');
 });
 
+test('Mochila Cohete: salta lejos, sin atravesar columnas ni caer arriba de otro', () => {
+    toDuels();
+    const [a, b] = arenas[0].heroes;
+    a.inventory = []; giveItem(a, 'JET_PACK');
+    a.x = 10; a.y = 6; b.x = 12; b.y = 6;
+    autopilot = true; // sin cursor: como la IA
+    try {
+        check(useItem(a, 0), 'sale aunque nadie esté a tiro');
+        checkEq(a.x, 10 - ITEMS.JET_PACK.jump, 'se aleja');
+        checkEq(a.y, 6, 'derecho');
+        a.x = 8; a.y = 3; b.x = 10; b.y = 3; // la columna (7, 3) está justo atrás
+        a.cooldowns.ITEM_JET_PACK = 0;
+        useItem(a, 0);
+        check(walkable(a.arena, a.x, a.y), 'cae en un lugar válido');
+    } finally { autopilot = false; }
+});
+
+test('Domo de Contención: no te pegan, pero tampoco pegás ni lanzás', () => {
+    toDuels();
+    const [a, b] = arenas[0].heroes;
+    a.inventory = []; giveItem(a, 'STASIS_DOME');
+    useItem(a, 0);
+    const hp = a.hp;
+    dealDamage(b, a, 500, 'pure');
+    checkEq(a.hp, hp, 'no recibe daño');
+    check(hasFlag(a, 'disarm') && hasFlag(a, 'silence'), 'tampoco pega ni lanza');
+    checkEq(getEffect(a, 'STASIS').until - gameClock, ITEMS.STASIS_DOME.stasis, 'dura entero: no es control enemigo');
+});
+
+test('Onda de Choque: pega y frena a los que están cerca', () => {
+    toDuels();
+    const [a, b] = arenas[0].heroes;
+    a.inventory = []; giveItem(a, 'PULSE_WAVE');
+    b.x = a.x + 2; b.y = a.y;
+    const hp = b.hp;
+    check(useItem(a, 0), 'sale');
+    check(b.hp < hp, 'pega');
+    check(getEffect(b, 'PULSE_SLOW'), 'frena');
+    b.x = a.x + 9;
+    a.cooldowns.ITEM_PULSE_WAVE = 0;
+    check(!useItem(a, 0), 'sin nadie cerca no se gasta');
+});
+
+test('La IA guarda el Domo para cuando le queda poca vida', () => {
+    toDuels();
+    const [a, b] = arenas[0].heroes;
+    a.inventory = []; giveItem(a, 'STASIS_DOME');
+    b.x = a.x + 1; b.y = a.y;
+    a.hp = a.maxHp;
+    aiUseItems(a, false);
+    check(!getEffect(a, 'STASIS'), 'con vida, no');
+    a.hp = Math.round(a.maxHp * 0.2);
+    aiUseItems(a, false);
+    check(getEffect(a, 'STASIS'), 'con poca vida, sí');
+});
+
 test('La IA: la Batería solo temprano y lo propio de cada competidor existe', () => {
     Object.values(AI_HERO_ITEMS).forEach(o => [...(o.early || []), ...(o.late || [])].forEach(k => check(ITEMS[k], `existe ${k}`)));
     resetGame();

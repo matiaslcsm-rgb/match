@@ -81,3 +81,9 @@ Bobina de Choque y cuatro compuestos: Inhibidor de Señal (silencia), Maza de Ch
 
 Duelos: mediana 15,5 s, 12% por tiempo, 0,8 cambios de ventaja, esquive de la IA 32%. Bruja, Axe, Rec y Sabio siguen casi en 0% de victorias: falta resolverlos. La Bruja sigue saliendo en la ronda 15.
 
+### 2026-10-30: rama de supervivencia (264 partidas)
+Célula de Impulso y tres compuestos: Mochila Cohete (salta), Domo de Contención (2 s sin daño, sin pegar ni lanzar) y Onda de Choque (área que frena).
+Probado y descartado: que la IA compre esto antes de la build. Rec, Bruja y Axe salieron antes (rondas 15, 14 y 16) y el Arcanista subió a 32%. Es la segunda vez que pasa: a la IA floja le falta oro, y un ítem antes de la build la hunde.
+Con los ítems después de la build, % de victorias y puesto: Arcanista 24 / 2,7 · Nigromante 23 / 4,2 · Zeus 22 / 4,1 · Vampiro 20 / 5,0 · Danzante 19 / 4,8 · Asesino 15 / 4,7 · Alquimista 7 / 3,6 · Sabio 3 / 4,7 · Rec 3 / 5,2 · Axe 2 / 5,0 · Bruja 1 / 5,5.
+Comparado con el inicio de hoy, nadie pasa de 24% (antes 29%). Bruja, Axe, Rec y Sabio siguen en 1-3%. Duelos: mediana 16 s, 13% por tiempo.
+

@@ -106,7 +106,7 @@ function useItem(hero, slot, opts = {}) {
     const id = itemCooldownId(item);
     if ((hero.cooldowns[id] || 0) > 0) return false;
     const target = nearestEnemy(hero, item.active.range);
-    if (!target) { if (!opts.quiet) log(`${item.name}: sin objetivo en rango.`); return false; }
+    if (!target && !item.active.self) { if (!opts.quiet) log(`${item.name}: sin objetivo en rango.`); return false; }
     item.active.cast(hero, target);
     hero.cooldowns[id] = item.active.cooldown;
     (hero.cooldownTotals = hero.cooldownTotals || {})[id] = item.active.cooldown;

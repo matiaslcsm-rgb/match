@@ -13,6 +13,7 @@
 //   mods     modificadores de stats (ver effects.js; str/agi/int, maxHp, hpRegen, maxMana, manaRegen también valen)
 //   flags    estados (ej: 'trueStrike')
 //   active   ítem activo: { cooldown, range, cast(owner, target) }. Se usa con la tecla de su casilla, 1 a 6 (ver useItem).
+//            self: no necesita un enemigo en rango; aiLow: la IA lo guarda para cuando le queda poca vida.
 //   hooks(item)  reacciones a eventos (opcional): función que devuelve el objeto de hooks
 //   special  texto de lo que hacen los hooks/flags (el resto de la descripción se arma solo con los mods)
 //   counters texto de qué contrarresta
@@ -56,6 +57,8 @@ const ITEMS = {
         hooks: item => ({ beforeAttack(owner, ctx) { if (!ctx.target.isHero) ctx.dmg += item.creepDmg; } })
     },
 
+    // La rama de supervivencia: de la misma Célula salen salir, aguantar o frenarlos a todos.
+    IMPULSE_CELL: { key: 'IMPULSE_CELL', name: 'Célula de Impulso', tier: 'basic', cost: 85, mods: { maxHp: 40, moveSpeedPct: 0.04 } },
     // La rama de control: de la misma Bobina salen cuatro ítems, según lo que pida la partida.
     COIL: { key: 'COIL', name: 'Bobina de Choque', tier: 'basic', cost: 95, mods: { flatAtk: 5, int: 3 } },
 
@@ -185,6 +188,36 @@ const ITEMS = {
         } })
     },
 
+    // --- Supervivencia ---
+    JET_PACK: {
+        key: 'JET_PACK', name: 'Mochila Cohete', tier: 'composite', group: 'Supervivencia', components: ['IMPULSE_CELL', 'TRAVEL_BOOTS'], recipe: 120,
+        mods: { moveSpeedPct: 0.12 }, jump: 5, counters: 'Golpes anunciados y los que te encierran',
+        special: 'ACTIVO (tecla de su casilla, 1 a 6): saltás hasta 5 casillas hacia el cursor. Enfriamiento: 18 s.',
+        active: { cooldown: 18, self: true, aiLow: true, range: 4, cast(owner, target) { jumpWith(owner, target, ITEMS.JET_PACK.jump); } }
+    },
+    STASIS_DOME: {
+        key: 'STASIS_DOME', name: 'Domo de Contención', tier: 'composite', group: 'Supervivencia', components: ['IMPULSE_CELL', 'CHAINMAIL'], recipe: 130,
+        mods: { armor: 4, maxHp: 80 }, stasis: 2, counters: 'Jefes y golpes que te rematan',
+        special: 'ACTIVO (tecla de su casilla, 1 a 6): 2 s sin recibir daño, pero tampoco podés pegar ni tirar habilidades. Enfriamiento: 40 s.',
+        active: { cooldown: 40, self: true, aiLow: true, range: 4, cast(owner) {
+            addEffect(owner, { id: 'STASIS', name: 'Domo', duration: ITEMS.STASIS_DOME.stasis, tags: ['MEJORA'], flags: ['invulnerable', 'disarm', 'silence'] });
+            fxText(owner, '¡DOMO!', '#ff9a2e', 12, 0.8);
+        } }
+    },
+    PULSE_WAVE: {
+        key: 'PULSE_WAVE', name: 'Onda de Choque', tier: 'composite', group: 'Supervivencia', components: ['IMPULSE_CELL', 'FROST_ORB'], recipe: 110,
+        mods: { hpRegen: 3, maxHp: 60 }, radius: 3, slow: 0.4, slowFor: 3, dmg: 80, counters: 'Enjambres y los que te persiguen',
+        special: 'ACTIVO (tecla de su casilla, 1 a 6): 80 de daño mágico a los enemigos a 3 casillas o menos, y los frena 40% por 3 s. Enfriamiento: 22 s.',
+        active: { cooldown: 22, range: 3, cast(owner) {
+            const item = ITEMS.PULSE_WAVE;
+            enemiesOf(owner).filter(c => c.isAlive() && distance(owner, c) <= item.radius).forEach(c => {
+                dealDamage(owner, c, item.dmg, 'magical');
+                addEffect(c, { id: 'PULSE_SLOW', name: 'Frenado', duration: item.slowFor, tags: ['PERJUICIO'], mods: { moveSpeedPct: -item.slow } });
+            });
+            if (fxArena(owner)) fxRing(owner, '#ff9a2e', item.radius, 0.35);
+        } }
+    },
+
     // --- Magia ---
     ARCANE_STAFF: {
         key: 'ARCANE_STAFF', name: 'Báculo Arcano', tier: 'composite', group: 'Magia', components: ['BRANCH_INT', 'MANA_CRYSTAL'], recipe: 60,
@@ -235,9 +268,23 @@ function talentBook(key, name, stat, label) {
 }
 
 // Grupos de compuestos, en el orden en que se muestran.
-const ITEM_GROUPS = ['Atributos', 'Ataque', 'Robo de vida y anticuración', 'Defensa y tanque', 'Control', 'Magia'];
+const ITEM_GROUPS = ['Atributos', 'Ataque', 'Robo de vida y anticuración', 'Defensa y tanque', 'Supervivencia', 'Control', 'Magia'];
 
 // --- Efectos reutilizables de los ítems ---
+// Salta hasta `dist` casillas: el jugador, hacia el cursor; la IA, lejos de lo que tiene más cerca. Si el destino está
+// ocupado, cae antes (no atraviesa paredes ni termina arriba de otro).
+function jumpWith(owner, threat, dist) {
+    const c = owner === player && !autopilot && cursorWorld();
+    const dx = c ? c.x - owner.x : threat ? owner.x - threat.x : 0, dy = c ? c.y - owner.y : threat ? owner.y - threat.y : 0, len = Math.hypot(dx, dy) || 1;
+    for (let d = c ? Math.min(dist, len) : dist; d >= 1; d--) {
+        const x = Math.round(owner.x + dx / len * d), y = Math.round(owner.y + dy / len * d);
+        if (!walkable(owner.arena, x, y) || bodiesAt(owner.arena, x, y, owner).length) continue;
+        owner.x = x; owner.y = y; owner.moveTarget = null;
+        emit(owner, 'onMove', { steps: Math.round(d) });
+        return true;
+    }
+    return false;
+}
 function applyRoot(target, duration) {
     if (!target.isAlive()) return;
     if (addEffect(target, { id: 'ROOT', name: 'Atrapado', duration, flags: ['root'], tags: ['PERJUICIO'] })) fxText(target, '¡ATRAPADO!', '#ff9a2e', 12, 0.8);

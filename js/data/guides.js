@@ -6,11 +6,11 @@
 const BUILD_GUIDES = {
     AXE: {
         why: 'Tanque que pega cuando lo golpean: vida y armadura para aguantar y devolver daño con Contraataque y Espinas.',
-        early: ['CHAINMAIL', 'VITALITY'], core: ['EVO_CORE', 'THORNS', 'HEART', 'BOSS_PLATE'], late: ['SHOCK_MACE', 'AEGIS', 'CRIMSON']
+        early: ['CHAINMAIL', 'VITALITY'], core: ['PULSE_WAVE', 'EVO_CORE', 'THORNS', 'HEART', 'BOSS_PLATE'], late: ['SHOCK_MACE', 'AEGIS', 'CRIMSON']
     },
     REC: {
         why: 'Sus drones pegan en cada ataque: velocidad de ataque y daño (el aéreo es su golpe básico); maná para Acople y Cámara Fija.',
-        early: ['QUICK_GLOVES', 'BLADE'], core: ['BOSS_PLATE', 'SWIFT_BLADE', 'GLOVES', 'MANA_CRYSTAL'], late: ['NET_GUN', 'EVO_CORE', 'HAMMER', 'SKADI']
+        early: ['QUICK_GLOVES', 'BLADE'], core: ['JET_PACK', 'BOSS_PLATE', 'SWIFT_BLADE', 'GLOVES', 'MANA_CRYSTAL'], late: ['NET_GUN', 'EVO_CORE', 'HAMMER', 'SKADI']
     },
     ASSASSIN: {
         why: 'Críticos enormes cuerpo a cuerpo: más crítico y velocidad, y robo de vida para sostenerse.',
@@ -26,7 +26,7 @@ const BUILD_GUIDES = {
     },
     FROSTWITCH: {
         why: 'Control en área: hechizos más fuertes, resistencia al control y ralentizar también con el ataque.',
-        early: ['STARTER_CELL', 'MANA_CRYSTAL'], core: ['BOSS_PLATE', 'ARCANE_STAFF', 'ECLIPSE_STAFF'], late: ['INHIBITOR', 'SKADI', 'AEGIS']
+        early: ['STARTER_CELL', 'MANA_CRYSTAL'], core: ['STASIS_DOME', 'BOSS_PLATE', 'ARCANE_STAFF', 'ECLIPSE_STAFF'], late: ['INHIBITOR', 'SKADI', 'AEGIS']
     },
     NECROMANCER: {
         why: 'Desgaste y ejecución: vida y maná para sostener el aura y el Manto Fantasma, y amplificación para rematar con la Guadaña.',
@@ -34,7 +34,7 @@ const BUILD_GUIDES = {
     },
     VOIDSAGE: {
         why: 'Entra y sale con teletransportes: movilidad, maná y amplificación para la ráfaga en área.',
-        early: ['TRAVEL_BOOTS', 'MANA_CRYSTAL'], core: ['EMERGENCY_CELL', 'ARCANE_STAFF', 'ECLIPSE_STAFF', 'BOOTS'], late: ['INHIBITOR', 'AEGIS', 'CLOAK']
+        early: ['TRAVEL_BOOTS', 'MANA_CRYSTAL'], core: ['STASIS_DOME', 'EMERGENCY_CELL', 'ARCANE_STAFF', 'ECLIPSE_STAFF', 'BOOTS'], late: ['INHIBITOR', 'AEGIS', 'CLOAK']
     },
     ALCHEMIST: {
         why: 'Ácido que baja la armadura: anticuración y rompe corazas para que su daño y el de sus ataques rindan.',
