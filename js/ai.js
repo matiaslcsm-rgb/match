@@ -222,8 +222,10 @@ let aiBuysCounters = true; // se puede apagar para medir cuánto importan los co
 const AI_BUILDS = {
     STR: ['BELT', 'HEART', 'THORNS', 'CRIMSON'],
     AGI: ['GLOVES', 'SWIFT_BLADE', 'CRIMSON', 'SKADI'],
-    INT: ['ARCANE_STAFF', 'ECLIPSE_STAFF', 'TOME', 'AEGIS']
+    INT: ['ARCANE_STAFF', 'ECLIPSE_STAFF', 'TOME', 'AEGIS'],
+    CRANE: ['CRIMSON', 'HEART', 'THORNS', 'HAMMER'] // sin robo de vida propio: primero la Sed; medido en docs/BALANCE-CH.md
 };
+const aiBuild = hero => AI_BUILDS[hero.key] || AI_BUILDS[hero.primaryAttr]; // la de su atributo, si no tiene una propia
 
 // Lo que cada competidor necesita además de la build de su atributo (medido con el banco, docs/BALANCE-CH.md).
 // early: solo hasta AI_EARLY_LAST_ROUND; después deja de ser objetivo y se puede vender. late: con la build
@@ -271,7 +273,7 @@ function aiShop(hero) {
     if (itemAvailable(ITEMS.GREED, hero) && hero.gold >= itemCost(ITEMS.GREED, hero)) buyItem(ITEMS.GREED, hero);
     const counters = aiBuysCounters && nextWave ? aiNeededCounters(nextWave) : [];
     const own = AI_HERO_ITEMS[hero.key] || {}, early = waveNumber <= AI_EARLY_LAST_ROUND && own.early || [];
-    const late = own.late || [], keep = [...counters, ...early, ...AI_BUILDS[hero.primaryAttr]];
+    const late = own.late || [], keep = [...counters, ...early, ...aiBuild(hero)];
     const targets = [...keep, ...late]; // lo propio va después de la build: antes los hundía
     // Los contras desplazan a lo propio de `late` (con 6 casillas llenas no entraban: se moría a Emisores sin la Capa);
     // lo de `late` no desplaza contras, solo entra si hay lugar: venderlos y recomprarlos cada ronda gasta de más.
@@ -282,7 +284,7 @@ function aiShop(hero) {
         if (!targets.some(step)) break;
     }
     // Con la build armada, el oro que sobra va a libros de talento de su atributo principal (guarda una reserva)
-    if (AI_BUILDS[hero.primaryAttr].every(k => countItem(hero, k) > 0)) {
+    if (aiBuild(hero).every(k => countItem(hero, k) > 0)) {
         const book = ITEMS['TALENT_' + hero.primaryAttr];
         while (hero.gold >= itemCost(book, hero) + AI_TALENT_RESERVE) buyItem(book, hero);
     }

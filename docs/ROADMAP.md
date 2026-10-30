@@ -121,7 +121,8 @@ Que se sienta un programa de TV (concepto en `docs/CONCEPTO-FUTURISTA.md`).
   - [x] Rama de control e ítems activos (2026-10-30, pedido del usuario: ítems que se arman según la situación, activos como en
     Dota o LoL): Bobina de Choque → Inhibidor, Maza, Lanzarredes o Tenaza. Se usan con las teclas 1 a 6.
   - [x] La IA compra sus contras con el inventario lleno (2026-10-30): se moría a los Emisores sin la Capa. No resuelve a los de abajo y el Nigromante cae a 8%; números en `docs/BALANCE-CH.md`.
-  - [ ] Bruja, Axe, Rec y Sabio siguen casi en 0% de victorias.
+  - [x] Grúa con build propia (2026-10-30, sin tocar stats ni habilidades): Sed Carmesí, Corazón, Coraza y Martillo. A 528 partidas, puesto 6,6 → 6,3, afuera en la ronda 15,4 → 16,8, duelos 39 → 45%. Sigue última y sin ganar partidas.
+  - [ ] Bruja, Grúa, Rec y Sabio siguen casi en 0% de victorias.
 - [x] Tutorial al día con todo lo nuevo (2026-10-30).
 - [ ] Rendimiento: el 3D fluido en una compu común. Medido el 2026-10-28 (con tribunas, columnas y drones): 7,7 ms por
   cuadro en una oleada de 10 creeps y 6,6 ms en un duelo, lógica y dibujo, con una GTX 1650 (~130 cuadros por segundo).

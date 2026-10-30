@@ -1302,6 +1302,19 @@ test('IA: el contra desplaza a lo propio de su build tardía, y lo propio no des
     } finally { autopilot = false; }
 });
 
+test('IA: Grúa arma su build propia, primero el robo de vida; los demás, la de su atributo', () => {
+    newGame('VAMPIRE');
+    checkEq(aiBuild(player), AI_BUILDS.STR, 'sin build propia, la de su atributo');
+    newGame('CRANE');
+    checkEq(aiBuild(player), AI_BUILDS.CRANE, 'la suya');
+    aiBuild(player).forEach(k => check(ITEMS[k], `existe ${k}`));
+    nextWave = null; player.gold = 5000;
+    aiShop(player);
+    aiBuild(player).forEach(k => check(countItem(player, k) > 0, `compró ${k}`));
+    checkEq(countItem(player, 'BELT'), 0, 'el Cinturón de la build de Fuerza no');
+    check(player.gold < 5000 - aiBuild(player).reduce((a, k) => a + itemTotalCost(ITEMS[k]), 0), 'con su build armada, sigue con los libros de talento');
+});
+
 test('IA: arma los contras de la próxima oleada (de a componentes si no le alcanza)', () => {
     newGame('CRANE');
     gameState = 'PREP'; player.gold = 1000;

@@ -119,3 +119,23 @@ Duelos: mediana 16,6 s, 14% por tiempo, 0,9 cambios de ventaja, la IA esquiva 43
 % de victorias y puesto: Arcanista 23 / 3,0 · Zeus 21 / 4,4 · Vampiro 21 / 4,6 · Asesino 18 / 4,3 · Nigromante 15 / 4,7 · Alquimista 14 / 2,8 · Danzante 13 / 4,9 · Sabio 7 / 4,4 · Bruja 4 / 5,2 · Rec 1 / 4,5 · Grúa 0 / 6,6.
 Duelos: mediana 14,4 s (meta 15-30, apenas abajo), 13% por tiempo, 0,8 cambios de ventaja, esquive de la IA 40%. Nadie pasa de 23%. Grúa gana 38% de sus duelos y sale en la ronda 16: sigue siendo la última con la IA.
 
+### 2026-10-30: Grúa con build propia (528 partidas, antes → después)
+Diagnóstico: Grúa pierde más vidas temprano que el resto de los de cuerpo a cuerpo (rondas 1 a 5: 118 muertes cada 264 partidas; el Vampiro, 7) y no tiene robo de vida propio. Arreglo (`AI_BUILDS.CRANE`, ai.js, sin tocar stats ni habilidades): Sed Carmesí, Corazón, Coraza y Martillo, en vez de Cinturón, Corazón, Coraza y Sed.
+
+| Héroe | % antes | % después | Puesto antes | Puesto después |
+|---|---|---|---|---|
+| Danzante Cinético | 26 | 25 | 3,5 | 3,8 |
+| Zeus | 21 | 23 | 4,5 | 4,4 |
+| Arcanista | 21 | 22 | 3,1 | 3,1 |
+| Guerrero Vampiro | 21 | 22 | 4,5 | 4,6 |
+| Asesino | 22 | 17 | 3,4 | 3,4 |
+| Nigromante | 8 | 11 | 5,6 | 5,4 |
+| Alquimista | 13 | 10 | 3,3 | 3,4 |
+| Sabio del Vacío | 4 | 5 | 4,7 | 4,9 |
+| Bruja del Hielo | 3 | 3 | 5,5 | 5,4 |
+| Rec | 1 | 1 | 4,8 | 4,8 |
+| Grúa | 0 | 0 | 6,6 | 6,3 |
+
+Medido con los cuerpos sólidos ya integrados (`c824ebc`). Grúa: afuera en la ronda 15,4 → 16,8, duelos 39 → 45%, muertes en las rondas 11 a 15 de 218 a 118. Sigue última y no ganó ninguna de sus 397 partidas. Sin los cuerpos sólidos (`ba6643b`) había dado lo mismo: puesto 6,6 → 6,1, duelos 38 → 46%. Duelos: mediana 13,3 → 12,8 s (meta 15-30 ✘: ya venía abajo con los cuerpos sólidos), 11% por tiempo, 0,88 cambios de ventaja, esquive 40%.
+Probado y descartado, a 264 partidas sobre `ba6643b`: vender la primera pieza de la build con la build armada, para que entren los contras (a todos: Vampiro 30%, Zeus 14%; solo Cinturón y Guantes: Vampiro 30%; a Grúa casi no la mueve: puesto 6,3-6,4); Grúa sin la Batería de Arranque (puesto 6,5). La Sed comprada temprano, la Máscara Vampírica, la Capa en `late`, la Viga sin empuje, Sed con Hoja Veloz y más stats (22 de daño y 220 de vida) se probaron mientras otra sesión cambiaba la carpeta: esas cifras no valen y quedan sin medir.
+En las rondas tardías la oleada pide 3 o 4 contras y la build protege 4 de las 6 casillas: por eso sigue habiendo muertes a Emisores sin la Capa.
