@@ -115,7 +115,7 @@ function mitigate(target, amount, type) {
 // → reducción de daño por efectos → armadura/resistencia mágica → daño recibido extra (Condenado) → regla de un solo golpe (oneHit)
 // → no bajar de 1 con preventDeath → evento onDamaged → muerte.
 // Devuelve { dealt, evaded }: dealt es la vida que realmente perdió el objetivo (para robo de vida).
-let dodgeableHit = false; // el golpe viene de un proyectil de habilidad: se podía evitar caminando (banco de duelos, duels.js)
+let dodgeableHit = null; // el proyectil de habilidad que está pegando: se podía evitar caminando (banco de duelos, duels.js)
 function dealDamage(source, target, amount, type = 'physical', opts = {}) {
     if (!target.isAlive() || hasFlag(target, 'invulnerable')) return { dealt: 0, evaded: false };
     if (type === 'magical' && hasFlag(target, 'magicImmune')) return { dealt: 0, evaded: false };
@@ -141,11 +141,18 @@ function dealDamage(source, target, amount, type = 'physical', opts = {}) {
     // dealt en el evento es el daño completo (sin recortar por la vida restante): lo usa Forma Inmortal para acumular
     emit(target, 'onDamaged', { source, dealt: final, type });
     if (source && hpLost > 0) hitFlinch(source, target); // sacudida (fxSkills.js)
-    if (hpLost > 0 && source && source.isHero && target.isHero && target.arena && target.arena.stats) { target.arena.stats.dmg += hpLost; if (dodgeableHit) target.arena.stats.avoidable += hpLost; }
+    if (hpLost > 0 && source && source.isHero && target.isHero && target.arena && target.arena.stats) noteDuelHit(target.arena.stats, source, hpLost);
     if (hpLost > 0) target.lastHitAt = gameClock; // cuándo le pegaron por última vez
     if (source && hpLost > 0) emit(source, 'onDealDamage', { target, dealt: hpLost, type, isCrit: opts.isCrit, relic: opts.relic });
     if (!target.isAlive()) onUnitDeath(target, source);
     return { dealt: hpLost, evaded: false };
+}
+
+// Anota un golpe entre héroes en las cuentas del duelo; el más fuerte sale en el cartel del resultado (ui.js).
+function noteDuelHit(stats, source, dmg) {
+    stats.dmg += dmg;
+    if (dodgeableHit) stats.avoidable += dmg;
+    if (!stats.bestHit || dmg > stats.bestHit.dmg) stats.bestHit = { by: source, dmg, skill: fxCastingSkill ? fxCastingSkill.name : dodgeableHit && dodgeableHit.skillName };
 }
 
 function onUnitDeath(unit, killer) {
@@ -241,8 +248,8 @@ function updateProjectiles(arena, dt) {
                 if (stopped || !c.isAlive() || p.hitSet.has(c) || Math.hypot(c.x - p.x, c.y - p.y) > p.radius) return;
                 p.hitSet.add(c);
                 let dealt;
-                dodgeableHit = true;
-                try { dealt = p.basic ? resolveBasicHit(p.attacker, c, p.dmg, p.isCrit) : dealDamage(p.attacker, c, p.dmg, p.dmgType, { isCrit: p.isCrit }).dealt; } finally { dodgeableHit = false; }
+                dodgeableHit = p;
+                try { dealt = p.basic ? resolveBasicHit(p.attacker, c, p.dmg, p.isCrit) : dealDamage(p.attacker, c, p.dmg, p.dmgType, { isCrit: p.isCrit }).dealt; } finally { dodgeableHit = null; }
                 if (p.onHit) p.onHit(c, dealt);
                 if (p.stopOnHit) stopped = true; // no atraviesa: se queda en el primero
             });

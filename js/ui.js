@@ -776,12 +776,34 @@ function duelCardHtml(a, b) {
         `${[a, b].includes(player) ? '<span class="dc-yours">¡Te toca!</span>' : ''}</div>` +
         `<div class="dc-versus">${side(a)}<span class="dc-vs">VS</span>${side(b)}</div><p class="dc-line">${duelTagline(a, b)}</p></div>`;
 }
-function showDuelCard(a, b) {
+function playDuelCard(html) {
     const card = document.getElementById('duel-card');
     if (!card || matchSummaryOff) return; // el banco juega sin mirar
-    card.innerHTML = duelCardHtml(a, b);
+    card.innerHTML = html;
     card.firstChild.addEventListener('animationend', e => { if (e.animationName === 'dc-show') card.innerHTML = ''; }); // las de adentro también avisan acá
 }
+function showDuelCard(a, b) { playDuelCard(duelCardHtml(a, b)); }
+
+// Cartel del resultado: lo mismo, cuando termina el duelo. La frase sale de cómo terminó, la primera regla que se cumpla.
+function duelVerdict(winner, loser, changes, byTime) {
+    const pct = h => Math.max(1, Math.round(100 * h.hp / h.maxHp));
+    if (byTime) return `¡Se acabó el tiempo! Define la vida: ${pct(winner)}% contra ${pct(loser)}%.`;
+    if (changes >= 2) return `¡Qué duelo! La ventaja cambió ${changes} veces.`;
+    if (pct(winner) <= 15) return `¡Por un pelo! ${winner.name} se salva con ${pct(winner)}% de vida.`;
+    if (pct(winner) >= 70) return `Paseo de ${winner.name}: termina con ${pct(winner)}% de vida.`;
+    return `${winner.name} se lleva los ${POINTS.duelWin} puntos.`;
+}
+function duelResultHtml(arena, winner, loser, byTime) {
+    const s = arena.stats || { changes: 0 }, hit = s.bestHit;
+    const mine = winner === player ? '¡Ganaste!' : loser === player ? 'Perdiste' : '';
+    return `<div class="dc-box"><div class="dc-head"><span class="lb-live"><i></i>EN VIVO</span><span>Resultado · ronda ${waveNumber}</span>` +
+        `${mine ? `<span class="dc-yours">${mine}</span>` : ''}</div>` +
+        `<div class="dc-result">${heroIconHtml(winner, 'lg')}<div><b>Gana ${winner.name}</b><small>${winner.ownerName || winner.name} · venció a ${loser.name}</small></div></div>` +
+        `<div class="dc-stats"><span>Duró <b>${Math.round(arena.elapsed)} s</b></span><span>Ventaja <b>${s.changes} ${s.changes === 1 ? 'cambio' : 'cambios'}</b></span>` +
+        `${hit ? `<span>Mejor golpe <b>${hit.by.name}: ${hit.dmg}${hit.skill ? ` · ${hit.skill}` : ''}</b></span>` : ''}</div>` +
+        `<p class="dc-line">${duelVerdict(winner, loser, s.changes, byTime)}</p></div>`;
+}
+function showDuelResult(arena, winner, loser, byTime) { playDuelCard(duelResultHtml(arena, winner, loser, byTime)); }
 
 // --- RANKING ---
 // Tabla con los 8 héroes: puesto, vidas, puntos, oro y dónde está. Un clic en un héroe muestra su arena.

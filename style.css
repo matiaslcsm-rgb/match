@@ -776,6 +776,12 @@ body.pixel-ui { background: repeating-linear-gradient(135deg, #121412 0 14px, #1
 .dc-side small { color: var(--in-dim); font-size: 0.75rem; }
 .dc-vs { font-size: 2rem; color: var(--in-orange); text-shadow: 3px 3px 0 var(--in-line); }
 .dc-line { margin: 0; font-size: 0.9rem; color: var(--in-yellow); }
+.dc-result { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 8px 0 6px; animation: dc-left 0.3s ease-out; }
+.dc-result div { display: flex; flex-direction: column; text-align: left; }
+.dc-result b { font-size: 1.3rem; text-transform: uppercase; letter-spacing: 1px; color: var(--in-orange); }
+.dc-result small { color: var(--in-dim); font-size: 0.75rem; }
+.dc-stats { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px 16px; margin-bottom: 6px; font-size: 0.78rem; color: var(--in-dim); }
+.dc-stats b { color: var(--in-bone); font-weight: normal; }
 @keyframes dc-show { 0% { opacity: 0; } 6% { opacity: 1; } 88% { opacity: 1; } 100% { opacity: 0; } }
 @keyframes dc-left { from { transform: translateX(-60px); opacity: 0; } }
 @keyframes dc-right { from { transform: translateX(60px); opacity: 0; } }

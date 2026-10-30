@@ -1094,7 +1094,7 @@ test('Banco de duelos: cada duelo anota cuánto duró, si fue por tiempo, los ca
     duelLog = [];
     dealDamage(a, b, 60, 'pure');
     check(arena.stats.dmg > 0 && arena.stats.avoidable === 0, 'cuenta el daño entre héroes (un golpe común no se podía evitar)');
-    dodgeableHit = true; const before = arena.stats.avoidable; dealDamage(a, b, 20, 'pure'); dodgeableHit = false;
+    dodgeableHit = {}; const before = arena.stats.avoidable; dealDamage(a, b, 20, 'pure'); dodgeableHit = null;
     check(arena.stats.avoidable > before, 'el de un proyectil de habilidad cuenta como evitable');
     b.hp = b.maxHp * 0.5; a.hp = a.maxHp; updateDuelArena(arena, 0.1);
     check(arena.stats.lead === a, 'va ganando el de más vida');
@@ -1849,6 +1849,39 @@ test('Cartel del duelo: presenta a los dos y la frase del presentador sale de c�
     check(card.textContent.includes('¡Te toca!'), 'avisa si peleás vos');
     resetGame();
     checkEq(card.innerHTML, '', 'se limpia con la partida');
+});
+
+test('Cartel del resultado: cuenta cómo terminó el duelo, con el golpe más fuerte y su habilidad', () => {
+    resetGame();
+    selectHero(HERO_TEMPLATES.AXE);
+    learnSkill(currentDraft.options[0]);
+    const [a, b] = heroes;
+    const stats = { dmg: 0, avoidable: 0, changes: 0 };
+    noteDuelHit(stats, a, 30);
+    dodgeableHit = { skillName: 'Rayo de prueba' };
+    noteDuelHit(stats, b, 50);
+    dodgeableHit = null;
+    noteDuelHit(stats, a, 10);
+    checkEq(stats.dmg, 90, 'suma todo');
+    checkEq(stats.avoidable, 50, 'solo el proyectil se podía evitar');
+    checkEq(stats.bestHit.dmg, 50, 'se queda con el más fuerte');
+    checkEq(stats.bestHit.by, b, 'y con quién lo pegó');
+    checkEq(stats.bestHit.skill, 'Rayo de prueba', 'y con qué');
+    a.hp = a.maxHp; b.hp = 0;
+    check(duelVerdict(a, b, 0, true).includes('tiempo'), 'por tiempo');
+    check(duelVerdict(a, b, 3, false).includes('3 veces'), 'peleado');
+    check(duelVerdict(a, b, 0, false).includes('Paseo'), 'con la vida casi llena');
+    a.hp = Math.round(a.maxHp * 0.1);
+    check(duelVerdict(a, b, 0, false).includes('Por un pelo'), 'con poca vida');
+    a.hp = Math.round(a.maxHp * 0.5);
+    check(duelVerdict(a, b, 0, false).includes(`${POINTS.duelWin} puntos`), 'normal');
+    const card = document.getElementById('duel-card');
+    showDuelResult({ stats, elapsed: 16.4 }, a, b, false);
+    check(card.textContent.includes(`Gana ${a.name}`), 'dice quién ganó');
+    check(card.textContent.includes('16 s'), 'cuánto duró');
+    check(card.textContent.includes('Rayo de prueba'), 'el mejor golpe');
+    check(card.textContent.includes('¡Ganaste!'), 'si ganaste vos');
+    resetGame();
 });
 
 test('Zócalo de TV: en combate muestra la tabla y un clic mira la arena de ese competidor', () => {

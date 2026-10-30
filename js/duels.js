@@ -81,6 +81,7 @@ function resolveDuel(arena, winner, loser, reason) {
     arena.done = true;
     if (arena.stats) duelLog.push({ round: waveNumber, secs: Math.round(arena.elapsed * 10) / 10, byTime: reason === 'se acabó el tiempo', changes: arena.stats.changes,
         dmg: arena.stats.dmg, avoidable: arena.stats.avoidable, winner: winner.name, loser: loser.name });
+    showDuelResult(arena, winner, loser, reason === 'se acabó el tiempo'); // acá, antes de que vayan a descansar y se curen
     const wasMuted = logMuted;
     const involvesPlayer = winner === player || loser === player;
     logMuted = false; // el resultado se anuncia siempre

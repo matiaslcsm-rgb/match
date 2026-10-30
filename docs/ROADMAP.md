@@ -99,7 +99,9 @@ Que se sienta un programa de TV (concepto en `docs/CONCEPTO-FUTURISTA.md`).
     mientras está, tapa el panel del rival.
   - [x] Ranking como zócalo de TV (2026-10-30): tira abajo de la barra del héroe durante el combate, en el lugar de la ayuda
     de controles (`renderTvRank`, ui.js). Clic = mirar esa arena. El ranking de la izquierda sigue, con vidas y estado.
-  - [ ] Repeticiones.
+  - [x] Cartel del resultado (2026-10-30): al terminar el duelo, quién ganó, cuánto duró, los cambios de ventaja, el mejor
+    golpe y una frase del presentador según cómo terminó (`showDuelResult`, ui.js). Solo interfaz: no cambia el balance.
+  - [ ] Repeticiones (volver a ver la jugada).
 - [x] El público reacciona (sonido y gradas). Hecho 2026-10-28: tribunas de hormigón atrás y a los costados de la
   arena 3D con espectadores de colores que se mueven solos y saltan cuando cae alguien (más si es un competidor o el
   jefe), con el grito de la tribuna (sonido sintetizado, `crowd` en audio.js).
