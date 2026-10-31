@@ -4,9 +4,9 @@ registerHero({
     key: 'CRANE', name: 'Grúa', symbol: 'G', primaryAttr: 'STR', role: 'Control cuerpo a cuerpo',
     attributes: { str: [24, 2.8], agi: [12, 1.4], int: [14, 1.6] },
     baseHp: 190, baseAtk: 16, baseAtkSpeed: 0.95, baseAttackRange: 1.5,
-    baseArmor: 5, baseMagicResist: 25, baseHpRegen: 3,
+    baseArmor: 5, baseMagicResist: 35, baseHpRegen: 3,
     baseMaxMana: 110, baseManaRegen: 1.3, baseMoveSpeed: 3.2, baseProjectileSpeed: 0,
-    baseCritChance: 5, baseEvasion: 0, baseSpellAmp: 0, baseLifesteal: 0,
+    baseCritChance: 5, baseEvasion: 0, baseSpellAmp: 0, baseLifesteal: 12,
     description: 'Blindaje: la operaria de la grúa del estadio. Engancha, arrastra y castiga contra las columnas. Se le gana corriéndose de la línea del gancho y sin pelear pegado a una columna.',
     scaling: { stat: 'atk', perKills: 8, perKillsAmount: 2, perHeroKill: 5 },
     innate: {

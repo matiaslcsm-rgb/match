@@ -139,3 +139,10 @@ Diagnóstico: Grúa pierde más vidas temprano que el resto de los de cuerpo a c
 Medido con los cuerpos sólidos ya integrados (`c824ebc`). Grúa: afuera en la ronda 15,4 → 16,8, duelos 39 → 45%, muertes en las rondas 11 a 15 de 218 a 118. Sigue última y no ganó ninguna de sus 397 partidas. Sin los cuerpos sólidos (`ba6643b`) había dado lo mismo: puesto 6,6 → 6,1, duelos 38 → 46%. Duelos: mediana 13,3 → 12,8 s (meta 15-30 ✘: ya venía abajo con los cuerpos sólidos), 11% por tiempo, 0,88 cambios de ventaja, esquive 40%.
 Probado y descartado, a 264 partidas sobre `ba6643b`: vender la primera pieza de la build con la build armada, para que entren los contras (a todos: Vampiro 30%, Zeus 14%; solo Cinturón y Guantes: Vampiro 30%; a Grúa casi no la mueve: puesto 6,3-6,4); Grúa sin la Batería de Arranque (puesto 6,5). La Sed comprada temprano, la Máscara Vampírica, la Capa en `late`, la Viga sin empuje, Sed con Hoja Veloz y más stats (22 de daño y 220 de vida) se probaron mientras otra sesión cambiaba la carpeta: esas cifras no valen y quedan sin medir.
 En las rondas tardías la oleada pide 3 o 4 contras y la build protege 4 de las 6 casillas: por eso sigue habiendo muertes a Emisores sin la Capa.
+
+### 2026-10-30: cuerpos sólidos y Grúa reforzada (264 partidas)
+% de victorias y puesto: Danzante 25 / 3,6 · Asesino 21 / 3,4 · Zeus 21 / 4,5 · Arcanista 20 / 3,4 · Vampiro 19 / 4,8 · Nigromante 13 / 5,4 · Alquimista 12 / 3,3 · Sabio 5 / 4,9 · Bruja 2 / 5,6 · Rec 1 / 5,1 · Grúa 0 / 5,6.
+Duelos: mediana 13.1 s (meta 15-30 ✘: bajó de ~15), 12% por tiempo, 0.9 cambios de ventaja, esquive de la IA 42%.
+Probado y descartado para Grúa: más crecimiento de Fuerza (3,6): puesto 6,4, casi igual. Lo que funcionó: 12% de robo de vida (duelos 43 → 52%, puesto 6,4 → 5,6) y resistencia mágica 35 contra los Drones Emisores.
+A 66 partidas el Nigromante parecía caer mucho con los cuerpos sólidos; a 264 quedó 5,4 (antes 4,7): baja, pero menos.
+

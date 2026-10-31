@@ -46,6 +46,7 @@ Cada vez que mueve a un rival a la fuerza, su próximo ataque básico pega +40%.
 Entre 45% y 55% de sus duelos; la IA esquiva entre 30% y 70% de los ganchos; ningún cruce 80 a 20.
 
 ## Números jugables (medidos el 2026-10-30)
-Los números de arriba eran propuestas sin medir y con ellos quedaba afuera en la ronda 6: moría en las primeras oleadas. Programados: vida 190, daño 16, velocidad de ataque 0,95, armadura 5, resistencia mágica 25, regeneración 3, velocidad 3,2; escala daño (+2 cada 8 bajas), no armadura. Carga Pesada se activa también con los que no se pueden mover, como los jefes. La IA ancla el Contrapeso solo con el rival encima y compra la Batería de Arranque.
-Banco de 264: gana 38% de sus duelos (meta 45-55%), puesto 6,6, afuera en la ronda 16, 0 victorias en 196 partidas: sigue última con la IA. Ojo: el banco mide a la IA.
+Los números de arriba eran propuestas sin medir y con ellos quedaba afuera en la ronda 6. Programados: vida 190, daño 16, velocidad de ataque 0,95, armadura 5, resistencia mágica 35, regeneración 3, velocidad 3,2 y **12% de robo de vida**; escala daño (+2 cada 8 bajas), no armadura. Carga Pesada se activa también con los que no se pueden mover, como los jefes. La IA ancla el Contrapeso solo con el rival encima y compra la Batería de Arranque.
+Lo que la destrabó fue el robo de vida: subir su crecimiento de Fuerza no movió nada, porque le faltaba cómo recuperarse en las peleas largas contra jefes.
+Banco de 264, con cuerpos sólidos: gana 50% de sus duelos (meta 45-55% ✔), puesto 5,6, afuera en la ronda 19, 0 victorias en 196 partidas. Pierde mucho contra el Asesino y el Danzante, y le gana cómoda al Nigromante.
 **Tiene 4 habilidades normales:** el resto de los competidores tiene 3. Se dejó como se aprobó y el validador acepta 3 o 4.

@@ -84,7 +84,7 @@ copiado de Dota.
     de 4,0 a 5,6), 55% de sus duelos. Medido junto con los ajustes de la ficha: Reflejos 22 (+3), daño 8, rango 5,
     velocidad 2,3 y la IA no tira el Acople ni la Cámara Fija con el rival encima.
 - [x] **Grúa** reemplaza a Axe (2026-10-30, ficha `docs/competidores/grua.md`): gancho, viga, contrapeso, cabina y demolición. Piezas nuevas
-  del motor: mover a la fuerza (`dragUnit`), inamovible (`anchored`) y escudo (`addShield`). Gana 38% de sus duelos; puesto 6,6 con la IA.
+  del motor: mover a la fuerza (`dragUnit`), inamovible (`anchored`) y escudo (`addShield`). Reforzada con robo de vida: gana 50% de sus duelos, puesto 5,6.
 - [ ] Los otros siete del show (borrador en `docs/MATCH.md` §4): Grúa, Eco, Flash, Kilo, Parche, Vector, Viral, Glitch.
   Antes de cada uno, su ficha para aprobar.
   **(decisión)** Ficha lista para aprobar (2026-10-30): `docs/competidores/vector.md` (reemplaza al Asesino).
