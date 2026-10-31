@@ -166,3 +166,23 @@ Diagnóstico: la Bruja gana 60% de sus duelos pero sale en la ronda 15,6: le fal
 Victorias: Bruja 6 → 11 de 383, Rec 4 → 9 de 385, Grúa 0 → 3 de 397 (Grúa no cambió: es ruido). Mejoran en puesto, pero siguen lejos del 12,5% parejo. Duelos: mediana 13,2 → 14,3 s (meta 15-30 ✘), 13% por tiempo, 0,87 cambios de ventaja, esquive 41%.
 Probado y descartado, a 528 partidas, para Rec sin el Corazón: Guantes, Martillo, Hoja Certera y Sed (puesto 5,2); Sed, Martillo, Hoja Certera y Guantes (5,0); Martillo, Tenaza, Sed y Guantes (5,2). Para la Bruja, Corazón antes que los báculos: puesto 4,8 junto con otra build de Rec, sin ventaja. El banco de esta tanda corre partes de semillas en paralelo sobre copias exportadas, así que los números pueden no coincidir exactos con `?banco=528`.
 
+
+### 2026-10-30: Sabio con build propia (528 partidas, antes → después)
+Diagnóstico: el Sabio salía en la ronda 18,8 con la build de Inteligencia, que no le da aguante, y su kit lo lleva al medio de los enemigos (Distorsión Espacial y áreas de radio corto). Arreglo (`AI_BUILDS.VOIDSAGE`, ai.js, sin tocar stats ni habilidades): Báculo, Corazón, Cetro y Botas Firmes, en vez de Báculo, Cetro, Túnica y Égida.
+
+| Héroe | % antes | % después | Puesto antes | Puesto después | Afuera antes | Afuera después |
+|---|---|---|---|---|---|---|
+| Zeus | 21 | 24 | 4,6 | 4,7 | 21,7 | 21,0 |
+| Danzante Cinético | 23 | 22 | 3,9 | 4,1 | 22,1 | 21,8 |
+| Guerrero Vampiro | 24 | 22 | 4,6 | 4,5 | 21,6 | 21,9 |
+| Arcanista | 20 | 20 | 3,2 | 3,4 | 21,3 | 21,5 |
+| Asesino | 19 | 18 | 3,5 | 3,6 | 20,6 | 20,8 |
+| Sabio del Vacío | 5 | 11 | 5,1 | 4,0 | 18,8 | 20,7 |
+| Alquimista | 12 | 9 | 3,6 | 3,9 | 19,8 | 19,4 |
+| Nigromante | 10 | 7 | 5,8 | 5,9 | 19,4 | 19,6 |
+| Bruja del Hielo | 3 | 4 | 5,1 | 5,0 | 16,3 | 16,4 |
+| Rec | 2 | 1 | 4,6 | 4,7 | 18,6 | 18,6 |
+| Grúa | 1 | 0 | 5,6 | 5,8 | 18,6 | 18,9 |
+
+Victorias del Sabio: 19 → 43 de 406. Sale del grupo de abajo, pero parte de lo que gana sale de los de abajo y del medio: Alquimista 48 → 37, Nigromante 35 → 24, Rec 9 → 4 (con estos totales, cambios así pueden ser en parte ruido). Duelos: mediana 14,3 → 14,2 s (meta 15-30 ✘), 13% por tiempo, 0,85 cambios de ventaja, esquive 43%.
+Probado y descartado, a 528 partidas: Báculo, Cetro, Corazón y Égida, la de la Bruja (8%, puesto 4,5, afuera 19,7). Se mide igual que la tanda anterior: 4 partes de semillas en paralelo sobre copias exportadas.

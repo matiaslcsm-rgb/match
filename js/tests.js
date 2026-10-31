@@ -1289,8 +1289,8 @@ test('IA: Grúa arma su build propia, primero el robo de vida; los demás, la de
     check(player.gold < 5000 - aiBuild(player).reduce((a, k) => a + itemTotalCost(ITEMS[k]), 0), 'con su build armada, sigue con los libros de talento');
 });
 
-test('IA: la Bruja y Rec arman su build propia, con aguante y sin lo que no les rinde', () => {
-    [['FROSTWITCH', 'TOME'], ['REC', 'SWIFT_BLADE']].forEach(([key, not]) => {
+test('IA: la Bruja, Rec y el Sabio arman su build propia, con aguante y sin lo que no les rinde', () => {
+    [['FROSTWITCH', 'TOME'], ['REC', 'SWIFT_BLADE'], ['VOIDSAGE', 'TOME']].forEach(([key, not]) => {
         newGame(key);
         checkEq(aiBuild(player), AI_BUILDS[key], `${key}: la suya`);
         nextWave = null; player.gold = 5000;

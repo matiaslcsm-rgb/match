@@ -5,7 +5,7 @@ registerHero({
     key: 'VECTOR', name: 'Vector', symbol: 'E', primaryAttr: 'AGI', role: 'Duelista de contraataque',
     attributes: { str: [18, 2.0], agi: [23, 3.2], int: [15, 1.5] },
     baseHp: 165, baseAtk: 12, baseAtkSpeed: 1.05, baseAttackRange: 1.5,
-    baseArmor: 3, baseMagicResist: 15, baseHpRegen: 1.5,
+    baseArmor: 3, baseMagicResist: 30, baseHpRegen: 1.5,
     baseMaxMana: 110, baseManaRegen: 1.4, baseMoveSpeed: 3.4, baseProjectileSpeed: 0,
     baseCritChance: 10, baseEvasion: 5, baseSpellAmp: 0, baseLifesteal: 8,
     description: 'Reflejos: el esgrimista favorito de la tribuna. Espera tu golpe con la Guardia y te lo devuelve. Se le gana sin pegarle en guardia: amagar y castigarlo cuando queda expuesto, o usar área.',

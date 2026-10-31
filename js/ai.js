@@ -226,7 +226,8 @@ const AI_BUILDS = {
     INT: ['ARCANE_STAFF', 'ECLIPSE_STAFF', 'TOME', 'AEGIS'],
     CRANE: ['CRIMSON', 'HEART', 'THORNS', 'HAMMER'], // sin robo de vida propio: primero la Sed; medido en docs/BALANCE-CH.md
     FROSTWITCH: ['ARCANE_STAFF', 'ECLIPSE_STAFF', 'HEART', 'AEGIS'], // gana sus duelos pero sale temprano: Corazón en vez de Túnica
-    REC: ['GLOVES', 'HEART', 'HAMMER', 'CRIMSON'] // los drones suman daño plano, no crítico: Martillo y aguante en vez de Hoja Veloz y Ojo
+    REC: ['GLOVES', 'HEART', 'HAMMER', 'CRIMSON'], // los drones suman daño plano, no crítico: Martillo y aguante en vez de Hoja Veloz y Ojo
+    VOIDSAGE: ['ARCANE_STAFF', 'HEART', 'ECLIPSE_STAFF', 'BOOTS'] // salta al medio y salía primero que los otros magos: Corazón antes del Cetro y Botas en vez de Túnica y Égida
 };
 const aiBuild = hero => AI_BUILDS[hero.key] || AI_BUILDS[hero.primaryAttr]; // la de su atributo, si no tiene una propia
 
