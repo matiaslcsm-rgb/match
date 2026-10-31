@@ -36,9 +36,10 @@ function summonAutomaton(owner, near = owner) {
 }
 function destroyMinion(m) { m.hp = 0; fxDeath(m); }
 
-// El duelo arranca con 1 Autómata: el Sello invoca al matar, y en un duelo eso ya lo termina (decisión del usuario).
+// El duelo arranca con Autómatas: el Sello invoca al matar, y en un duelo eso ya lo termina (decisión del usuario; 2 medido con el banco).
+const DUEL_AUTOMATONS = 2;
 function duelAutomaton(hero) {
-    if (skillLevel(hero, SKILL_INDEX.NECROMANCER_AUTOMATON) > 0 || skillLevel(hero, SKILL_INDEX.NECROMANCER_SEAL) > 0) summonAutomaton(hero);
+    if (skillLevel(hero, SKILL_INDEX.NECROMANCER_AUTOMATON) > 0 || skillLevel(hero, SKILL_INDEX.NECROMANCER_SEAL) > 0) for (let i = 0; i < DUEL_AUTOMATONS; i++) summonAutomaton(hero);
 }
 
 function updateMinions(arena, dt) {
@@ -58,7 +59,7 @@ function updateMinions(arena, dt) {
         if (m.attackTimer < 1 / effAtkSpeed(m)) return;
         m.attackTimer = 0;
         fxAttack(m, target, 'melee');
-        dealDamage(m.owner, target, Math.round(effAttack(m)), 'physical', { isAttack: true });
+        dealDamage(m.owner, target, Math.round(effAttack(m)), 'physical', { isAttack: true, fullDuelDamage: true });
     });
     arena.minions = arena.minions.filter(m => m.isAlive());
 }

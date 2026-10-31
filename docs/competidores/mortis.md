@@ -4,6 +4,19 @@
 >
 > **Diferencias con lo de abajo:** Sello, Eco y Sobrecarga suman 40/40/60% de la Inteligencia, y la vida y el daño de los Autómatas crecen con ella (x2 y x0,25), porque con números fijos dejaban de servir en las rondas altas. Los jefes de ronda no apuntan a los Autómatas.
 
+## Números jugables (medidos el 2026-10-31, banco de 132)
+Los números de más abajo eran propuestas. Programados: vida 195, armadura 3 y resistencia mágica 30 (lo que más pesó: perdía los duelos en 8 s, sin escape). Cada duelo arranca con 2 Autómatas. El Aura y los golpes de los Autómatas no sufren el recorte de duelo (`fullDuelDamage`). El Aura hace 0,4/0,6/0,8/1% a los creeps, y 0,8/1,2/1,6/2% a los competidores. Eco suma 30% de Inteligencia. El robo de vida del escalado es +1 cada 10 bajas. Los Autómatas crecen x1 de vida y x0,12 de daño por Inteligencia.
+
+| Prueba | Partidas ganadas | Duelos ganados |
+|---|---|---|
+| Primera versión (66) | 27% | 27% |
+| Sin recorte de duelo (66) | 33% | 34% |
+| Más resistencia (132) | 32% | 40% |
+| Más resistencia, menos contra creeps (132) | 39% | 40% |
+| **Final: Autómatas crecen menos (132)** | **26%** | **36%** |
+
+**No llega a la meta de 45-55% de duelos**, y quedan cruces muy desparejos: 8 de 83 contra Arcanista y 8 de 56 contra Alquimista, los dos con aturdimientos. Mejor contra Guerrero Vampiro (48 de 80) y Danzante (56 de 102). Le falta una respuesta al aturdimiento, y eso ya pide cambiar el kit, no los números.
+
 ## Quién es
 Un robot flotante sin piernas, de capucha verde, cráneo, armadura de cobre y garras. Levita con propulsores que dejan una estela verde de nanobots. Junta chatarra de los caídos y la hace caminar.
 - **Rol:** desgaste a distancia e invocador.

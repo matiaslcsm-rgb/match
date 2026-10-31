@@ -4,12 +4,12 @@
 registerHero({
     key: 'NECROMANCER', name: 'M.O.R.T.I.S.', symbol: 'N', primaryAttr: 'INT', role: 'Desgaste e invocación a distancia',
     attributes: { str: [19, 2.2], agi: [14, 1.4], int: [24, 3.2] },
-    baseHp: 160, baseAtk: 12, baseAtkSpeed: 0.95, baseAttackRange: 3,
-    baseArmor: 1, baseMagicResist: 15, baseHpRegen: 0.5,
+    baseHp: 195, baseAtk: 12, baseAtkSpeed: 0.95, baseAttackRange: 3,
+    baseArmor: 3, baseMagicResist: 30, baseHpRegen: 0.5,
     baseMaxMana: 130, baseManaRegen: 1.8, baseMoveSpeed: 2.6, baseProjectileSpeed: 8,
     baseCritChance: 5, baseEvasion: 5, baseSpellAmp: 0, baseLifesteal: 0,
     description: 'Inteligencia: nigromante robótico flotante. Corroe con su aura, ata con el Sello, levanta Autómatas y los detona.',
-    scaling: { stat: 'lifesteal', perKills: 10, perKillsAmount: 2, perHeroKill: 5 },
+    scaling: { stat: 'lifesteal', perKills: 10, perKillsAmount: 1, perHeroKill: 5 },
     innate: {
         id: 'NECROMANCER_INNATE', name: 'Sadista', tags: ['CURACIÓN', 'AL_MATAR'],
         description: 'Innato: cada baja te da una carga de regeneración de vida y maná (+3/s cada una) por 7s, hasta 6 cargas. Si es un competidor, suma 6 cargas de una.',
@@ -49,16 +49,16 @@ registerHero({
     NECROMANCER_AURA: {
         id: 'NECROMANCER_AURA', name: 'Aura de Corrupción', kind: 'passive',
         tags: ['MÁGICO', 'DAÑO_EN_EL_TIEMPO', 'ÁREA'],
-        values: { radius: 4, hpDmgPct: [0.008, 0.012, 0.016, 0.02], antiheal: [0.15, 0.2, 0.25, 0.3] },
-        description: 'Pasiva: los enemigos en radio {radius} pierden {hpDmgPct%} de su vida máxima por segundo como daño mágico y reciben {antiheal%} menos curación.',
+        values: { radius: 4, hpDmgPct: [0.008, 0.012, 0.016, 0.02], creepDmgPct: [0.004, 0.006, 0.008, 0.01], antiheal: [0.15, 0.2, 0.25, 0.3] },
+        description: 'Pasiva: los competidores en radio {radius} pierden {hpDmgPct%} de su vida máxima por segundo como daño mágico, y los creeps {creepDmgPct%}. Además reciben {antiheal%} menos curación.',
         hooks: {
             onTick(owner, { dt }) {
                 if (!owner.isAlive() || !everyInterval(owner, this.id, dt)) return;
-                const radius = val(this, owner, 'radius'), pct = val(this, owner, 'hpDmgPct'), antiheal = val(this, owner, 'antiheal');
+                const radius = val(this, owner, 'radius'), antiheal = val(this, owner, 'antiheal');
                 enemiesOf(owner).slice().forEach(c => {
                     if (!c.isAlive() || Math.hypot(c.x - owner.x, c.y - owner.y) > radius) return;
                     addEffect(c, { id: 'NECROMANCER_CORRUPTION', name: 'Corrupción', duration: 1.2, tags: ['PERJUICIO'], mods: { healingTakenPct: -antiheal } });
-                    dealDamage(owner, c, Math.max(1, c.maxHp * pct), 'magical');
+                    dealDamage(owner, c, Math.max(1, c.maxHp * val(this, owner, c.isHero ? 'hpDmgPct' : 'creepDmgPct')), 'magical', { fullDuelDamage: true });
                 });
             }
         }
@@ -66,14 +66,14 @@ registerHero({
     NECROMANCER_AUTOMATON: {
         id: 'NECROMANCER_AUTOMATON', name: 'Autómata Putrefacto', kind: 'passive',
         tags: ['MEJORA', 'AL_MATAR'],
-        values: { cap: [2, 3, 4, 5], hp: [120, 160, 200, 240], atk: [10, 15, 20, 25], intHp: 2, intAtk: 0.25 },
-        description: 'Pasiva: podés tener hasta {cap} Autómatas a la vez, con {hp} de vida y {atk} de daño, más lo que sumen por tu Inteligencia. Duran 25s y arrancás cada duelo con uno. Quien destruye uno cobra oro.',
+        values: { cap: [2, 3, 4, 5], hp: [120, 160, 200, 240], atk: [10, 15, 20, 25], intHp: 1, intAtk: 0.12 },
+        description: 'Pasiva: podés tener hasta {cap} Autómatas a la vez, con {hp} de vida y {atk} de daño, más lo que sumen por tu Inteligencia. Duran 25s y arrancás cada duelo con dos. Quien destruye uno cobra oro.',
         hooks: {}
     },
     NECROMANCER_ECHO: {
         id: 'NECROMANCER_ECHO', name: 'Eco de los Muertos', kind: 'active',
         tags: ['MÁGICO', 'ÁREA'],
-        values: { cooldown: [8, 7, 6, 5], manaCost: [70, 80, 90, 100], baseDmg: [90, 140, 190, 240], intRatio: 0.4, radius: 2.5, falloff: 0.35, maxWaves: 3 },
+        values: { cooldown: [8, 7, 6, 5], manaCost: [70, 80, 90, 100], baseDmg: [90, 140, 190, 240], intRatio: 0.3, radius: 2.5, falloff: 0.35, maxWaves: 3 },
         description: 'Un chirrido hace {baseDmg} + {intRatio%} de tu Inteligencia como daño mágico en radio {radius}. Cada Autómata lo repite desde donde está, del más cercano al más lejano, {falloff%} más débil que el anterior. Un mismo enemigo recibe {maxWaves} ondas como máximo.',
         aiReady(hero) {
             const radius = val(this, hero, 'radius');

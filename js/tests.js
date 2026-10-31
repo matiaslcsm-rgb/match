@@ -644,13 +644,22 @@ test('Sobrecarga de Servidores: detona a los Autómatas, frena y ata con 2 explo
     for (let i = 0; i < 30; i++) check(!draftOptions(player, 6).some(o => o.id === 'NECROMANCER_OVERLOAD'), 'no sale en el draft de otro');
 });
 
-test('Duelo: arranca con 1 Autómata, el rival puede destruirlo y cobra', () => {
+test('Duelo: el Aura y los Autómatas no sufren el recorte de daño entre competidores', () => {
+    newGame('NECROMANCER');
+    const rival = heroes.find(h => h !== player);
+    makeDuelArenas({ pairs: [[player, rival]], bye: null });
+    rival.hp = rival.maxHp = 1000; rival.magicResist = 0; rival.effects = [];
+    const hit = opts => { const hp = rival.hp; dealDamage(player, rival, 100, 'pure', opts); const d = hp - rival.hp; rival.hp = hp; return d; };
+    check(hit({ fullDuelDamage: true }) > hit({}), 'pega más que un golpe común');
+});
+
+test('Duelo: arranca con 2 Autómatas, el rival puede destruirlos y cobra', () => {
     newGame('NECROMANCER');
     learn('NECROMANCER_SEAL', 1);
     const rival = heroes.find(h => h !== player);
     const arena = makeDuelArenas({ pairs: [[player, rival]], bye: null })[0];
     const m = minionsOf(player)[0];
-    check(m, 'hay uno');
+    checkEq(minionsOf(player).length, DUEL_AUTOMATONS, 'arranca con ellos');
     check(enemiesOf(rival).includes(m), 'el rival lo tiene de objetivo');
     check(enemiesOf(player).length === 1 && enemiesOf(player)[0] === rival, 'el tuyo no es enemigo tuyo');
     const gold = rival.gold;
