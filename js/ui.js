@@ -17,6 +17,11 @@ function applyMapSize() {
 }
 applyMapSize();
 // Lo que sobra a los costados cuando la arena se dibuja en 2D (sin WebGL), que va centrada
+// Texto sobre la arena, con contorno negro para que se lea sobre cualquier piso
+function inkText(text, x, y, color) {
+    ctx.lineJoin = 'round'; ctx.lineWidth = 4; ctx.strokeStyle = '#14151a'; ctx.strokeText(text, x, y);
+    ctx.fillStyle = color; ctx.fillText(text, x, y);
+}
 function canvasShift() { return (viewW - MAP_W) / 2; }
 function setCanvasTransform(centered) {
     const k = mapScale * (window.devicePixelRatio || 1);
@@ -1139,10 +1144,10 @@ function render3d(arena, dt) {
     ctx.clearRect(0, 0, viewW, MAP_H);
     M3D.frame(arena, dt);
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    if (arena.kind === 'duel') { ctx.font = 'bold 13px "Chakra Petch", sans-serif'; ctx.fillStyle = '#ffb703'; ctx.fillText(`⚔ DUELO: ${arena.heroes[0].displayName}  vs  ${arena.heroes[1].displayName}`, viewW / 2, TOP_LINE); drawRivalPanel(arena); }
+    if (arena.kind === 'duel') { ctx.font = 'bold 14px "Chakra Petch", sans-serif'; inkText(`⚔ DUELO: ${arena.heroes[0].displayName}  vs  ${arena.heroes[1].displayName}`, viewW / 2, TOP_LINE, '#ffb703'); drawRivalPanel(arena); }
     if (arena.kind === 'boss' && arena.boss) {
         const b = arena.boss, x = (viewW - MAP_W) / 2 + TILE * 3, w = MAP_W - TILE * 6;
-        ctx.font = 'bold 13px "Chakra Petch", sans-serif'; ctx.fillStyle = b.color; ctx.fillText(`👹 ${b.label}: ${Math.max(0, b.hp)} / ${b.maxHp}`, viewW / 2, TOP_LINE);
+        ctx.font = 'bold 14px "Chakra Petch", sans-serif'; inkText(`👹 ${b.label}: ${Math.max(0, b.hp)} / ${b.maxHp}`, viewW / 2, TOP_LINE, b.color);
         ctx.fillStyle = '#330010'; ctx.fillRect(x, TOP_LINE + 10, w, 5);
         ctx.fillStyle = '#ff0055'; ctx.fillRect(x, TOP_LINE + 10, w * Math.max(0, b.hp) / b.maxHp, 5);
     }
@@ -1169,7 +1174,7 @@ function render3d(arena, dt) {
     if (targeting && !canControlPlayer()) cancelTargeting();
     drawTargetingHint(); // la mira y el área de la habilidad van en el piso 3D (match3d.js)
     drawUltBanner(viewW / 2, MAP_H * 0.66);
-    if (viewedHero && viewedHero !== player) { ctx.font = '11px "Chakra Petch", sans-serif'; ctx.fillStyle = '#ffb703'; ctx.fillText(`👁 Mirando a ${viewedHero.displayName} (clic en tu foto de arriba para volver)`, viewW / 2, TOP_LINE + 26); }
+    if (viewedHero && viewedHero !== player) { ctx.font = 'bold 12px "Chakra Petch", sans-serif'; inkText(`👁 Mirando a ${viewedHero.displayName} (clic en tu foto de arriba para volver)`, viewW / 2, TOP_LINE + 26, '#ffb703'); }
     if (paused) { ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(0, 0, viewW, MAP_H); ctx.font = 'bold 30px "Chakra Petch", sans-serif'; ctx.fillStyle = '#ffb703'; ctx.fillText('PAUSA', viewW / 2, MAP_H / 2); }
 }
 
