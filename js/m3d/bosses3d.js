@@ -13,6 +13,8 @@ export const both = s => { const side = k => LIMBS.includes(s.b) ? s.b + k : s.b
     return [{ ...s, b: side('L') }, { ...s, b: side('R'), p: [-s.p[0], s.p[1], s.p[2]], r: s.r && [s.r[0], -s.r[1], -s.r[2]] }]; };
 export const box = (b, s, p, m, r) => ({ t: 'box', b, s, p, m, r });
 export const cyl = (b, rad, h, p, m, r) => ({ t: 'cyl', b, rad, h, p, m, r });
+export const ball = (b, rad, p, m, scale) => ({ t: 'ball', b, rad, p, m, scale }); // scale: [x, y, z], para achatarla o estirarla
+export const cone = (b, top, bottom, h, p, m, r) => ({ t: 'cone', b, top, bottom, h, p, m, r }); // cilindro con punta o acampanado
 
 export const BOSS_ROBOTS = {
     // Gólem Ancestral → "La Prensa": orugas, hombros de bloque y puños enormes (pisa y aturde)
@@ -106,11 +108,13 @@ export function addExtras(robot, def) {
     const bones = robot.userData.bones;
     def.extras.forEach(s => {
         if (!bones[s.b]) throw new Error(`Robot: el hueso "${s.b}" no existe`);
-        const k = s.t + (s.s || [s.rad, s.h]).join(',');
-        const g = GEO[k] || (GEO[k] = s.t === 'box' ? new THREE.BoxGeometry(...s.s) : new THREE.CylinderGeometry(s.rad, s.rad, s.h, 16));
+        const k = s.t + (s.s || [s.rad, s.h, s.top, s.bottom]).join(',');
+        const g = GEO[k] || (GEO[k] = s.t === 'box' ? new THREE.BoxGeometry(...s.s) : s.t === 'ball' ? new THREE.SphereGeometry(s.rad, 20, 14)
+            : s.t === 'cone' ? new THREE.CylinderGeometry(s.top, s.bottom, s.h, 20) : new THREE.CylinderGeometry(s.rad, s.rad, s.h, 16));
         const m = outline(new THREE.Mesh(g, s.m === 'glow' ? (GLOW[def.glow] || (GLOW[def.glow] = new THREE.MeshBasicMaterial({ color: def.glow }))) : mat(s.m)));
         m.position.set(...s.p);
         if (s.r) m.rotation.set(...s.r);
+        if (s.scale) m.scale.set(...s.scale);
         bones[s.b].add(m);
     });
 }

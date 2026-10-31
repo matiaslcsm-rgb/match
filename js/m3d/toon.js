@@ -24,10 +24,11 @@ function ink(key, push) {
     return m;
 }
 const INK_BOX = ink('box', `sign(position) * ${LINE.toFixed(3)}`);
+const INK_BALL = ink('ball', `normalize(position) * ${LINE.toFixed(3)}`);
 const INK_CYL = ink('cyl', `vec3(normalize(position.xz + vec2(0.0001)).x, sign(position.y), normalize(position.xz + vec2(0.0001)).y) * ${LINE.toFixed(3)}`);
 export function outline(mesh) {
     const g = mesh.geometry;
-    const kind = g.type === 'BoxGeometry' ? INK_BOX : g.type === 'CylinderGeometry' ? INK_CYL : null;
+    const kind = g.type === 'BoxGeometry' ? INK_BOX : g.type === 'CylinderGeometry' ? INK_CYL : g.type === 'SphereGeometry' ? INK_BALL : null;
     if (!kind) return mesh;
     if (!g.boundingBox) g.computeBoundingBox();
     const size = g.boundingBox.getSize(new THREE.Vector3());
@@ -82,7 +83,7 @@ export function wallTex() {
 const MATS = {};
 export function mat(name) {
     if (MATS[name]) return MATS[name];
-    const P = { gris: '#8a97a8', oliva: '#7f9a4a', hueso: '#f2ecdc', nar: '#ff8420', ama: '#ffc61a', carbon: '#3b4250', metal: '#b9c3cf',
+    const P = { craneo: '#e9dfc2', gris: '#8a97a8', oliva: '#7f9a4a', hueso: '#f2ecdc', nar: '#ff8420', ama: '#ffc61a', carbon: '#3b4250', metal: '#b9c3cf',
         hierro: '#565f6e', junta: '#2f3540', cobre: '#c8763e', cableR: '#e0433a', cableV: '#46b04a', cableA: '#3a6fe0' }; // hierro, junta y cobre: el esqueleto
     let m;
     if (name === 'peligro') m = surface({ map: hazard() });

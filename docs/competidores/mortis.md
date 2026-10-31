@@ -4,6 +4,9 @@
 >
 > **Diferencias con lo de abajo:** Sello, Eco y Sobrecarga suman 40/40/60% de la Inteligencia, y la vida y el daño de los Autómatas crecen con ella (x2 y x0,25), porque con números fijos dejaban de servir en las rondas altas. Los jefes de ronda no apuntan a los Autómatas.
 
+## Modelo
+Robot hecho por código con formas curvas (`ball` y `cone`, bosses3d.js) para acercarse al dibujo del usuario: capucha, cráneo, coraza, túnica en jirones, armazón, llamas y la mancha verde del Aura. Si se quiere idéntico, hace falta un modelo 3D real en `.glb`: el usuario lo genera con una herramienta de imagen a 3D y se carga en el juego.
+
 ## Números jugables (medidos el 2026-10-31, banco de 132)
 Los números de más abajo eran propuestas. Programados: vida 195, armadura 3 y resistencia mágica 30 (lo que más pesó: perdía los duelos en 8 s, sin escape). Cada duelo arranca con 2 Autómatas. El Aura y los golpes de los Autómatas no sufren el recorte de duelo (`fullDuelDamage`). El Aura hace 0,4/0,6/0,8/1% a los creeps, y 0,8/1,2/1,6/2% a los competidores. Eco suma 30% de Inteligencia. El robo de vida del escalado es +1 cada 10 bajas. Los Autómatas crecen x1 de vida y x0,12 de daño por Inteligencia.
 

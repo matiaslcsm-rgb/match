@@ -293,8 +293,9 @@ function unitObj(u) {
     robot.scale.set(scale * bulkOf(u), scale, scale * bulkOf(u));
     const g = new THREE.Group(); g.add(robot);
     if (u.isHero) { const ring = ringMesh(0.36, 0.46, u === (typeof player !== 'undefined' ? player : null) ? '#00f5d4' : '#ffb703', 0.9); g.add(ring); g.userData.ring = ring; }
+    const floats = u.isHero && (HERO_ROBOTS[u.key] || {}).float; if (floats) g.add(ringMesh(0.75, 1.15, HERO_ROBOTS[u.key].glow, 0.28)); // la mancha verde del Aura
     scene.add(g);
-    o = { g, robot, scale, yaw: u.isHero ? 0 : Math.PI, last: null, seen: 0 };
+    o = { g, robot, scale, floats, yaw: u.isHero ? 0 : Math.PI, last: null, seen: 0 };
     units.set(u, o);
     return o;
 }
@@ -498,6 +499,7 @@ function frame(arena, dt) {
         let d = o.yaw - o.g.rotation.y; d = Math.atan2(Math.sin(d), Math.cos(d));
         o.g.rotation.y += d * Math.min(1, dt * 12);
         animateRobot(o.robot, dt, speed / o.scale * 0.6, false);
+        if (o.floats) o.robot.position.y = 0.12 + Math.sin(performance.now() / 420) * 0.08; // flota
         const hit = u.fxHitAt !== undefined && fxClock - u.fxHitAt < 0.12;
         o.robot.scale.setScalar(o.scale * (hit ? 1.07 : 1));
         o.g.visible = true;
