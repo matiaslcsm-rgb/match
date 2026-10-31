@@ -28,7 +28,6 @@ function renderPauseMenu() {
     document.getElementById('pause-options').innerHTML =
         opt('sound', '🔊 Sonido', soundOn) +
         opt('music', '🎵 Música', musicOn) +
-        opt('sprites', '🎨 Pixel art (G)', spritesOn) +
         opt('colorblind', '🎨 Zonas de ataque para daltonismo (azul y naranja)', A11Y.colorblind) +
         opt('quickcast', '⚡ Lanzamiento rápido (la habilidad sale al apretar la tecla)', quickCast) +
         opt('autocast', '✨ Habilidades automáticas (H)', autoCast) +
@@ -50,7 +49,7 @@ function renderPauseMenu() {
     });
     document.querySelectorAll('#pause-options .pm-toggle').forEach(btn => {
         btn.onclick = () => {
-            ({ sound: () => setSound(!soundOn), music: () => setMusic(!musicOn), colorblind: () => setA11y('colorblind', !A11Y.colorblind), sprites: () => setSprites(!spritesOn), autocast: () => setAutoCast(!autoCast), quickcast: () => setQuickCast(!quickCast),
+            ({ sound: () => setSound(!soundOn), music: () => setMusic(!musicOn), colorblind: () => setA11y('colorblind', !A11Y.colorblind), autocast: () => setAutoCast(!autoCast), quickcast: () => setQuickCast(!quickCast),
                autopilot: () => setAutopilot(!autopilot), fullscreen: toggleFullscreen })[btn.dataset.opt]();
             renderPauseMenu();
         };

@@ -994,7 +994,7 @@ function drawUnit(u, color, symbol, pos = u, opts = {}) {
         }
     } else {
         if (opts.glow) { ctx.shadowColor = color; ctx.shadowBlur = 10; }
-        ctx.font = opts.big ? 'bold 26px monospace' : opts.glow ? 'bold 19px monospace' : '18px monospace';
+        ctx.font = opts.big ? 'bold 26px "Chakra Petch", sans-serif' : opts.glow ? 'bold 19px "Chakra Petch", sans-serif' : '18px "Chakra Petch", sans-serif';
         ctx.fillStyle = hit ? '#ffffff' : color; ctx.fillText(symbol, cx, cy + 1);
         ctx.shadowBlur = 0;
     }
@@ -1007,7 +1007,7 @@ function drawUnit(u, color, symbol, pos = u, opts = {}) {
         if (u.isHero && u.maxMana) { ctx.fillStyle = '#4895ef'; ctx.fillRect(cx - w / 2, top + 4, w * Math.max(0, u.mana / u.maxMana), 2); }
     }
     if (u.effects && u.effects.length) {
-        ctx.font = '10px monospace';
+        ctx.font = '10px "Chakra Petch", sans-serif';
         if (hasFlag(u, 'stun')) { ctx.fillStyle = '#ffd166'; ctx.fillText('✦✦', cx, cy - halfHeight - 9 + Math.sin(fxClock * 10) * 1.5); }
         else if (sumMod(u, 'moveSpeedPct') < 0) { ctx.fillStyle = '#90e0ef'; ctx.fillText('❄', cx + TILE / 2 - 3, cy - TILE / 2 + 6); }
     }
@@ -1061,34 +1061,34 @@ function renderRestArea(dt = 0) {
     ctx.drawImage(arenaBackground('rest'), 0, 0, MAP_W, MAP_H);
     drawSceneryOverlay('rest');
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.font = 'bold 16px monospace'; ctx.fillStyle = '#d8f3dc';
+    ctx.font = 'bold 16px "Chakra Petch", sans-serif'; ctx.fillStyle = '#d8f3dc';
     ctx.shadowColor = '#000'; ctx.shadowBlur = 4;
     ctx.fillText('ÁREA DE DESCANSO', MAP_W / 2, TILE * 0.8);
     ctx.shadowBlur = 0;
-    ctx.font = '11px monospace'; ctx.fillStyle = '#74c69d';
+    ctx.font = '11px "Chakra Petch", sans-serif'; ctx.fillStyle = '#74c69d';
     ctx.fillText('Volvés al combate con vida y maná completos', MAP_W / 2, MAP_H - TILE * 0.6);
-    ctx.font = '18px monospace';
+    ctx.font = '18px "Chakra Petch", sans-serif';
     heroes.filter(h => h.inRest && !h.eliminated).forEach(h => {
         drawUnit(h, heroColor(h), h.symbol, drawPos(h, dt), { glow: h === player });
-        if (h === player) { ctx.font = '10px monospace'; ctx.fillStyle = '#00f5d4'; ctx.fillText('vos', (h.rx ?? h.x) * TILE + TILE / 2, (h.ry ?? h.y) * TILE + TILE + 4); }
+        if (h === player) { ctx.font = '10px "Chakra Petch", sans-serif'; ctx.fillStyle = '#00f5d4'; ctx.fillText('vos', (h.rx ?? h.x) * TILE + TILE / 2, (h.ry ?? h.y) * TILE + TILE + 4); }
     });
     if (player && player.moveTarget && player.inRest) {
         const t = player.moveTarget, px = t.x * TILE + TILE / 2, py = t.y * TILE + TILE / 2;
         ctx.strokeStyle = '#2dc653'; ctx.lineWidth = 2;
         ctx.beginPath(); ctx.moveTo(px - 5, py - 5); ctx.lineTo(px + 5, py + 5); ctx.moveTo(px + 5, py - 5); ctx.lineTo(px - 5, py + 5); ctx.stroke();
     }
-    ctx.font = '11px monospace'; ctx.fillStyle = '#74c69d';
+    ctx.font = '11px "Chakra Petch", sans-serif'; ctx.fillStyle = '#74c69d';
     ctx.fillText('Caminá con clic derecho', MAP_W / 2, TILE * 1.5);
 }
 
 // Portada en el mapa mientras estás en el menú o eligiendo héroe.
 function renderTitle() {
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.font = 'bold 30px monospace'; ctx.fillStyle = '#ffb703';
+    ctx.font = 'bold 30px "Chakra Petch", sans-serif'; ctx.fillStyle = '#ffb703';
     ctx.fillText('MATCH', MAP_W / 2, MAP_H / 2 - 30);
-    ctx.font = '13px monospace'; ctx.fillStyle = '#8ecae6';
+    ctx.font = '13px "Chakra Petch", sans-serif'; ctx.fillStyle = '#8ecae6';
     ctx.fillText('Elegí tu competidor →', MAP_W / 2, MAP_H / 2 + 10);
-    ctx.font = '20px monospace';
+    ctx.font = '20px "Chakra Petch", sans-serif';
     const order = { STR: 0, AGI: 1, INT: 2 }; // agrupados por atributo, en su color
     Object.values(HERO_TEMPLATES).sort((a, b) => order[a.primaryAttr] - order[b.primaryAttr]).forEach((t, i, all) => {
         ctx.fillStyle = ATTR_INFO[t.primaryAttr].color;
@@ -1111,10 +1111,10 @@ function drawRivalPanel(arena) {
     ctx.fillStyle = 'rgba(12,13,16,0.82)'; ctx.fillRect(x, y, w, h);
     ctx.strokeStyle = '#ffb703'; ctx.lineWidth = 1; ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
     ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-    ctx.font = 'bold 10px monospace'; ctx.fillStyle = '#ffd27a'; ctx.fillText(shortName(r.displayName, 22), x + 5, y + 8);
+    ctx.font = 'bold 10px "Chakra Petch", sans-serif'; ctx.fillStyle = '#ffd27a'; ctx.fillText(shortName(r.displayName, 22), x + 5, y + 8);
     ctx.fillStyle = '#330a0a'; ctx.fillRect(x + 5, y + 15, w - 10, 3); ctx.fillStyle = '#e8a33a'; ctx.fillRect(x + 5, y + 15, (w - 10) * Math.max(0, r.hp / r.maxHp), 3);
     ctx.fillStyle = '#0a1830'; ctx.fillRect(x + 5, y + 20, w - 10, 2); ctx.fillStyle = '#4895ef'; ctx.fillRect(x + 5, y + 20, (w - 10) * (r.maxMana ? Math.max(0, r.mana / r.maxMana) : 0), 2);
-    ctx.font = '9px monospace';
+    ctx.font = '9px "Chakra Petch", sans-serif';
     skills.forEach((s, i) => {
         const ry = y + 31 + i * row, left = Math.max(0, r.cooldowns[s.id] || 0), total = (r.cooldownTotals && r.cooldownTotals[s.id]) || skillCooldown(s, r) || 1;
         const winding = r.windup && r.windup.skill === s, noMana = r.mana < (val(s, r, 'manaCost') || 0);
@@ -1139,10 +1139,10 @@ function render3d(arena, dt) {
     ctx.clearRect(0, 0, viewW, MAP_H);
     M3D.frame(arena, dt);
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    if (arena.kind === 'duel') { ctx.font = 'bold 13px monospace'; ctx.fillStyle = '#ffb703'; ctx.fillText(`⚔ DUELO: ${arena.heroes[0].displayName}  vs  ${arena.heroes[1].displayName}`, viewW / 2, TOP_LINE); drawRivalPanel(arena); }
+    if (arena.kind === 'duel') { ctx.font = 'bold 13px "Chakra Petch", sans-serif'; ctx.fillStyle = '#ffb703'; ctx.fillText(`⚔ DUELO: ${arena.heroes[0].displayName}  vs  ${arena.heroes[1].displayName}`, viewW / 2, TOP_LINE); drawRivalPanel(arena); }
     if (arena.kind === 'boss' && arena.boss) {
         const b = arena.boss, x = (viewW - MAP_W) / 2 + TILE * 3, w = MAP_W - TILE * 6;
-        ctx.font = 'bold 13px monospace'; ctx.fillStyle = b.color; ctx.fillText(`👹 ${b.label}: ${Math.max(0, b.hp)} / ${b.maxHp}`, viewW / 2, TOP_LINE);
+        ctx.font = 'bold 13px "Chakra Petch", sans-serif'; ctx.fillStyle = b.color; ctx.fillText(`👹 ${b.label}: ${Math.max(0, b.hp)} / ${b.maxHp}`, viewW / 2, TOP_LINE);
         ctx.fillStyle = '#330010'; ctx.fillRect(x, TOP_LINE + 10, w, 5);
         ctx.fillStyle = '#ff0055'; ctx.fillRect(x, TOP_LINE + 10, w * Math.max(0, b.hp) / b.maxHp, 5);
     }
@@ -1152,7 +1152,7 @@ function render3d(arena, dt) {
         ctx.fillStyle = 'rgba(0,0,0,0.75)'; ctx.fillRect(p.x - w / 2 - 1, top - 1, w + 2, u.isHero ? 7 : 5);
         ctx.fillStyle = u.isHero ? (u === player ? '#2dc653' : '#e8a33a') : pct > 0.5 ? '#c8402e' : '#e0703a'; ctx.fillRect(p.x - w / 2, top, w * pct, 3);
         if (u.isHero && u.maxMana) { ctx.fillStyle = '#4895ef'; ctx.fillRect(p.x - w / 2, top + 4, w * Math.max(0, u.mana / u.maxMana), 2); }
-        if (u.isHero) { ctx.font = 'bold 10px monospace'; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,0.85)'; ctx.strokeText(u.displayName, p.x, top - 8); ctx.fillStyle = u === player ? '#00f5d4' : '#ffd27a'; ctx.fillText(u.displayName, p.x, top - 8); }
+        if (u.isHero) { ctx.font = 'bold 10px "Chakra Petch", sans-serif'; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,0.85)'; ctx.strokeText(u.displayName, p.x, top - 8); ctx.fillStyle = u === player ? '#00f5d4' : '#ffd27a'; ctx.fillText(u.displayName, p.x, top - 8); }
     };
     arena.creeps.forEach(c => { if (c.isAlive()) bar(c); });
     arena.heroes.forEach(h => { if (!h.eliminated && h.isAlive()) bar(h); });
@@ -1163,14 +1163,14 @@ function render3d(arena, dt) {
         const p = M3D.project(f.x, f.y, 1.4);
         ctx.globalAlpha = Math.max(0, 1 - t * t);
         if (pxNumberText(f.text)) pxDrawNumber(f.text, p.x, p.y, f.color, Math.max(2, Math.round(2 * f.size / 12 * A11Y.combatText)) + (t < 0.12 ? 1 : 0));
-        else { ctx.font = `bold ${Math.round(f.size * A11Y.combatText)}px monospace`; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,0.8)'; ctx.strokeText(f.text, p.x, p.y); ctx.fillStyle = f.color; ctx.fillText(f.text, p.x, p.y); }
+        else { ctx.font = `bold ${Math.round(f.size * A11Y.combatText)}px "Chakra Petch", sans-serif`; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,0.8)'; ctx.strokeText(f.text, p.x, p.y); ctx.fillStyle = f.color; ctx.fillText(f.text, p.x, p.y); }
     });
     ctx.globalAlpha = 1;
     if (targeting && !canControlPlayer()) cancelTargeting();
     drawTargetingHint(); // la mira y el área de la habilidad van en el piso 3D (match3d.js)
     drawUltBanner(viewW / 2, MAP_H * 0.66);
-    if (viewedHero && viewedHero !== player) { ctx.font = '11px monospace'; ctx.fillStyle = '#ffb703'; ctx.fillText(`👁 Mirando a ${viewedHero.displayName} (clic en tu foto de arriba para volver)`, viewW / 2, TOP_LINE + 26); }
-    if (paused) { ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(0, 0, viewW, MAP_H); ctx.font = 'bold 30px monospace'; ctx.fillStyle = '#ffb703'; ctx.fillText('PAUSA', viewW / 2, MAP_H / 2); }
+    if (viewedHero && viewedHero !== player) { ctx.font = '11px "Chakra Petch", sans-serif'; ctx.fillStyle = '#ffb703'; ctx.fillText(`👁 Mirando a ${viewedHero.displayName} (clic en tu foto de arriba para volver)`, viewW / 2, TOP_LINE + 26); }
+    if (paused) { ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(0, 0, viewW, MAP_H); ctx.font = 'bold 30px "Chakra Petch", sans-serif'; ctx.fillStyle = '#ffb703'; ctx.fillText('PAUSA', viewW / 2, MAP_H / 2); }
 }
 
 // MATCH 3D: los boxes del show (el área de descanso) en 3D; encima, el título, los nombres y la ayuda
@@ -1183,16 +1183,16 @@ function renderRest3d(dt) {
     ctx.clearRect(0, 0, viewW, MAP_H);
     M3D.frame(restScene, dt);
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.strokeStyle = 'rgba(0,0,0,0.85)';
-    ctx.font = 'bold 16px monospace'; ctx.lineWidth = 4;
+    ctx.font = 'bold 16px "Chakra Petch", sans-serif'; ctx.lineWidth = 4;
     ctx.strokeText('BOXES DEL SHOW', viewW / 2, TOP_LINE); ctx.fillStyle = '#f2c21a'; ctx.fillText('BOXES DEL SHOW', viewW / 2, TOP_LINE);
-    ctx.font = '11px monospace'; ctx.lineWidth = 3;
+    ctx.font = '11px "Chakra Petch", sans-serif'; ctx.lineWidth = 3;
     const note = (t, y) => { ctx.strokeText(t, viewW / 2, y); ctx.fillStyle = '#e9e5d8'; ctx.fillText(t, viewW / 2, y); };
     note('Caminá con clic derecho · Volvés al combate con vida y maná completos', TOP_LINE + 15);
     restScene.heroes.forEach(h => {
         const p = M3D.project(h.rx ?? h.x, h.ry ?? h.y, M3D.headHeight(h)), name = h.displayName;
-        ctx.font = 'bold 10px monospace'; ctx.strokeText(name, p.x, p.y - 4); ctx.fillStyle = h === player ? '#00f5d4' : '#ffd27a'; ctx.fillText(name, p.x, p.y - 4);
+        ctx.font = 'bold 10px "Chakra Petch", sans-serif'; ctx.strokeText(name, p.x, p.y - 4); ctx.fillStyle = h === player ? '#00f5d4' : '#ffd27a'; ctx.fillText(name, p.x, p.y - 4);
     });
-    if (paused) { ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(0, 0, viewW, MAP_H); ctx.font = 'bold 30px monospace'; ctx.fillStyle = '#ffb703'; ctx.fillText('PAUSA', viewW / 2, MAP_H / 2); }
+    if (paused) { ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(0, 0, viewW, MAP_H); ctx.font = 'bold 30px "Chakra Petch", sans-serif'; ctx.fillStyle = '#ffb703'; ctx.fillText('PAUSA', viewW / 2, MAP_H / 2); }
 }
 
 function render() {
@@ -1223,12 +1223,12 @@ function render() {
     drawSceneryOverlay(arena.kind);
     if (arena.walls) arena.walls.forEach((row, y) => row.forEach((on, x) => { if (on) { ctx.fillStyle = '#3a3e43'; ctx.fillRect(x * TILE + 2, y * TILE + 2, TILE - 4, TILE - 4); ctx.fillStyle = '#f2c21a'; ctx.fillRect(x * TILE + 2, y * TILE + TILE / 2 - 2, TILE - 4, 4); } })); // columnas del duelo
     if (arena.kind === 'duel') {
-        ctx.font = 'bold 13px monospace'; ctx.textAlign = 'center'; ctx.fillStyle = '#ffb703';
+        ctx.font = 'bold 13px "Chakra Petch", sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#ffb703';
         ctx.fillText(`⚔ DUELO: ${arena.heroes[0].displayName}  vs  ${arena.heroes[1].displayName}`, MAP_W / 2, TILE * 0.7);
     }
     if (arena.kind === 'boss' && arena.boss) {
         const b = arena.boss;
-        ctx.font = 'bold 13px monospace'; ctx.textAlign = 'center'; ctx.fillStyle = b.color;
+        ctx.font = 'bold 13px "Chakra Petch", sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = b.color;
         ctx.fillText(`👹 ${b.label}: ${Math.max(0, b.hp)} / ${b.maxHp}`, MAP_W / 2, TILE * 0.5);
         ctx.fillStyle = '#330010'; ctx.fillRect(TILE * 3, TILE * 0.8, MAP_W - TILE * 6, 5);
         ctx.fillStyle = '#ff0055'; ctx.fillRect(TILE * 3, TILE * 0.8, (MAP_W - TILE * 6) * Math.max(0, b.hp) / b.maxHp, 5);
@@ -1265,7 +1265,7 @@ function render() {
     arena.heroes.forEach(h => {
         if (h.eliminated) return;
         // Muerto esperando revivir: una calavera en el lugar donde va a reaparecer
-        if (!h.isAlive()) { ctx.font = '18px monospace'; ctx.fillStyle = '#555'; ctx.fillText('☠', h.x * TILE + TILE / 2, h.y * TILE + TILE / 2); return; }
+        if (!h.isAlive()) { ctx.font = '18px "Chakra Petch", sans-serif'; ctx.fillStyle = '#555'; ctx.fillText('☠', h.x * TILE + TILE / 2, h.y * TILE + TILE / 2); return; }
         const pos = drawPos(h, dt);
         // Rango de ataque: círculo punteado (el tuyo más visible). Lo que entra en el círculo recibe tu ataque automático.
         ctx.save();
@@ -1280,13 +1280,13 @@ function render() {
     ctx.restore();
     if (arena.kind === 'duel') drawRivalPanel(arena);
     if (hero !== player) {
-        ctx.font = '11px monospace'; ctx.fillStyle = '#ffb703';
+        ctx.font = '11px "Chakra Petch", sans-serif'; ctx.fillStyle = '#ffb703';
         ctx.fillText(`👁 Mirando a ${hero.displayName} (clic en tu foto de arriba para volver)`, MAP_W / 2, TOP_LINE + 26);
     }
     if (paused) {
         setCanvasTransform(false);
         ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(0, 0, viewW, MAP_H);
-        ctx.font = 'bold 30px monospace'; ctx.textAlign = 'center'; ctx.fillStyle = '#ffb703';
+        ctx.font = 'bold 30px "Chakra Petch", sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#ffb703';
         ctx.fillText('PAUSA', viewW / 2, MAP_H / 2);
     }
 }

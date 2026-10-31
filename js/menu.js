@@ -134,7 +134,6 @@ const TUTORIAL_PAGES = [
             ${tutKey(['H'], 'Habilidades automáticas: se lanzan solas y vos solo te movés.')}
             ${tutKey(['B'], 'Abrir o cerrar la tienda (en la preparación).')}
             ${tutKey(['M'], 'Pantalla completa. En el minimapa: clic para mirar, clic derecho para caminar.')}
-            ${tutKey(['G'], 'Pixel art o letras ASCII.')}
             ${tutKey(['P'], 'Piloto automático: la IA juega por vos.')}
             ${tutKey(['Esc'], 'Pausa: tutorial, glosario y opciones.')}
         </div>` },

@@ -8,8 +8,8 @@ const KEY_DEFAULTS = {
 const KEY_LABELS = {
     map: 'Pantalla completa', shop: 'Tienda', autocast: 'Habilidades automáticas', autopilot: 'Piloto automático', skillKeys: 'Acomodar habilidades', panels: 'Historial de eventos'
 };
-// Fijas: Esc, G (pixel art), las de las habilidades (hero.js, SKILL_KEYS) y las de los ítems
-const KEY_FIXED = ['escape', 'g', 'q', 'w', 'e', 'r', 'd', 'f', 't', 'v', '1', '2', '3', '4', '5', '6'];
+// Fijas: Esc, las de las habilidades (hero.js, SKILL_KEYS) y las de los ítems
+const KEY_FIXED = ['escape', 'q', 'w', 'e', 'r', 'd', 'f', 't', 'v', '1', '2', '3', '4', '5', '6'];
 const ITEM_KEYS = ['1', '2', '3', '4', '5', '6']; // los ítems activos, una por casilla del inventario (items.js, useItem)
 const KEYMAP = Object.assign({}, KEY_DEFAULTS);
 try { const saved = JSON.parse(localStorage.getItem('chc-keys') || '{}'); Object.keys(KEY_DEFAULTS).forEach(a => { if (saved[a] && !KEY_FIXED.includes(saved[a])) KEYMAP[a] = saved[a]; }); } catch (e) { /* las de fábrica */ }

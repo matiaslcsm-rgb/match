@@ -3,10 +3,10 @@
 // la Hidra tiene tres cabezas...). Lo usa match3d.js; las reglas de cada jefe están en js/data/bosses.js.
 //
 // extras: formas como las de las piezas (parts.js), pegadas a un hueso con su lado (headL no existe: la cabeza, el
-// pecho, la columna y la pelvis van sin lado; brazos y piernas con L o R). m: un material de ps1.js o 'glow' (brilla
+// pecho, la columna y la pelvis van sin lado; brazos y piernas con L o R). m: un material de toon.js o 'glow' (brilla
 // del color del jefe). both() hace la del lado izquierdo y su espejo del derecho.
 import * as THREE from 'three';
-import { mat } from './ps1.js';
+import { mat, outline } from './toon.js';
 
 const LIMBS = ['shoulder', 'upperArm', 'forearm', 'hand', 'thigh', 'shin', 'foot'];
 export const both = s => { const side = k => LIMBS.includes(s.b) ? s.b + k : s.b; // en el pecho o la cabeza: el mismo hueso, del otro lado
@@ -107,8 +107,8 @@ export function addExtras(robot, def) {
     def.extras.forEach(s => {
         if (!bones[s.b]) throw new Error(`Robot: el hueso "${s.b}" no existe`);
         const k = s.t + (s.s || [s.rad, s.h]).join(',');
-        const g = GEO[k] || (GEO[k] = s.t === 'box' ? new THREE.BoxGeometry(...s.s) : new THREE.CylinderGeometry(s.rad, s.rad, s.h, 8));
-        const m = new THREE.Mesh(g, s.m === 'glow' ? (GLOW[def.glow] || (GLOW[def.glow] = new THREE.MeshBasicMaterial({ color: def.glow }))) : mat(s.m));
+        const g = GEO[k] || (GEO[k] = s.t === 'box' ? new THREE.BoxGeometry(...s.s) : new THREE.CylinderGeometry(s.rad, s.rad, s.h, 16));
+        const m = outline(new THREE.Mesh(g, s.m === 'glow' ? (GLOW[def.glow] || (GLOW[def.glow] = new THREE.MeshBasicMaterial({ color: def.glow }))) : mat(s.m)));
         m.position.set(...s.p);
         if (s.r) m.rotation.set(...s.r);
         bones[s.b].add(m);

@@ -33,7 +33,7 @@ function renderMinimap() {
     for (let i = 1; i < COLS; i += 3) { c.beginPath(); c.moveTo(i / COLS * MINI_W, 0); c.lineTo(i / COLS * MINI_W, MINI_H); c.stroke(); }
     for (let i = 1; i < ROWS; i += 3) { c.beginPath(); c.moveTo(0, i / ROWS * MINI_H); c.lineTo(MINI_W, i / ROWS * MINI_H); c.stroke(); }
     if (!arena || !inCombat()) {
-        c.fillStyle = '#8d8b80'; c.font = '14px monospace'; c.textAlign = 'center'; c.textBaseline = 'middle';
+        c.fillStyle = '#8d8b80'; c.font = '14px "Chakra Petch", sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle';
         c.fillText('BOXES', MINI_W / 2, MINI_H / 2);
         return;
     }

@@ -6,7 +6,7 @@
 //   · Cámara desde arriba en diagonal, como Dota; se juega igual que siempre (clic derecho caminar, clic izquierdo
 //     objetivo, habilidades hacia el cursor): el mouse se traduce a casillas tirando un rayo contra el piso.
 //   · Competidores y creeps son robots armados por piezas con el motor de arena-robots (robot.js, parts.js,
-//     skeleton.js, ps1.js), con el look de PS1 y la estética industrial de MATCH.
+//     skeleton.js), con el look de dibujo animado de toon.js.
 //   · Las barras de vida y los números de daño se dibujan en el canvas 2D de siempre, que queda transparente encima.
 //   · El descanso (2026-10-28) son los boxes del show: portones de garaje, la estación de reparación (donde estaba la
 //     fuente) y dos de carga (las fogatas); en el piso, los 8 boxes numerados. Se camina igual.
@@ -17,10 +17,9 @@ import { buildRobot, animateRobot } from './robot.js';
 import { BOSS_ROBOTS, addExtras } from './bosses3d.js';
 import { HERO_ROBOTS } from './heroes3d.js';
 import { CREEP_ROBOTS } from './creeps3d.js';
-import { RES, setRes, makeRenderer, floorTex, wallTex, mat, ps1Material } from './ps1.js';
+import { makeRenderer, floorTex, wallTex, mat, surface, outline, outlineAll } from './toon.js';
 
 const U = 1;                  // una casilla = 1 metro
-const PIXEL = 2;              // cada píxel del 3D ocupa 2 píxeles de la pantalla (look PS1, pero legible desde arriba)
 const COLS = 20, ROWS = 12;   // = VIEW_COLS, VIEW_ROWS (game.js)
 
 // --- QUÉ ROBOT ES CADA UNO ---
@@ -64,8 +63,7 @@ function paintRobot(robot, color) {
         if (!o.isMesh) return;
         const name = Object.keys(MAT_NAMES).find(n => MAT_NAMES[n] === o.material);
         if (!PAINT.includes(name)) return;
-        // siempre sobre la chapa clara: el color se multiplica por la textura, y sobre la oliva quedaba casi negro
-        if (!tinted[color]) { const m = MAT_NAMES.hueso.clone(); m.color.set(color); tinted[color] = ps1Material(m); }
+        if (!tinted[color]) { const m = MAT_NAMES.hueso.clone(); m.color.set(color); tinted[color] = m; }
         o.material = tinted[color];
     });
 }
@@ -76,33 +74,32 @@ const lighten = (hex, k) => { const c = new THREE.Color(hex); c.lerp(new THREE.C
 const wrap = document.getElementById('map-wrap'), canvas2d = document.getElementById('ascii-canvas');
 const cv = document.createElement('canvas');
 cv.id = 'match3d-canvas';
-cv.style.cssText = 'position:absolute;left:0;top:0;z-index:0;pointer-events:none;image-rendering:pixelated;display:none;';
+cv.style.cssText = 'position:absolute;left:0;top:0;z-index:0;pointer-events:none;display:none;';
 wrap.insertBefore(cv, canvas2d);
 canvas2d.style.position = 'relative'; canvas2d.style.zIndex = '1'; // el 2D (barras, números, mouse) queda encima del 3D
 const renderer = makeRenderer(cv);
 const scene = new THREE.Scene();
 scene.fog = new THREE.Fog('#0c0d10', 26, 48);
 const camera = new THREE.PerspectiveCamera(36, COLS / ROWS, 0.5, 120);
-const hemi = new THREE.HemisphereLight('#dfe6f2', '#4a443a', 2.8);
-const sun = new THREE.DirectionalLight('#fff1d6', 3.2); sun.position.set(-8, 20, 12);
+const hemi = new THREE.HemisphereLight('#dfe6f2', '#6a6458', 1.9);
+const sun = new THREE.DirectionalLight('#fff1d6', 1.7); sun.position.set(-8, 20, 12);
 scene.add(hemi, sun);
 
 // Arena: piso de hormigón, la franja de afuera más oscura, vallas con franjas de peligro y 4 torres de luz del show
 const arenaGroup = new THREE.Group(); scene.add(arenaGroup);
 {
-    const floor = new THREE.Mesh(new THREE.PlaneGeometry(COLS, ROWS), ps1Material(new THREE.MeshLambertMaterial({ map: floorTex(1) })));
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(COLS, ROWS), surface({ map: floorTex(1) }));
     floor.material.map.repeat.set(COLS / 2, ROWS / 2);
     floor.rotation.x = -Math.PI / 2; floor.position.set(COLS / 2, 0, ROWS / 2); arenaGroup.add(floor);
     const outer = new THREE.Mesh(new THREE.PlaneGeometry(COLS + 30, ROWS + 30), new THREE.MeshLambertMaterial({ color: '#2a2b2e' }));
     outer.rotation.x = -Math.PI / 2; outer.position.set(COLS / 2, -0.02, ROWS / 2); arenaGroup.add(outer);
-    const fence = mat('peligro'), wall = ps1Material(new THREE.MeshLambertMaterial({ map: wallTex() }));
+    const fence = mat('peligro'), wall = surface({ map: wallTex() });
     const seg = (x, z, w, d) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, 0.35, d), fence); m.position.set(x, 0.175, z); arenaGroup.add(m); };
     seg(COLS / 2, -0.15, COLS + 0.6, 0.3); seg(COLS / 2, ROWS + 0.15, COLS + 0.6, 0.3); seg(-0.15, ROWS / 2, 0.3, ROWS); seg(COLS + 0.15, ROWS / 2, 0.3, ROWS);
     for (const [x, z] of [[-1.2, -1.2], [COLS + 1.2, -1.2], [-1.2, ROWS + 1.2], [COLS + 1.2, ROWS + 1.2]]) {
         const post = new THREE.Mesh(new THREE.BoxGeometry(0.5, 6, 0.5), wall); post.position.set(x, 3, z); arenaGroup.add(post);
         const lamp = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.5, 0.6), new THREE.MeshBasicMaterial({ color: '#fff4c8' }));
         lamp.position.set(x, 6.1, z); lamp.lookAt(COLS / 2, 0, ROWS / 2); arenaGroup.add(lamp);
-        const spot = new THREE.PointLight('#ffe9b8', 18, 26, 1.6); spot.position.set(x, 5.8, z); arenaGroup.add(spot);
     }
     // "EN VIVO": la luz roja de grabación arriba de la valla del fondo
     const rec = new THREE.Mesh(new THREE.SphereGeometry(0.22, 8, 6), new THREE.MeshBasicMaterial({ color: '#ff2a2a' }));
@@ -115,13 +112,13 @@ const restGroup = new THREE.Group(); restGroup.visible = false; scene.add(restGr
     const at = (m, x, y, h) => { m.position.set((x + 0.5) * U, h, (y + 0.5) * U); restGroup.add(m); return m; };
     const box = (w, h, d, material, x, y, lift = 0) => at(new THREE.Mesh(new THREE.BoxGeometry(w, h, d), material), x, y, lift + h / 2);
     const glow = c => new THREE.MeshBasicMaterial({ color: c });
-    const floor = new THREE.Mesh(new THREE.PlaneGeometry(COLS, ROWS), ps1Material(new THREE.MeshLambertMaterial({ map: floorTex(1), color: '#c9c4b8' })));
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(COLS, ROWS), surface({ map: floorTex(1), color: '#d9d3c6' }));
     floor.material.map.repeat.set(COLS / 2, ROWS / 2);
     floor.rotation.x = -Math.PI / 2; floor.position.set(COLS / 2, 0, ROWS / 2); restGroup.add(floor);
     const outer = new THREE.Mesh(new THREE.PlaneGeometry(COLS + 30, ROWS + 30), new THREE.MeshLambertMaterial({ color: '#2a2b2e' }));
     outer.rotation.x = -Math.PI / 2; outer.position.set(COLS / 2, -0.02, ROWS / 2); restGroup.add(outer);
     // la pared del fondo: cuatro portones de garaje, con su luz arriba
-    const wall = ps1Material(new THREE.MeshLambertMaterial({ map: wallTex() }));
+    const wall = surface({ map: wallTex() });
     box(COLS + 1, 3.2, 0.4, wall, COLS / 2 - 0.5, -1.2);
     for (let i = 0; i < 4; i++) {
         const x = 2 + i * 5;
@@ -149,17 +146,18 @@ const restGroup = new THREE.Group(); restGroup.visible = false; scene.add(restGr
         box(0.12, 0.12, 1.2, mat('ama'), x, 6.3, 0.06);
         at(new THREE.PointLight('#ff9a40', 8, 6, 1.8), x, 7.6, 1.2);
     }
-    at(new THREE.PointLight('#fff1d6', 14, 22, 1.4), 10, 6, 6);
+    at(new THREE.PointLight('#fff1d6', 5, 22, 1.4), 10, 6, 6);
+    outlineAll(restGroup);
 }
 // El piso de los boxes: los 8 lugares numerados, la calle de boxes y la cruz de a dónde caminás
 function drawRestDecal() {
     const px = v => v * TILE + TILE / 2;
     dctx.strokeStyle = 'rgba(242,194,26,0.85)'; dctx.lineWidth = 2;
     dctx.setLineDash([8, 6]); dctx.beginPath(); dctx.moveTo(0, px(10.6)); dctx.lineTo(MAP_W, px(10.6)); dctx.stroke(); dctx.setLineDash([]);
-    dctx.font = 'bold 13px monospace'; dctx.fillStyle = 'rgba(242,194,26,0.5)'; dctx.fillText('CALLE DE BOXES', MAP_W / 2, px(11.1));
+    dctx.font = 'bold 13px "Chakra Petch", sans-serif'; dctx.fillStyle = 'rgba(242,194,26,0.5)'; dctx.fillText('CALLE DE BOXES', MAP_W / 2, px(11.1));
     (typeof REST_SPOTS !== 'undefined' ? REST_SPOTS : []).forEach(([x, y], i) => {
         dctx.strokeStyle = 'rgba(233,229,216,0.7)'; dctx.strokeRect(px(x) - TILE * 0.6, px(y) - TILE * 0.6, TILE * 1.2, TILE * 1.2);
-        dctx.font = 'bold 9px monospace'; dctx.fillStyle = 'rgba(233,229,216,0.75)'; dctx.fillText(String(i + 1).padStart(2, '0'), px(x) - TILE * 0.38, px(y) - TILE * 0.42);
+        dctx.font = 'bold 9px "Chakra Petch", sans-serif'; dctx.fillStyle = 'rgba(233,229,216,0.75)'; dctx.fillText(String(i + 1).padStart(2, '0'), px(x) - TILE * 0.38, px(y) - TILE * 0.42);
     });
     const me = typeof player !== 'undefined' ? player : null;
     if (me && me.inRest && me.moveTarget) {
@@ -177,10 +175,10 @@ function placePillars(arena) {
     pillarsOf = arena.walls;
     while (pillars.children.length) pillars.remove(pillars.children[0]);
     if (!arena.walls) return;
-    const wall = ps1Material(new THREE.MeshLambertMaterial({ map: wallTex() }));
+    const wall = surface({ map: wallTex() });
     arena.walls.forEach((row, y) => row.forEach((on, x) => {
         if (!on) return;
-        const add = (geo, m, h) => { const o = new THREE.Mesh(geo, m); o.position.set((x + 0.5) * U, h, (y + 0.5) * U); pillars.add(o); };
+        const add = (geo, m, h) => { const o = outline(new THREE.Mesh(geo, m)); o.position.set((x + 0.5) * U, h, (y + 0.5) * U); pillars.add(o); };
         add(new THREE.BoxGeometry(1, 0.2, 1), mat('carbon'), 0.1);
         add(new THREE.BoxGeometry(0.8, 2.4, 0.8), wall, 1.4);
         add(new THREE.BoxGeometry(0.84, 0.25, 0.84), mat('peligro'), 0.6);
@@ -207,7 +205,7 @@ const crowdMesh = (() => {
     const pos = [...geo.attributes.position.array, ...head.attributes.position.array], nor = [...geo.attributes.normal.array, ...head.attributes.normal.array];
     const idx = [...geo.index.array, ...head.index.array.map(i => i + geo.attributes.position.count)];
     merged.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); merged.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3)); merged.setIndex(idx);
-    const m = new THREE.InstancedMesh(merged, new THREE.MeshLambertMaterial({ color: '#ffffff' }), spots.length);
+    const m = new THREE.InstancedMesh(merged, surface({ color: '#ffffff' }), spots.length);
     const c = new THREE.Color(), mtx = new THREE.Matrix4();
     spots.forEach((p, i) => {
         crowd.base.push(p); crowd.phase.push(Math.random() * Math.PI * 2);
@@ -461,7 +459,7 @@ function projectileTrail(pr, pos, color) {
 
 // --- CADA CUADRO ---
 let frameNo = 0;
-const tmp = new THREE.Vector3();
+const tmp = new THREE.Vector3(), cvSize = { w: 0, h: 0 };
 function frame(arena, dt) {
     frameNo++;
     // Tamaño: el canvas 3D tapa justo el área del mapa (adentro del borde del canvas 2D)
@@ -469,8 +467,7 @@ function frame(arena, dt) {
     cv.style.display = 'block';
     cv.style.left = canvas2d.offsetLeft + canvas2d.clientLeft + 'px'; cv.style.top = canvas2d.offsetTop + canvas2d.clientTop + 'px';
     cv.style.width = w + 'px'; cv.style.height = h + 'px';
-    const rw = Math.max(64, Math.round(w / PIXEL)), rh = Math.max(48, Math.round(h / PIXEL));
-    if (rw !== RES.w || rh !== RES.h) { setRes(rw, rh); renderer.setSize(rw, rh, false); }
+    if (w !== cvSize.w || h !== cvSize.h) { cvSize.w = w; cvSize.h = h; renderer.setSize(w, h, false); }
     placeCamera(w / Math.max(1, h), arena, dt);
     if (shakeAmount) { camera.position.x += (Math.random() - 0.5) * shakeAmount * 0.03; camera.position.z += (Math.random() - 0.5) * shakeAmount * 0.03; } // temblor de los golpes fuertes
     // Jefe: luz más roja; los boxes, más cálidos
@@ -574,7 +571,7 @@ function screenToTile(clientX, clientY) {
 }
 
 // --- RETRATOS: el robot de verdad, en una foto chica, para la interfaz (ranking, tienda, glosarios, carteles) ---
-const PORTRAIT = 88, portraits = {};
+const PORTRAIT = 192, portraits = {};
 let portraitGl = null, portraitScene = null;
 // full: el robot entero (la portada). Si no, de la cintura para arriba, que es lo que se reconoce en chico.
 function portrait(u, key, full = false) {
@@ -582,11 +579,11 @@ function portrait(u, key, full = false) {
     if (portraits[key]) return portraits[key];
     if (!portraitGl) {
         const c = document.createElement('canvas'); c.width = c.height = PORTRAIT;
-        portraitGl = new THREE.WebGLRenderer({ canvas: c, alpha: true, antialias: false, preserveDrawingBuffer: true });
+        portraitGl = new THREE.WebGLRenderer({ canvas: c, alpha: true, antialias: true, preserveDrawingBuffer: true });
         portraitGl.setPixelRatio(1); portraitGl.setSize(PORTRAIT, PORTRAIT, false);
         portraitScene = new THREE.Scene();
-        const lamp = new THREE.DirectionalLight('#fff1d6', 3.4); lamp.position.set(-3, 5, 6);
-        portraitScene.add(new THREE.HemisphereLight('#dfe6f2', '#4a443a', 2.6), lamp);
+        const lamp = new THREE.DirectionalLight('#fff1d6', 1.9); lamp.position.set(-3, 5, 6);
+        portraitScene.add(new THREE.HemisphereLight('#dfe6f2', '#6a6458', 1.5), lamp);
     }
     const { robot, h } = makeRobot(u);
     robot.scale.set(bulkOf(u), 1, bulkOf(u));
@@ -605,6 +602,7 @@ function portrait(u, key, full = false) {
 // --- CUÁNDO SE USA ---
 // Siempre, salvo en las pruebas (index.html?test: corren sin dibujar) o con ?view3d=0 (para revisar el 2D)
 const enabled = !/[?&]test/.test(location.search) && !/[?&]view3d=0/.test(location.search);
+outlineAll(arenaGroup);
 window.M3D = {
     // Minimapa (hud.js): mirar un lugar por un momento, y las cuatro esquinas de lo que muestra la cámara
     peek: (x, y) => { cam.peek = { x: x + 0.5, z: y + 0.5, until: performance.now() + 3000 }; },

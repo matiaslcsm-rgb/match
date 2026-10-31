@@ -196,6 +196,6 @@ function drawMouseOverlay(arena, noHint) {
 // El cartel de cómo lanzar la habilidad que estás apuntando
 function drawTargetingHint() {
     if (!targeting) return;
-    ctx.font = 'bold 12px monospace'; ctx.fillStyle = '#ffd166'; ctx.textAlign = 'center';
+    ctx.font = 'bold 12px "Chakra Petch", sans-serif'; ctx.fillStyle = '#ffd166'; ctx.textAlign = 'center';
     ctx.fillText(`${targeting.skill.name}: clic izquierdo para lanzar · clic derecho o Esc para cancelar`, screenW() / 2, screenH() * 0.72);
 }

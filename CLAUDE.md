@@ -14,6 +14,8 @@ draft, tienda, un duelo por ronda, apuestas, jefes) con competidores y creeps co
 - **Solo 3D (decisión del usuario 2026-10-28):** la arena de combate (oleada, duelo, jefe) se dibuja en 3D con cámara en
   diagonal como Dota (`js/m3d/match3d.js`). El 2D de la arena queda solo para las pruebas y por si el navegador no tiene
   WebGL. El orden de lo que sigue está en `docs/ROADMAP.md` (el garaje para armar competidores quedó descartado por ahora).
+- **Dibujo animado 3D (decisión del usuario 2026-10-31):** se dejó atrás el pixel y el voxel. Colores planos y contorno negro
+  (`js/m3d/toon.js`), letra Chakra Petch e íconos con trazos. Los sprites de `sprites.js` quedan solo para la vista 2D sin WebGL.
 - **HUD estilo Dota (decisión del usuario 2026-10-31):** se imita la distribución y la forma de usar la pantalla, con el look de
   MATCH y sin gráficos de Dota (`js/hud.js`, `style.css`).
 

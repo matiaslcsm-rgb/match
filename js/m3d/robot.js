@@ -5,13 +5,13 @@
 import * as THREE from 'three';
 import { partOf, LIMB_BONES } from './parts.js';
 import { BONES, SHAPES, LEG } from './skeleton.js';
-import { mat } from './ps1.js';
+import { mat, outline } from './toon.js';
 
 const SIDES = { L: 1, R: -1 }; // izquierda del robot: x+ (mira hacia z+)
 const GEO = {}; // geometrías compartidas
 function geo(s) {
-    const k = s.t === 'box' ? 'b' + s.s.join(',') : `c${s.rad},${s.h},${s.seg || 8}`;
-    return GEO[k] || (GEO[k] = s.t === 'box' ? new THREE.BoxGeometry(...s.s) : new THREE.CylinderGeometry(s.rad, s.rad, s.h, s.seg || 8));
+    const seg = Math.max(s.seg || 0, 16), k = s.t === 'box' ? 'b' + s.s.join(',') : `c${s.rad},${s.h},${seg}`;
+    return GEO[k] || (GEO[k] = s.t === 'box' ? new THREE.BoxGeometry(...s.s) : new THREE.CylinderGeometry(s.rad, s.rad, s.h, seg));
 }
 const isLimb = name => BONES.some(b => b.n === name && b.limb);
 
@@ -26,7 +26,7 @@ export function buildRobot(build) {
     }));
     const wheels = [], tracks = [], hands = { L: [], R: [] };
     const put = (s, side) => {
-        const k = SIDES[side] || 1, m = new THREE.Mesh(geo(s), mat(s.m));
+        const k = SIDES[side] || 1, m = outline(new THREE.Mesh(geo(s), mat(s.m)));
         m.position.set(s.p[0] * k, s.p[1], s.p[2]);
         if (s.r) m.rotation.set(s.r[0], s.r[1] * k, s.r[2] * k);
         bones[s.b + side].add(m);
@@ -35,7 +35,7 @@ export function buildRobot(build) {
         if (s.hand) hands[side].push(m);
     };
     const putAll = (shapes, sides) => shapes.forEach(s => (isLimb(s.b) ? sides : ['']).forEach(side => put(s, side)));
-    putAll(SHAPES.map(s => s.t === 'cyl' ? { ...s, rad: s.rad * 1.35 } : s), ['L', 'R']); // un poco más grueso: a 320x240 los caños finos se pierden
+    putAll(SHAPES, ['L', 'R']);
     ['legs', 'core', 'head'].forEach(slot => putAll(partOf(build, slot).shapes, ['L', 'R']));
     const arms = { L: partOf(build, 'armL'), R: partOf(build, 'armR') };
     Object.entries(arms).forEach(([side, arm]) => {

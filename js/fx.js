@@ -176,7 +176,7 @@ function drawArenaFx(arena) {
         if (f.kind === 'text' && pxNumberText(f.text)) { // número con la fuente de píxeles (pixelFx.js) // número de daño con la fuente de píxeles
             pxDrawNumber(f.text, px, py, f.color, Math.max(2, Math.round(2 * f.size / 12 * A11Y.combatText)) + (t < 0.12 ? 1 : 0));
         } else if (f.kind === 'text') {
-            ctx.font = `bold ${Math.round(f.size * A11Y.combatText * (t < 0.15 ? 1 + (0.15 - t) * 3 : 1))}px monospace`;
+            ctx.font = `bold ${Math.round(f.size * A11Y.combatText * (t < 0.15 ? 1 + (0.15 - t) * 3 : 1))}px "Chakra Petch", sans-serif`;
             ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,0.8)'; ctx.strokeText(f.text, px, py);
             ctx.fillStyle = f.color; ctx.fillText(f.text, px, py);
         } else if (f.kind === 'particle') {

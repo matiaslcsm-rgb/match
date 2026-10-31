@@ -41,7 +41,6 @@ window.addEventListener('keydown', e => {
     if (act === 'shop') { toggleShop(); return; }
     if (act === 'map') { toggleFullscreen(); return; }
     if (act === 'autocast') { setAutoCast(!autoCast); return; }
-    if (k === 'g') { setSprites(!spritesOn); return; }
     if (k === 'escape') { handleEscape(); return; }
     if (paused) return; // en pausa no responden las demás teclas
     if (inCombat() && !autopilot) { if (ITEM_KEYS.includes(k)) useItem(player, ITEM_KEYS.indexOf(k)); else handleSkillKeypress(k); }
