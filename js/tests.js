@@ -561,65 +561,103 @@ test('Sadista: cada baja da una carga de regeneración que se acumula y se renue
     checkNear(effHpRegen(player) - before, 3 * 6, 'tope de 6 cargas (la baja de héroe ya suma 6 de una)');
 });
 
-test('Pulso de Muerte: daño mágico en área a tu alrededor y te cura según lo que dañaste', () => {
-    newGame('NECROMANCER');
-    const s = learn('NECROMANCER_PULSE', 1);
-    const near = dummy({ hp: 9999, maxHp: 9999 });
-    const far = dummy({ x: player.x + 15, y: player.y, hp: 9999, maxHp: 9999 });
-    player.hp = 1;
-    s.cast(player);
-    const expected = magicDmg(valueAt(s, 'baseDmg', 1) + player.int * valueAt(s, 'intRatio', 1));
-    checkEq(9999 - near.hp, expected, 'daño a un enemigo en el radio');
-    checkEq(far.hp, 9999, 'no llega a uno lejos');
-    checkEq(player.hp, Math.min(player.maxHp, 1 + Math.round(expected * valueAt(s, 'healPct', 1))), 'se cura según el daño hecho');
-});
-
-test('Manto Fantasma: inmune a físico y desarmado, pierde resistencia mágica y cura más; ralentiza al activarse', () => {
-    newGame('NECROMANCER');
-    const s = learn('NECROMANCER_SHROUD', 1);
-    const near = dummy({ hp: 9999, maxHp: 9999 });
-    const magicResist0 = effMagicResist(player);
-    player.hp = 1;
-    s.cast(player);
-    check(hasFlag(player, 'physicalImmune'), 'inmune a daño físico');
-    check(hasFlag(player, 'disarm'), 'desarmado');
-    checkNear(effMagicResist(player), magicResist0 - valueAt(s, 'magicResistPenalty', 1), 'pierde resistencia mágica');
-    const { dealt } = dealDamage(near, player, 100, 'physical');
-    checkEq(dealt, 0, 'el daño físico no le hace nada');
-    checkEq(player.hp, 1, 'vida sin cambios');
-    const healed = healUnit(player, 100);
-    checkNear(healed, Math.round(100 * (1 + valueAt(s, 'healingBonusPct', 1))), 'cura más mientras está espectral');
-    checkNear(effMoveMult(near), 1 - valueAt(s, 'slowPct', 1), 'ralentiza al activarse');
-});
-
-test('Guadaña del Segador: aturde y, al terminar, hace daño puro según la vida que falta (ejecuta si alcanza)', () => {
-    newGame('NECROMANCER');
-    const s = learn('NECROMANCER_REAP', 1);
-    const a = dummy({ hp: 500, maxHp: 1000, armor: 50 }); // le falta 500: con ratio 0.7 son 350, no alcanza a matarlo
-    s.cast(player);
-    check(hasFlag(a, 'stun'), 'aturdido de entrada');
-    checkEq(a.hp, 500, 'el daño todavía no se aplicó, se calcula al terminar el aturdimiento');
-    const hpRegen0 = player.hpRegen;
-    gameClock += valueAt(s, 'stunDuration', 1) + 0.1;
-    tickEffects(a, 0.016);
-    const expected = Math.round((1000 - 500) * valueAt(s, 'missingHpRatio', 1));
-    checkEq(500 - a.hp, expected, 'daño puro (ignora la armadura) según lo que le faltaba');
-    check(a.isAlive(), 'no le alcanzó para matarlo');
-    checkEq(player.hpRegen, hpRegen0, 'sin matarlo, no gana regeneración permanente');
-
-    a.hp = 0; // fuera de juego: si no, nearestEnemy lo sigue eligiendo a él (mismo lugar que el nuevo dummy)
-    const b = dummy({ hp: 50, maxHp: 200 }); // le falta 150: con ratio 0.7 son 105, más que sus 50 de vida
-    s.cast(player);
-    gameClock += valueAt(s, 'stunDuration', 1) + 0.1;
-    tickEffects(b, 0.016);
-    check(!b.isAlive(), 'con poca vida, lo ejecuta');
-    checkNear(player.hpRegen - hpRegen0, valueAt(s, 'hpRegenPerKill', 1), 'Ascenso: regeneración de vida permanente por la baja');
-});
-
 // Daño mágico esperado tras pasar por dealDamage: aplica la amplificación de hechizo del que lanza
 // (spellAmp) antes de redondear. Los dummy() no tienen resistencia mágica, así que no hace falta mitigar.
 function magicDmg(rawAmount) { return Math.round(rawAmount * (1 + effSpellAmp(player) / 100)); }
 
+test('M.O.R.T.I.S.: el Sello ata, daña según lo que falta e invoca un Autómata si el sellado muere', () => {
+    newGame('NECROMANCER');
+    checkEq(player.name, 'M.O.R.T.I.S.', 'nombre');
+    const s = learn('NECROMANCER_SEAL', 1);
+    const a = dummy({ hp: 500, maxHp: 1000 });
+    check(s.cast(player), 'se lanza');
+    check(hasFlag(a, 'root'), 'atado');
+    checkEq(500 - a.hp, magicDmg(valueAt(s, 'baseDmg', 1) + player.int * valueAt(s, 'intRatio', 1) + 500 * valueAt(s, 'missingPct', 1)), 'daño');
+    checkEq(minionsOf(player).length, 0, 'sin baja, nada');
+    dealDamage(player, a, 99999, 'pure');
+    checkEq(minionsOf(player).length, 1, 'al morir el sellado aparece un Autómata');
+    const b = dummy({ hp: 9999, maxHp: 9999 });
+    dealDamage(player, b, 9998, 'pure'); dealDamage(player, b, 9, 'pure');
+    checkEq(minionsOf(player).length, 1, 'otra baja cualquiera no invoca');
+});
+
+test('M.O.R.T.I.S.: el Aura hace daño mágico y corta la curación', () => {
+    newGame('NECROMANCER');
+    const s = learn('NECROMANCER_AURA', 4);
+    const a = dummy({ hp: 1000, maxHp: 1000, magicResist: 0 }); a.hp = 500;
+    s.hooks.onTick.call(s, player, { dt: 1 });
+    check(a.hp < 500, 'daña');
+    checkNear(sumMod(a, 'healingTakenPct'), -valueAt(s, 'antiheal', 4), 'anticuración');
+});
+
+test('Autómatas: tope, duración, pelean para el dueño y al destruirlos cobra el enemigo', () => {
+    newGame('NECROMANCER');
+    checkEq(automatonCap(player), AUTOMATON_BASE_CAP, 'sin la pasiva, 2');
+    learn('NECROMANCER_AUTOMATON', 2);
+    checkEq(automatonCap(player), 3, 'con la pasiva, según el nivel');
+    [1, 2, 3, 4].forEach(() => summonAutomaton(player));
+    checkEq(minionsOf(player).length, 3, 'no pasa del tope');
+    const m = minionsOf(player)[0];
+    checkEq(enemiesOf(m), enemiesOf(player), 'pelea contra los enemigos del dueño');
+    const c = creeps[0]; Object.assign(c, { x: m.x + 1, y: m.y, hp: 1, armor: 0 });
+    m.attackTimer = 99;
+    const gold = player.gold;
+    updateMinions(player.arena, 0.016);
+    check(!c.isAlive() && player.gold > gold, 'la baja la cobra el dueño');
+    const other = minionsOf(player)[1];
+    Object.assign(c, { hp: 50, x: other.x + 1, y: other.y });
+    player.x = 0; player.y = 0; other.x = 10; other.y = 5; c.x = 11; c.y = 5;
+    checkEq(creepTarget(c), other, 'los creeps les pegan al más cercano');
+    gameClock = other.expires + 1;
+    updateMinions(player.arena, 0.016);
+    checkEq(minionsOf(player).length, 0, 'se apagan a los 25 s');
+});
+
+test('Eco de los Muertos: cada Autómata lo repite más débil, hasta 3 ondas por enemigo', () => {
+    newGame('NECROMANCER');
+    learn('NECROMANCER_AUTOMATON', 4);
+    const s = learn('NECROMANCER_ECHO', 1);
+    const a = dummy({ hp: 99999, maxHp: 99999 });
+    [1, 2, 3].forEach(() => { const m = summonAutomaton(player); m.x = a.x; m.y = a.y + 1; });
+    s.cast(player);
+    const d = valueAt(s, 'baseDmg', 1) + player.int * valueAt(s, 'intRatio', 1);
+    const expected = [1, 0.65, 0.65 * 0.65].reduce((n, k) => n + magicDmg(d * k), 0);
+    checkEq(99999 - a.hp, expected, 'tres ondas, cada una 35% menos');
+});
+
+test('Sobrecarga de Servidores: detona a los Autómatas, frena y ata con 2 explosiones; solo sale para M.O.R.T.I.S.', () => {
+    newGame('NECROMANCER');
+    learn('NECROMANCER_AUTOMATON', 4);
+    const s = learn('NECROMANCER_OVERLOAD', 1);
+    check(!s.cast(player), 'sin Autómatas no se gasta');
+    const a = dummy({ hp: 99999, maxHp: 99999 });
+    const hero = dummy({ hp: 99999, maxHp: 99999, x: a.x, y: a.y + 1 }); hero.isHero = true;
+    [1, 2].forEach(() => { const m = summonAutomaton(player); m.x = a.x + 1; m.y = a.y; });
+    check(s.cast(player), 'detona');
+    checkEq(minionsOf(player).length, 0, 'se destruyen');
+    checkEq(99999 - a.hp, 2 * magicDmg(valueAt(s, 'baseDmg', 1) + player.int * valueAt(s, 'intRatio', 1)), 'dos explosiones');
+    check(sumMod(a, 'moveSpeedPct') < 0, 'frena');
+    check(!hasFlag(a, 'root'), 'a un creep no lo ata');
+    check(hasFlag(hero, 'root'), 'a un competidor con 2 explosiones, sí');
+    hero.isHero = false;
+    resetGame(); selectHero(HERO_TEMPLATES.CRANE);
+    for (let i = 0; i < 30; i++) check(!draftOptions(player, 6).some(o => o.id === 'NECROMANCER_OVERLOAD'), 'no sale en el draft de otro');
+});
+
+test('Duelo: arranca con 1 Autómata, el rival puede destruirlo y cobra', () => {
+    newGame('NECROMANCER');
+    learn('NECROMANCER_SEAL', 1);
+    const rival = heroes.find(h => h !== player);
+    const arena = makeDuelArenas({ pairs: [[player, rival]], bye: null })[0];
+    const m = minionsOf(player)[0];
+    check(m, 'hay uno');
+    check(enemiesOf(rival).includes(m), 'el rival lo tiene de objetivo');
+    check(enemiesOf(player).length === 1 && enemiesOf(player)[0] === rival, 'el tuyo no es enemigo tuyo');
+    const gold = rival.gold;
+    dealDamage(rival, m, 99999, 'pure');
+    checkEq(rival.gold, gold + Math.max(1, Math.round(CREEP_TYPES.GRUNT.gold * speedGoldMultiplier(0))), 'cobra lo de un creep común');
+    arena.done = true;
+});
 test('Campo Estático: cada hechizo lanzado hace daño mágico a los enemigos cercanos, % de su vida actual', () => {
     newGame('ZEUS');
     const near = dummy({ hp: 1000, maxHp: 1000 }); // pegado al jugador, adentro del radio 4

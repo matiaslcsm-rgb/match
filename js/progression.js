@@ -122,7 +122,7 @@ function grantPermanent(hero, stat, amount, sourceName) {
 // del pool global. Nunca ofrece habilidades que ya tiene ni las de `exclude` (ej: la recién reemplazada).
 function draftOptions(hero, count, exclude = []) {
     const blocked = new Set([...hero.skills.map(s => s.id), ...exclude, ...bannedSkills]);
-    const available = ALL_SKILLS.filter(s => !blocked.has(s.id));
+    const available = ALL_SKILLS.filter(s => !blocked.has(s.id) && (!s.exclusive || s.heroKey === hero.key)); // exclusive: solo le sale a su dueño
     const natural = shuffle(available.filter(s => s.heroKey === hero.key));
     const picks = natural.length ? [natural[0]] : [];
     shuffle(available.filter(s => !picks.includes(s))).forEach(s => { if (picks.length < count) picks.push(s); });

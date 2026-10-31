@@ -451,12 +451,15 @@ function updateArena(arena, dt) {
     // Efectos temporales: avanzan, emiten onTick y los vencidos disparan su onExpire (puede matar al héroe)
     arena.heroes.forEach(h => tickEffects(h, dt));
     arena.creeps.forEach(c => { if (c.isAlive()) tickEffects(c, dt); });
+    (arena.minions || []).forEach(m => { if (m.isAlive()) tickEffects(m, dt); });
     if (!inCombat() || arena.done) return;
 
     separateBodies(arena);
     arena.heroes.forEach(hero => { if (!arena.done) updateHero(hero, arena, dt); });
     if (arena.done) return; // el héroe quedó eliminado o el duelo se resolvió
     updateProjectiles(arena, dt);
+    updateMinions(arena, dt);
+    if (arena.done) return;
     if (arena.kind === 'duel') { updateDuelArena(arena, dt); return; }
     if (arena.kind === 'boss') { updateBossArena(arena, dt); return; }
     arena.creeps.forEach(c => updateCreep(c, dt));

@@ -6,6 +6,11 @@ import { box, cyl, both } from './bosses3d.js';
 const PI = Math.PI;
 
 export const CREEP_ROBOTS = {
+    // Autómata Putrefacto (minions.js): el esqueleto mecánico de M.O.R.T.I.S., con cráneo y ojos verdes
+    AUTOMATON: {
+        build: { legs: 'bipedo', core: 'liviano', head: 'sensor', armL: 'pinza', armR: 'pinza' }, paint: '#cfc7a8', glow: '#7dff9b',
+        extras: [box('head', [0.34, 0.32, 0.34], [0, 0.17, 0], 'metal'), ...both(box('head', [0.09, 0.08, 0.02], [0.08, 0.2, 0.18], 'glow'))]
+    },
     // Microdrón: chiquito, sin brazos que importen; viene en cantidad
     CHUSMA: { build: { legs: 'ruedas', core: 'liviano', head: 'sensor', armL: 'pinza', armR: 'pinza' }, paint: '#8a8f85', glow: '#d9dcd0', extras: [] },
     // Dron de Piso: el soldado básico, con casco de obra

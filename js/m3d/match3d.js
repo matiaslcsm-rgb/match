@@ -281,6 +281,7 @@ function makeRobot(u) {
     const measure = () => { const b = new THREE.Box3().setFromObject(robot); return Math.max(0.1, b.max.y - b.min.y); };
     const bodyH = measure();
     if (look) addExtras(robot, look);
+    if (look && look.float) ['thighL', 'thighR'].forEach(n => { robot.userData.bones[n].visible = false; }); // M.O.R.T.I.S. flota: sin piernas
     paintRobot(robot, look ? look.paint : lighten(u.color || (u.type && u.type.color) || '#9aa0a6', 0.15));
     return { robot, h: u.isHero ? bodyH : measure() };
 }
@@ -483,7 +484,7 @@ function frame(arena, dt) {
         restGroup.traverse(o => { if (o.name === 'charge') o.material.color.setHSL(0.07, 1, 0.45 + Math.sin(now * 3) * 0.12); });
     }
 
-    const list = arena.creeps.filter(c => c.isAlive()).concat(arena.heroes.filter(h => !h.eliminated && h.isAlive()));
+    const list = arena.creeps.filter(c => c.isAlive()).concat(arena.heroes.filter(h => !h.eliminated && h.isAlive()), (arena.minions || []).filter(m => m.isAlive()));
     for (const u of list) {
         const o = unitObj(u), p = drawPos(u, dt);
         o.seen = frameNo;

@@ -1155,11 +1155,12 @@ function render3d(arena, dt) {
         const p = M3D.project(u.rx ?? u.x, u.ry ?? u.y, M3D.headHeight(u)), w = u.isRoundBoss ? 56 : u.isHero ? 34 : 24, top = p.y - 4;
         const pct = Math.max(0, u.hp / u.maxHp);
         ctx.fillStyle = 'rgba(0,0,0,0.75)'; ctx.fillRect(p.x - w / 2 - 1, top - 1, w + 2, u.isHero ? 7 : 5);
-        ctx.fillStyle = u.isHero ? (u === player ? '#2dc653' : '#e8a33a') : pct > 0.5 ? '#c8402e' : '#e0703a'; ctx.fillRect(p.x - w / 2, top, w * pct, 3);
+        ctx.fillStyle = u.isHero ? (u === player ? '#2dc653' : '#e8a33a') : u.isMinion ? (u.owner === player ? '#2dc653' : '#e8a33a') : pct > 0.5 ? '#c8402e' : '#e0703a'; ctx.fillRect(p.x - w / 2, top, w * pct, 3);
         if (u.isHero && u.maxMana) { ctx.fillStyle = '#4895ef'; ctx.fillRect(p.x - w / 2, top + 4, w * Math.max(0, u.mana / u.maxMana), 2); }
         if (u.isHero) { ctx.font = 'bold 10px "Chakra Petch", sans-serif'; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,0.85)'; ctx.strokeText(u.displayName, p.x, top - 8); ctx.fillStyle = u === player ? '#00f5d4' : '#ffd27a'; ctx.fillText(u.displayName, p.x, top - 8); }
     };
     arena.creeps.forEach(c => { if (c.isAlive()) bar(c); });
+    (arena.minions || []).forEach(m => { if (m.isAlive()) bar(m); });
     arena.heroes.forEach(h => { if (!h.eliminated && h.isAlive()) bar(h); });
     // Números de daño y textos, sobre la cabeza de cada uno
     (arena.fx || []).forEach(f => {
@@ -1248,7 +1249,7 @@ function render() {
     }
 
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    arena.creeps.forEach(c => { if (c.isAlive()) drawUnit(c, c.color, c.symbol, drawPos(c, dt), { glow: c.isBoss || c.isRoundBoss, big: c.isRoundBoss }); });
+    arena.creeps.concat(arena.minions || []).forEach(c => { if (c.isAlive()) drawUnit(c, c.color, c.symbol, drawPos(c, dt), { glow: c.isBoss || c.isRoundBoss, big: c.isRoundBoss }); });
     // Proyectiles con estela, del color de quien los disparó (o el propio de la habilidad, ver vfx en su definición)
     const drawProjectiles = () => arena.projectiles.forEach(p => {
         const color = (p.vfx && p.vfx.color) || (p.attacker.isHero ? heroColor(p.attacker) : p.attacker.color || '#fefae0');

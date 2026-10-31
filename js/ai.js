@@ -119,6 +119,7 @@ function retreatStep(hero, enemies) {
 
 // --- HABILIDADES ---
 function aiWantsToCast(hero, skill, nearCount, bossNear, nearestDist = Infinity, nearest = null) {
+    if (skill.aiReady) return skill.aiReady(hero); // habilidades con su propia condición (Sobrecarga de Servidores)
     // Cuerpo a cuerpo: los saltos y teletransportes se guardan para cuando el enemigo está fuera de su alcance
     // (antes los usaba apenas estaban listos, aunque ya estuviera pegado, y después no podía alcanzar a los que se alejaban).
     if (skill.aiMinDist && nearestDist < skill.aiMinDist) return false; // no con el enemigo encima (ej: canalizar)

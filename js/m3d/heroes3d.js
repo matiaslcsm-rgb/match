@@ -91,17 +91,25 @@ export const HERO_ROBOTS = {
             box('head', [0.3, 0.05, 0.02], [0, 0.18, 0.23], 'glow')
         ]
     },
-    // Nigromante: capucha, costillas al aire, túnica en jirones y una guadaña más alta que él
+    // M.O.R.T.I.S.: flota sin piernas sobre tres propulsores; capucha verde, cráneo, armadura de cobre, túnica en jirones y brazales
     NECROMANCER: {
-        build: { legs: 'ruedas', core: 'liviano', head: 'domo', armL: 'pinza', armR: 'pinza' }, paint: '#2f5a45', glow: '#7dff9b', size: 1.05,
+        build: { legs: 'ruedas', core: 'liviano', head: 'domo', armL: 'pinza', armR: 'pinza' }, paint: '#2f5a45', glow: '#7dff9b', size: 1.05, float: true,
         extras: [
-            cyl('handR', 0.035, 2.6, [0, 0.55, 0.14], 'carbon'),                                   // el mango
-            box('handR', [0.05, 0.16, 1.2], [0, 1.82, 0.6], 'metal', [0.22, 0, 0]),                // la hoja
-            box('handR', [0.06, 0.1, 0.5], [0, 1.68, 1.02], 'glow', [0.45, 0, 0]),
-            box('head', [0.48, 0.42, 0.5], [0, 0.2, -0.05], 'carbon'),                             // la capucha
-            ...both(box('head', [0.08, 0.06, 0.02], [0.08, 0.18, 0.21], 'glow')),
-            ...[0.12, 0.26, 0.4].map(y => box('chest', [0.5, 0.05, 0.05], [0, y, 0.25], 'hueso')),  // las costillas
-            ...[[0.26, 0.85], [-0.02, 1.2], [-0.28, 0.95]].map(([x, l]) => box('chest', [0.22, l, 0.03], [x, -0.05 - l / 4, -0.26], 'carbon', [-0.08, 0, 0]))
+            box('head', [0.58, 0.52, 0.58], [0, 0.2, -0.08], 'oliva'),                             // la capucha
+            box('head', [0.32, 0.2, 0.34], [0, 0.5, -0.14], 'oliva', [0.3, 0, 0]),
+            box('head', [0.32, 0.3, 0.1], [0, 0.17, 0.25], 'metal'),                               // el cráneo
+            box('head', [0.22, 0.09, 0.08], [0, -0.03, 0.24], 'metal'),
+            ...both(box('head', [0.09, 0.08, 0.02], [0.08, 0.2, 0.31], 'glow')),
+            box('chest', [0.64, 0.44, 0.36], [0, 0.25, 0.02], 'cobre'),                            // la armadura y el núcleo verde
+            cyl('chest', 0.11, 0.06, [0, 0.25, 0.22], 'glow', [PI / 2, 0, 0]),
+            box('spine', [0.52, 0.11, 0.38], [0, 0.05, 0], 'cobre'),
+            ...both(box('shoulder', [0.36, 0.2, 0.44], [0.1, 0.14, 0], 'cobre')),
+            ...both(box('forearm', [0.17, 0.36, 0.17], [0, -0.32, 0], 'cobre')),                   // los brazales con su luz
+            ...both(box('forearm', [0.18, 0.05, 0.18], [0, -0.42, 0], 'glow')),
+            ...[[0.26, 0.9], [0, 1.2], [-0.26, 1]].flatMap(([x, l]) => [0.2, -0.2].map(z => box('pelvis', [0.25, l, 0.04], [x, -0.1 - l / 2, z], 'oliva'))), // la túnica en jirones
+            ...[0.25, -0.25].map(x => cyl('chest', 0.03, 1, [x, 0.95, -0.3], 'carbon')),            // el armazón de la espalda
+            box('chest', [0.6, 0.05, 0.05], [0, 1.42, -0.3], 'carbon'),
+            ...[0.26, 0, -0.26].flatMap(x => [cyl('pelvis', 0.13, 0.28, [x, -0.42, 0], 'cobre'), cyl('pelvis', 0.07, 0.8, [x, -0.95, 0], 'glow')]) // propulsores y su estela
         ]
     },
     // Sabio del Vacío: un disco negro detrás de la cabeza con un anillo de luz y losas que flotan

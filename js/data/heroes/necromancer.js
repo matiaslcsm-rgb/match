@@ -1,22 +1,18 @@
-// Nigromante (Inteligencia) — rework fiel a Necrophos de Dota 2 (pedido del usuario 2026-09-28, ver
-// https://dota2.fandom.com/wiki/Necrophos), adaptado a nuestro motor. Identidad: desgasta con un aura que
-// quita % de vida máxima, se vuelve espectral para sobrevivir ráfagas físicas, y remata con una definitiva
-// que ejecuta a quien le queda poca vida. Los números de Dota son para partidas de 40+ min; acá se reescalan
-// al resto del roster (ver DISEÑO.md §6).
+// M.O.R.T.I.S. (Inteligencia), el nigromante robótico (2026-10-31, ficha del usuario: docs/competidores/mortis.md). Reemplaza al
+// Nigromante; las claves internas siguen siendo NECROMANCER. Desgasta con un aura, ata y remata con el Sello, y levanta
+// Autómatas (minions.js) que repiten su Eco y detona con la definitiva.
 registerHero({
-    key: 'NECROMANCER', name: 'Nigromante', symbol: 'N', primaryAttr: 'INT', role: 'Desgaste y ejecución a distancia',
-    attributes: { str: [18, 1.8], agi: [11, 1.1], int: [22, 3.1] },
+    key: 'NECROMANCER', name: 'M.O.R.T.I.S.', symbol: 'N', primaryAttr: 'INT', role: 'Desgaste e invocación a distancia',
+    attributes: { str: [19, 2.2], agi: [14, 1.4], int: [24, 3.2] },
     baseHp: 160, baseAtk: 12, baseAtkSpeed: 0.95, baseAttackRange: 3,
     baseArmor: 1, baseMagicResist: 15, baseHpRegen: 0.5,
     baseMaxMana: 130, baseManaRegen: 1.8, baseMoveSpeed: 2.6, baseProjectileSpeed: 8,
     baseCritChance: 5, baseEvasion: 5, baseSpellAmp: 0, baseLifesteal: 0,
-    description: 'Inteligencia: desgasta con un aura que quita vida máxima, se vuelve espectral para sobrevivir y remata con una guadaña que ejecuta a los heridos.',
+    description: 'Inteligencia: nigromante robótico flotante. Corroe con su aura, ata con el Sello, levanta Autómatas y los detona.',
     scaling: { stat: 'lifesteal', perKills: 10, perKillsAmount: 2, perHeroKill: 5 },
     innate: {
-        // "Sadist" de Dota: regeneración por baja, en cargas que se renuevan y se acumulan (hasta un tope);
-        // una baja de héroe da varias cargas de una, como en el original.
         id: 'NECROMANCER_INNATE', name: 'Sadista', tags: ['CURACIÓN', 'AL_MATAR'],
-        description: 'Innato: cada baja te da una carga de regeneración de vida y maná (+3/s cada una) por 7s, hasta 6 cargas. Si es un héroe, suma 6 cargas de una.',
+        description: 'Innato: cada baja te da una carga de regeneración de vida y maná (+3/s cada una) por 7s, hasta 6 cargas. Si es un competidor, suma 6 cargas de una.',
         regenPerStack: 3, maxStacks: 6, duration: 7, heroKillStacks: 6,
         hooks: {
             onKill(owner, { victim }) {
@@ -31,97 +27,103 @@ registerHero({
         }
     }
 }, {
-    NECROMANCER_PULSE: {
-        // Death Pulse: pulso centrado en el propio Nigromante (no se apunta), daña a los enemigos alrededor
-        // y lo cura a él (en Dota cura también a aliados; acá cada héroe pelea solo, así que cura al propio).
-        id: 'NECROMANCER_PULSE', name: 'Pulso de Muerte', kind: 'active',
-        tags: ['MÁGICO', 'ÁREA', 'ROBO_VIDA'],
-        values: { cooldown: [8, 7, 6, 5], manaCost: [70, 85, 100, 115], baseDmg: [60, 100, 140, 180], intRatio: 0.5, radius: [2.5, 3, 3.5, 4], healPct: [0.3, 0.35, 0.4, 0.45] },
-        description: 'Libera un pulso de muerte a tu alrededor (radio {radius}): {baseDmg} + {intRatio%} de tu Inteligencia como daño mágico a los enemigos alcanzados, y te curás {healPct%} de todo lo que dañaste.',
+    NECROMANCER_SEAL: {
+        id: 'NECROMANCER_SEAL', name: 'Sello de Putrefacción', kind: 'active',
+        tags: ['MÁGICO', 'CONTROL', 'AL_MATAR'],
+        values: { cooldown: [12, 11, 10, 8], manaCost: [70, 85, 100, 115], range: 6, duration: [1.2, 1.5, 1.8, 2.1], baseDmg: [60, 110, 160, 210], intRatio: 0.4, missingPct: [0.08, 0.12, 0.16, 0.2], summonWindow: 2 },
+        description: 'Ata al enemigo objetivo (rango {range}) por {duration}s: no se mueve, pero puede atacar y lanzar. Le hace {baseDmg} + {intRatio%} de tu Inteligencia + {missingPct%} de la vida que le falta como daño mágico. Si muere con el sello o hasta {summonWindow}s después, aparece un Autómata.',
         cast(caster) {
-            const radius = val(this, caster, 'radius');
-            const dmg = val(this, caster, 'baseDmg') + caster.int * val(this, caster, 'intRatio');
-            const targets = enemiesOf(caster).filter(c => c.isAlive() && Math.hypot(c.x - caster.x, c.y - caster.y) <= radius);
-            if (!targets.length) { log('Pulso de Muerte: sin enemigos en el radio.'); return false; }
-            let total = 0;
-            targets.forEach(c => { total += dealDamage(caster, c, dmg, 'magical').dealt; });
-            const healed = healUnit(caster, total * val(this, caster, 'healPct'), { fromDamage: true });
-            log(`💀 ¡Pulso de Muerte! ${targets.length} enemigo(s) alcanzados, +${healed} HP.`);
+            const target = nearestEnemy(caster, val(this, caster, 'range'));
+            if (!target) { log('Sello de Putrefacción: sin objetivo en rango.'); return false; }
+            const duration = val(this, caster, 'duration'), window = duration + val(this, caster, 'summonWindow');
+            addEffect(target, { id: 'ROOT', name: 'Sellado', duration, flags: ['root'], tags: ['PERJUICIO'] });
+            // Mira si cae el sellado: va en el que lanzó, así vale para cualquiera que saque el Sello en el draft
+            addEffect(caster, { id: 'NECROMANCER_SEAL_WATCH', name: 'Sello', duration: window, flags: ['passive'], hooks: { onKill(owner, { victim }) { if (victim === target) summonAutomaton(owner, victim); } } });
+            fxRing(target, '#7dff9b', 1.2, duration);
+            const dmg = val(this, caster, 'baseDmg') + caster.int * val(this, caster, 'intRatio') + (target.maxHp - target.hp) * val(this, caster, 'missingPct');
+            dealDamage(caster, target, dmg, 'magical');
+            log(`🟢 ¡Sello de Putrefacción a ${target.label || target.displayName}!`);
             return true;
         }
     },
     NECROMANCER_AURA: {
-        // Heartstopper Aura: quita % de la vida MÁXIMA por segundo a todo el que esté cerca, como daño puro
-        // (en Dota ignora reducción de daño). El desgaste constante contra oleadas largas o tanques.
-        id: 'NECROMANCER_AURA', name: 'Aura que Detiene el Corazón', kind: 'passive',
-        tags: ['PURO', 'DAÑO_EN_EL_TIEMPO', 'ÁREA'],
-        values: { radius: 4, hpDmgPct: [0.015, 0.02, 0.025, 0.03] },
-        description: 'Pasiva: los enemigos en radio {radius} pierden {hpDmgPct%} de su HP máximo por segundo como daño puro.',
+        id: 'NECROMANCER_AURA', name: 'Aura de Corrupción', kind: 'passive',
+        tags: ['MÁGICO', 'DAÑO_EN_EL_TIEMPO', 'ÁREA'],
+        values: { radius: 4, hpDmgPct: [0.008, 0.012, 0.016, 0.02], antiheal: [0.15, 0.2, 0.25, 0.3] },
+        description: 'Pasiva: los enemigos en radio {radius} pierden {hpDmgPct%} de su vida máxima por segundo como daño mágico y reciben {antiheal%} menos curación.',
         hooks: {
             onTick(owner, { dt }) {
                 if (!owner.isAlive() || !everyInterval(owner, this.id, dt)) return;
-                const radius = val(this, owner, 'radius'), pct = val(this, owner, 'hpDmgPct');
-                enemiesOf(owner).forEach(c => {
-                    if (c.isAlive() && Math.hypot(c.x - owner.x, c.y - owner.y) <= radius) dealDamage(owner, c, Math.max(1, c.maxHp * pct), 'pure');
+                const radius = val(this, owner, 'radius'), pct = val(this, owner, 'hpDmgPct'), antiheal = val(this, owner, 'antiheal');
+                enemiesOf(owner).slice().forEach(c => {
+                    if (!c.isAlive() || Math.hypot(c.x - owner.x, c.y - owner.y) > radius) return;
+                    addEffect(c, { id: 'NECROMANCER_CORRUPTION', name: 'Corrupción', duration: 1.2, tags: ['PERJUICIO'], mods: { healingTakenPct: -antiheal } });
+                    dealDamage(owner, c, Math.max(1, c.maxHp * pct), 'magical');
                 });
             }
         }
     },
-    NECROMANCER_SHROUD: {
-        // Ghost Shroud: se vuelve espectral. Inmune a daño físico y desarmado (sigue moviéndose, a diferencia
-        // de un aturdimiento), pero pierde resistencia mágica y cura más mientras dura. Al activarse, ralentiza
-        // a quien tenga cerca (el "aura de frío" del original).
-        id: 'NECROMANCER_SHROUD', name: 'Manto Fantasma', kind: 'active',
-        tags: ['MEJORA', 'CONTROL'],
-        values: { cooldown: [26, 22, 18, 14], manaCost: [60, 65, 70, 75], duration: [3, 3.5, 4, 4.5], slowRadius: 4, slowPct: 0.3, magicResistPenalty: 40, healingBonusPct: 0.5 },
-        description: 'Te volvés espectral por {duration}s: inmune a daño físico (pero no podés atacar), con {magicResistPenalty} puntos menos de resistencia mágica y {healingBonusPct%} más de curación recibida. Al activarse, ralentiza {slowPct%} a los enemigos en radio {slowRadius}.',
+    NECROMANCER_AUTOMATON: {
+        id: 'NECROMANCER_AUTOMATON', name: 'Autómata Putrefacto', kind: 'passive',
+        tags: ['MEJORA', 'AL_MATAR'],
+        values: { cap: [2, 3, 4, 5], hp: [120, 160, 200, 240], atk: [10, 15, 20, 25], intHp: 2, intAtk: 0.25 },
+        description: 'Pasiva: podés tener hasta {cap} Autómatas a la vez, con {hp} de vida y {atk} de daño, más lo que sumen por tu Inteligencia. Duran 25s y arrancás cada duelo con uno. Quien destruye uno cobra oro.',
+        hooks: {}
+    },
+    NECROMANCER_ECHO: {
+        id: 'NECROMANCER_ECHO', name: 'Eco de los Muertos', kind: 'active',
+        tags: ['MÁGICO', 'ÁREA'],
+        values: { cooldown: [8, 7, 6, 5], manaCost: [70, 80, 90, 100], baseDmg: [90, 140, 190, 240], intRatio: 0.4, radius: 2.5, falloff: 0.35, maxWaves: 3 },
+        description: 'Un chirrido hace {baseDmg} + {intRatio%} de tu Inteligencia como daño mágico en radio {radius}. Cada Autómata lo repite desde donde está, del más cercano al más lejano, {falloff%} más débil que el anterior. Un mismo enemigo recibe {maxWaves} ondas como máximo.',
+        aiReady(hero) {
+            const radius = val(this, hero, 'radius');
+            return [hero, ...minionsOf(hero)].some(u => enemiesOf(hero).some(c => c.isAlive() && Math.hypot(c.x - u.x, c.y - u.y) <= radius));
+        },
         cast(caster) {
-            const duration = val(this, caster, 'duration');
-            addEffect(caster, {
-                id: this.id, name: this.name, duration, tags: ['MEJORA'], flags: ['physicalImmune', 'disarm'],
-                mods: { magicResist: -val(this, caster, 'magicResistPenalty'), healingTakenPct: val(this, caster, 'healingBonusPct') }
+            const radius = val(this, caster, 'radius'), max = val(this, caster, 'maxWaves'), weak = 1 - val(this, caster, 'falloff'), hits = new Map();
+            const dist = u => Math.hypot(u.x - caster.x, u.y - caster.y);
+            const sources = [caster, ...minionsOf(caster).sort((a, b) => dist(a) - dist(b))];
+            let dmg = val(this, caster, 'baseDmg') + caster.int * val(this, caster, 'intRatio'), total = 0;
+            sources.forEach(src => {
+                fxRing(src, '#7dff9b', radius, 0.35);
+                enemiesOf(caster).slice().forEach(c => {
+                    if (!c.isAlive() || (hits.get(c) || 0) >= max || Math.hypot(c.x - src.x, c.y - src.y) > radius) return;
+                    hits.set(c, (hits.get(c) || 0) + 1); total++;
+                    dealDamage(caster, c, dmg, 'magical');
+                });
+                dmg *= weak;
             });
-            const radius = val(this, caster, 'slowRadius'), slow = val(this, caster, 'slowPct');
-            let hits = 0;
-            enemiesOf(caster).forEach(c => {
-                if (c.isAlive() && Math.hypot(c.x - caster.x, c.y - caster.y) <= radius) {
-                    addEffect(c, { id: 'NECROMANCER_SHROUD_SLOW', name: 'Escarcha espectral', duration, mods: { moveSpeedPct: -slow } });
-                    hits++;
-                }
-            });
-            log(`👻 ¡Manto Fantasma! Espectral por ${duration}s${hits ? `, ralentizó a ${hits}` : ''}.`);
+            if (!total) { log('Eco de los Muertos: sin enemigos en el radio.'); return false; }
+            log(`📡 ¡Eco de los Muertos! ${total} impacto(s).`);
             return true;
         }
     },
-    NECROMANCER_REAP: {
-        // Reaper's Scythe: aturde y, al terminar el aturdimiento, hace daño puro según cuánta vida le falta al
-        // objetivo — si alcanza, muere ahí mismo (ejecución). Si lo mata, gana regeneración de vida y maná
-        // permanente, como el original.
-        id: 'NECROMANCER_REAP', name: 'Guadaña del Segador', kind: 'active', isUltimate: true,
-        tags: ['PURO', 'CONTROL', 'AL_MATAR'],
-        values: { cooldown: [75, 65, 55], manaCost: [130, 150, 170], range: 6, stunDuration: 1.5, missingHpRatio: [0.7, 0.8, 0.9], hpRegenPerKill: [2, 4, 6], manaRegenPerKill: [1, 2, 3] },
-        description: 'DEFINITIVA. Aturde al enemigo objetivo (rango {range}) por {stunDuration}s; al terminar, le hace daño puro igual al {missingHpRatio%} de la vida que le falta — si alcanza, muere. Si lo mata, ganás para siempre +{hpRegenPerKill} de regen. de vida/s y +{manaRegenPerKill} de regen. de maná/s.',
+    NECROMANCER_OVERLOAD: {
+        id: 'NECROMANCER_OVERLOAD', name: 'Sobrecarga de Servidores', kind: 'active', isUltimate: true, exclusive: true,
+        tags: ['MÁGICO', 'ÁREA', 'CONTROL'],
+        values: { cooldown: [75, 65, 55], manaCost: [130, 150, 170], baseDmg: [150, 225, 300], intRatio: 0.6, radius: 2, slowPct: 0.4, slowDuration: 2.5, rootDuration: 1.5, rootHits: 2 },
+        description: 'DEFINITIVA. Detona a todos tus Autómatas: cada uno hace {baseDmg} + {intRatio%} de tu Inteligencia como daño mágico en radio {radius} y frena {slowPct%} por {slowDuration}s. Si {rootHits} o más explosiones tocan al mismo competidor, queda atado {rootDuration}s.',
+        aiReady(hero) {
+            const radius = val(this, hero, 'radius');
+            return minionsOf(hero).some(m => enemiesOf(hero).some(c => c.isAlive() && Math.hypot(c.x - m.x, c.y - m.y) <= radius));
+        },
         cast(caster) {
-            const target = nearestEnemy(caster, val(this, caster, 'range'));
-            if (!target) { log('Guadaña del Segador: sin objetivo en rango.'); return false; }
-            const ratio = val(this, caster, 'missingHpRatio');
-            const stunDuration = val(this, caster, 'stunDuration');
-            const hpRegenPerKill = val(this, caster, 'hpRegenPerKill'), manaRegenPerKill = val(this, caster, 'manaRegenPerKill');
-            const skillName = this.name;
-            const resolve = () => {
-                if (!target.isAlive()) return;
-                const dmg = Math.max(0, target.maxHp - target.hp) * ratio;
-                dealDamage(caster, target, dmg, 'pure');
-                if (!target.isAlive()) {
-                    grantPermanent(caster, 'hpRegen', hpRegenPerKill, skillName);
-                    grantPermanent(caster, 'manaRegen', manaRegenPerKill, skillName);
-                }
-            };
-            // El daño se calcula al TERMINAR el aturdimiento (como en Dota): si es inmune y no lo pudo
-            // aturdir, igual se aplica de una para que la definitiva no quede en la nada.
-            const stunned = addEffect(target, { id: 'STUN', name: 'Aturdido', duration: stunDuration, flags: ['stun'], hooks: { onExpire: resolve } });
-            if (!stunned) resolve();
-            log(`💀 ¡Guadaña del Segador a ${target.label}!`);
+            const bombs = minionsOf(caster);
+            if (!bombs.length) { log('Sobrecarga de Servidores: no tenés Autómatas.'); return false; }
+            const radius = val(this, caster, 'radius'), dmg = val(this, caster, 'baseDmg') + caster.int * val(this, caster, 'intRatio');
+            const slow = val(this, caster, 'slowPct'), slowDuration = val(this, caster, 'slowDuration'), hits = new Map();
+            bombs.forEach(m => {
+                fxRing(m, '#7dff9b', radius, 0.5);
+                enemiesOf(caster).slice().forEach(c => {
+                    if (!c.isAlive() || Math.hypot(c.x - m.x, c.y - m.y) > radius) return;
+                    hits.set(c, (hits.get(c) || 0) + 1);
+                    addEffect(c, { id: 'NECROMANCER_OVERLOAD_SLOW', name: 'Sobrecarga', duration: slowDuration, tags: ['PERJUICIO'], mods: { moveSpeedPct: -slow } });
+                    dealDamage(caster, c, dmg, 'magical');
+                });
+                destroyMinion(m);
+            });
+            hits.forEach((n, c) => { if (n >= val(this, caster, 'rootHits') && c.isHero && c.isAlive()) addEffect(c, { id: 'ROOT', name: 'Atrapado', duration: val(this, caster, 'rootDuration'), flags: ['root'], tags: ['PERJUICIO'] }); });
+            log(`💥 ¡Sobrecarga de Servidores! ${bombs.length} Autómata(s) detonados.`);
             return true;
         }
     }

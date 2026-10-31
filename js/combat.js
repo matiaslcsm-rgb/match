@@ -31,8 +31,11 @@ function makeCreep(t, x, y, statMult, isBossUnit, bossAuraBonus) {
 function enemiesOf(unit) {
     const arena = unit.arena;
     if (!arena) return [];
+    if (unit.isMinion) return enemiesOf(unit.owner); // los Autómatas (minions.js) pelean contra los enemigos de su dueño
     if (!unit.isHero) return arena.heroes;
-    return arena.kind === 'duel' ? arena.heroes.filter(h => h !== unit) : arena.creeps;
+    if (arena.kind !== 'duel') return arena.creeps;
+    const rivals = arena.heroes.filter(h => h !== unit);
+    return arena.minions && arena.minions.length ? rivals.concat(arena.minions.filter(m => m.owner !== unit)) : rivals;
 }
 
 // Si la unidad está apuntando con el mouse (aimPoint, ver mouse.js), elige entre los enemigos a su alcance el más cercano

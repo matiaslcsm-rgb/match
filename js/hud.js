@@ -40,6 +40,7 @@ function renderMinimap() {
     if (arena.walls) { c.fillStyle = '#5a5e60'; arena.walls.forEach((row, y) => row.forEach((on, x) => { if (on) c.fillRect(x / COLS * MINI_W, y / ROWS * MINI_H, MINI_W / COLS, MINI_H / ROWS); })); }
     const dot = (u, color, r) => { c.fillStyle = color; c.beginPath(); c.arc(miniX(u.rx ?? u.x), miniY(u.ry ?? u.y), r, 0, Math.PI * 2); c.fill(); };
     arena.creeps.forEach(u => { if (u.isAlive()) dot(u, '#d9402c', u.isBoss || u.isRoundBoss ? 5 : 2.5); });
+    (arena.minions || []).forEach(u => { if (u.isAlive()) dot(u, u.owner === player ? '#7dff9b' : '#ffb703', 2.5); });
     arena.heroes.forEach(u => { if (!u.eliminated && u.isAlive()) dot(u, u === player ? '#00f5d4' : '#ffb703', 4); });
     // Lo que muestra la cámara
     const view = window.M3D && M3D.active && M3D.viewCorners();

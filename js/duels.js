@@ -73,6 +73,7 @@ function makeDuelArenas(plan) {
             h.x = DUEL_STARTS[i].x; h.y = DUEL_STARTS[i].y;
             h.lastOpponent = i === 0 ? b : a;
         });
+        [a, b].forEach(duelAutomaton); // después de ubicar a los dos
         return arena;
     });
     if (bye) bye.arena = null;

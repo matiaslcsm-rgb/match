@@ -21,7 +21,7 @@ const SKILL_VFX = {
     CRANE_HOOK: { el: 'steel', shape: 'proj' }, CRANE_BEAM: { el: 'steel', shape: 'whirl' }, CRANE_ANCHOR: { el: 'steel', shape: 'shield' }, CRANE_DEMOLITION: { el: 'steel', shape: 'meteor' },
     DANCER_CUT: { el: 'steel', shape: 'dash' }, DANCER_GHOSTSTEP: { el: 'shadow', shape: 'blink' }, DANCER_STORM: { el: 'steel', shape: 'whirl' },
     FROSTWITCH_BLAST: { el: 'ice', shape: 'proj' }, FROSTWITCH_ARMOR: { el: 'ice', shape: 'shield' }, FROSTWITCH_ZERO: { el: 'ice', shape: 'nova' },
-    NECROMANCER_PULSE: { el: 'shadow', shape: 'nova' }, NECROMANCER_SHROUD: { el: 'shadow', shape: 'aura' }, NECROMANCER_REAP: { el: 'shadow', shape: 'reap' },
+    NECROMANCER_SEAL: { el: 'poison', shape: 'claw' }, NECROMANCER_ECHO: { el: 'poison', shape: 'nova' }, NECROMANCER_OVERLOAD: { el: 'poison', shape: 'nova' },
     REC_ACOPLE: { el: 'arcane', shape: 'shot' }, REC_CAMARA_FIJA: { el: 'steel', shape: 'shot' },
     VAMP_CLAW: { el: 'blood', shape: 'claw' }, VAMP_LEAP: { el: 'blood', shape: 'dash' }, VAMP_IMMORTAL: { el: 'blood', shape: 'aura' },
     VOIDSAGE_BLINK: { el: 'void', shape: 'blink' }, VOIDSAGE_PULSE: { el: 'void', shape: 'nova' }, VOIDSAGE_RIFT: { el: 'void', shape: 'zone' },
@@ -156,7 +156,7 @@ function fxSkill(hero, skill, from) {
 // --- Ataque básico según el arma de cada competidor ---
 const WEAPON_FX = {
     CRANE: { el: 'steel', kind: 'heavy' }, VAMPIRE: { el: 'blood', kind: 'slash' }, VECTOR: { el: 'steel', kind: 'slash' },
-    DANCER: { el: 'steel', kind: 'twin' }, ARCANIST: { el: 'arcane', kind: 'orb' }, FROSTWITCH: { el: 'ice', kind: 'orb' }, NECROMANCER: { el: 'shadow', kind: 'scythe' },
+    DANCER: { el: 'steel', kind: 'twin' }, ARCANIST: { el: 'arcane', kind: 'orb' }, FROSTWITCH: { el: 'ice', kind: 'orb' }, NECROMANCER: { el: 'poison', kind: 'orb' },
     VOIDSAGE: { el: 'void', kind: 'orb' }, ALCHEMIST: { el: 'poison', kind: 'orb' }, ZEUS: { el: 'lightning', kind: 'zap' }, REC: { el: 'steel', kind: 'shot' }, FISTS: { el: 'steel', kind: 'punch' }
 };
 function weaponFx(hero) {

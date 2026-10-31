@@ -58,7 +58,7 @@ function spawnWave(arena, wave) {
 
 // El héroe al que ataca un creep: el de su arena o, si hay varios (jefe de ronda), el vivo más cercano.
 function creepTarget(c) {
-    const list = c.arena.heroes;
+    const minions = c.arena.minions || [], list = minions.length ? c.arena.heroes.concat(minions) : c.arena.heroes; // los Autómatas (minions.js) también
     if (list.length === 1) return list[0];
     let best = null, bestDist = Infinity;
     list.forEach(h => {

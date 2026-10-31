@@ -42,6 +42,7 @@ function bodyAt(arena, x, y, self) {
     if (!arena) return false;
     for (const u of arena.creeps) if (bodyBlocks(u, x, y, self)) return true;
     for (const u of arena.heroes) if (bodyBlocks(u, x, y, self)) return true;
+    if (arena.minions) for (const u of arena.minions) if (bodyBlocks(u, x, y, self)) return true;
     return false;
 }
 
@@ -73,10 +74,11 @@ function separateBodies(arena) {
     if (!BODIES_ON) return;
     const grid = new Uint8Array(COLS * ROWS), key = (x, y) => y * COLS + x, solid = u => u.isAlive() && !u.eliminated && !u.inRest && !(u.effects && hasFlag(u, 'phasing'));
     let stacked = false;
-    for (const list of [arena.creeps, arena.heroes]) for (const u of list) if (solid(u)) { if (grid[key(u.x, u.y)]++) stacked = true; }
+    const minions = arena.minions || [];
+    for (const list of [arena.creeps, arena.heroes, minions]) for (const u of list) if (solid(u)) { if (grid[key(u.x, u.y)]++) stacked = true; }
     if (!stacked) return; // lo normal: nadie encimado
     grid.fill(0);
-    [...arena.creeps, ...arena.heroes].filter(solid).sort((a, b) => !!(b.isBoss || b.isRoundBoss) - !!(a.isBoss || a.isRoundBoss)).forEach(u => {
+    [...arena.creeps, ...arena.heroes, ...minions].filter(solid).sort((a, b) => !!(b.isBoss || b.isRoundBoss) - !!(a.isBoss || a.isRoundBoss)).forEach(u => {
         if (grid[key(u.x, u.y)]) {
             search: for (let r = 1; r < COLS; r++) for (let dx = -r; dx <= r; dx++) for (let dy = -r; dy <= r; dy++) {
                 const x = u.x + dx, y = u.y + dy;

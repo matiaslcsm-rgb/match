@@ -15,7 +15,7 @@ let arenas = [];            // arenas activas en esta fase
 let viewedHero = null;      // héroe cuya arena (o descanso) se muestra
 
 function makeArena(kind, fighters) {
-    const arena = { kind, heroes: fighters, creeps: [], boss: null, projectiles: [], elapsed: 0, enrageAnnounced: false, done: false };
+    const arena = { kind, heroes: fighters, creeps: [], minions: [], boss: null, projectiles: [], elapsed: 0, enrageAnnounced: false, done: false };
     fighters.forEach(h => { h.arena = arena; });
     return arena;
 }
