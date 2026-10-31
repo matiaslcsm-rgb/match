@@ -1286,7 +1286,7 @@ test('IA: con el inventario lleno vende un contra que no sirve para comprar el q
 test('IA: el contra desplaza a lo propio de su build tardía, y lo propio no desplaza contras', () => {
     newGame('REC');
     gameState = 'PREP'; player.gold = ITEMS.CLOAK.recipe;
-    ['GLOVES', 'SWIFT_BLADE', 'CRIMSON', 'SKADI', 'BOOTS', 'JET_PACK'].forEach(k => giveItem(player, k));
+    [...AI_BUILDS.REC, 'BOOTS', 'JET_PACK'].forEach(k => giveItem(player, k));
     nextWave = { name: 'Asedio', groups: [{ type: 'SHAMAN', count: 3 }, { type: 'STUNNER', count: 3 }], boss: 'SHAMAN' };
     autopilot = true;
     try {
@@ -1313,6 +1313,18 @@ test('IA: Grúa arma su build propia, primero el robo de vida; los demás, la de
     aiBuild(player).forEach(k => check(countItem(player, k) > 0, `compró ${k}`));
     checkEq(countItem(player, 'BELT'), 0, 'el Cinturón de la build de Fuerza no');
     check(player.gold < 5000 - aiBuild(player).reduce((a, k) => a + itemTotalCost(ITEMS[k]), 0), 'con su build armada, sigue con los libros de talento');
+});
+
+test('IA: la Bruja y Rec arman su build propia, con aguante y sin lo que no les rinde', () => {
+    [['FROSTWITCH', 'TOME'], ['REC', 'SWIFT_BLADE']].forEach(([key, not]) => {
+        newGame(key);
+        checkEq(aiBuild(player), AI_BUILDS[key], `${key}: la suya`);
+        nextWave = null; player.gold = 5000;
+        aiShop(player);
+        aiBuild(player).forEach(k => check(countItem(player, k) > 0, `${key}: compró ${k}`));
+        checkEq(countItem(player, 'HEART'), 1, `${key}: el Corazón`);
+        checkEq(countItem(player, not), 0, `${key}: ${not} no`);
+    });
 });
 
 test('IA: arma los contras de la próxima oleada (de a componentes si no le alcanza)', () => {

@@ -146,3 +146,23 @@ Duelos: mediana 13.1 s (meta 15-30 ✘: bajó de ~15), 12% por tiempo, 0.9 cambi
 Probado y descartado para Grúa: más crecimiento de Fuerza (3,6): puesto 6,4, casi igual. Lo que funcionó: 12% de robo de vida (duelos 43 → 52%, puesto 6,4 → 5,6) y resistencia mágica 35 contra los Drones Emisores.
 A 66 partidas el Nigromante parecía caer mucho con los cuerpos sólidos; a 264 quedó 5,4 (antes 4,7): baja, pero menos.
 
+### 2026-10-30: Bruja y Rec con build propia (528 partidas, antes → después)
+Diagnóstico: la Bruja gana 60% de sus duelos pero sale en la ronda 15,6: le falta aguante, no daño. Rec usaba la build de Agilidad (crítico y robo de vida), que solo rinde en su dron aéreo; el daño plano y la velocidad de ataque rinden en los tres. Arreglo (`AI_BUILDS.FROSTWITCH` y `AI_BUILDS.REC`, ai.js, sin tocar stats ni habilidades): Bruja con Báculo, Cetro, Corazón y Égida; Rec con Guantes, Corazón, Martillo y Sed.
+
+| Héroe | % antes | % después | Puesto antes | Puesto después | Afuera antes | Afuera después |
+|---|---|---|---|---|---|---|
+| Guerrero Vampiro | 23 | 24 | 4,6 | 4,6 | 21,5 | 21,6 |
+| Danzante Cinético | 21 | 23 | 3,8 | 3,9 | 22,0 | 22,1 |
+| Zeus | 20 | 21 | 4,6 | 4,6 | 21,3 | 21,7 |
+| Arcanista | 20 | 20 | 3,3 | 3,2 | 20,9 | 21,3 |
+| Asesino | 23 | 19 | 3,4 | 3,5 | 20,8 | 20,6 |
+| Alquimista | 13 | 12 | 3,3 | 3,6 | 19,5 | 19,8 |
+| Nigromante | 11 | 10 | 5,6 | 5,8 | 19,1 | 19,4 |
+| Sabio del Vacío | 5 | 5 | 4,9 | 5,1 | 18,5 | 18,8 |
+| Bruja del Hielo | 2 | 3 | 5,6 | 5,1 | 15,6 | 16,3 |
+| Rec | 1 | 2 | 5,0 | 4,6 | 18,3 | 18,6 |
+| Grúa | 0 | 1 | 5,6 | 5,6 | 18,8 | 18,6 |
+
+Victorias: Bruja 6 → 11 de 383, Rec 4 → 9 de 385, Grúa 0 → 3 de 397 (Grúa no cambió: es ruido). Mejoran en puesto, pero siguen lejos del 12,5% parejo. Duelos: mediana 13,2 → 14,3 s (meta 15-30 ✘), 13% por tiempo, 0,87 cambios de ventaja, esquive 41%.
+Probado y descartado, a 528 partidas, para Rec sin el Corazón: Guantes, Martillo, Hoja Certera y Sed (puesto 5,2); Sed, Martillo, Hoja Certera y Guantes (5,0); Martillo, Tenaza, Sed y Guantes (5,2). Para la Bruja, Corazón antes que los báculos: puesto 4,8 junto con otra build de Rec, sin ventaja. El banco de esta tanda corre partes de semillas en paralelo sobre copias exportadas, así que los números pueden no coincidir exactos con `?banco=528`.
+
