@@ -6,7 +6,7 @@ const KEY_DEFAULTS = {
     map: 'm', shop: 'b', autocast: 'h', autopilot: 'p', skillKeys: 'k', panels: 'l'
 };
 const KEY_LABELS = {
-    map: 'Mapa grande', shop: 'Tienda', autocast: 'Habilidades automáticas', autopilot: 'Piloto automático', skillKeys: 'Acomodar habilidades', panels: 'Retraer los paneles'
+    map: 'Pantalla completa', shop: 'Tienda', autocast: 'Habilidades automáticas', autopilot: 'Piloto automático', skillKeys: 'Acomodar habilidades', panels: 'Historial de eventos'
 };
 // Fijas: Esc, G (pixel art), las de las habilidades (hero.js, SKILL_KEYS) y las de los ítems
 const KEY_FIXED = ['escape', 'g', 'q', 'w', 'e', 'r', 'd', 'f', 't', 'v', '1', '2', '3', '4', '5', '6'];

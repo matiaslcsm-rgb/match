@@ -962,15 +962,21 @@ test('La IA y el piloto no usan la reserva', () => {
     resetGame();
 });
 
-test('Paneles retráctiles: el mapa ocupa lo que dejan', () => {
-    const before = mapScale;
-    togglePanels();
-    check(document.body.classList.contains('hide-left') && document.body.classList.contains('hide-right'), 'se retraen los dos');
-    togglePanel('right');
-    check(!document.body.classList.contains('hide-right'), 'se muestran de a uno');
-    togglePanel('left');
-    check(!document.body.classList.contains('hide-left'), 'y se vuelven a mostrar');
-    checkEq(mapScale, before, 'el mapa vuelve a su tamaño');
+test('HUD estilo Dota: la arena ocupa toda la ventana, con L se abre el historial y el minimapa pasa a casillas', () => {
+    applyMapSize();
+    checkEq(canvas.style.width, `${Math.max(320, window.innerWidth)}px`, 'todo el ancho');
+    checkNear(viewW / MAP_H, Math.max(320, window.innerWidth) / Math.max(240, window.innerHeight), 'lo lógico sigue la forma de la ventana');
+    toggleLogPanel();
+    check(document.body.classList.contains('log-open'), 'se abre el historial');
+    toggleLogPanel();
+    check(!document.body.classList.contains('log-open'), 'y se cierra');
+    const box = document.getElementById('hud-map');
+    box.style.display = 'flex'; // fuera de la partida está oculto y mide cero
+    const r = miniCv.getBoundingClientRect(), p = miniTile({ clientX: r.left, clientY: r.top });
+    box.style.display = '';
+    checkEq(p.x, -0.5, 'esquina del minimapa: columna');
+    checkEq(p.y, -0.5, 'esquina del minimapa: fila');
+    checkEq(document.getElementById('tv-rank').parentElement.id, 'center-col', 'la barra de arriba está en el HUD');
 });
 
 test('Ítem de atributo: suma al atributo y a sus stats; venderlo devuelve la mitad y lo quita', () => {
@@ -2365,14 +2371,6 @@ test('Zócalo de TV: en combate muestra la tabla y un clic mira la arena de ese 
     resetGame();
     checkEq(strip.innerHTML, '', 'se limpia con la partida');
     check(!document.body.classList.contains('tv-rank-on'), 'y se apaga');
-});
-
-test('Mapa agrandable: M cambia el tamaño del mapa y vuelve', () => {
-    const w = canvas.style.width;
-    toggleBigMap();
-    check(canvas.style.width !== w, 'más grande');
-    toggleBigMap();
-    checkEq(canvas.style.width, w, 'vuelve al tamaño normal');
 });
 
 test('Habilidades automáticas: con H prendido el jugador lanza sus habilidades solo; apagado, no', () => {

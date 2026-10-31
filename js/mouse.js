@@ -68,15 +68,19 @@ function castAt(hero, skill, x, y) {
 
 function mouseToTile(e) {
     if (window.M3D && M3D.active) { const t = M3D.screenToTile(e.clientX, e.clientY); if (t) return t; } // MATCH 3D: rayo contra el piso
-    const rect = canvas.getBoundingClientRect();
-    return { x: (e.clientX - rect.left) / rect.width * VIEW_COLS - 0.5, y: (e.clientY - rect.top) / rect.height * VIEW_ROWS - 0.5 }; // la vista 2D (sin WebGL)
+    const s = mouseScreen(e);
+    return { x: s.fx * VIEW_COLS - 0.5, y: s.fy * VIEW_ROWS - 0.5 }; // la vista 2D (sin WebGL)
+}
+// Posición en pantalla, como fracción de la arena 2D (va centrada en la ventana)
+function mouseScreen(e) {
+    const rect = canvas.getBoundingClientRect(), k = rect.height / MAP_H;
+    return { fx: ((e.clientX - rect.left) / k - canvasShift()) / MAP_W, fy: (e.clientY - rect.top) / rect.height };
 }
 
 function canControlPlayer() { return player && inCombat() && !autopilot && player.arena && !player.inRest && player.isAlive(); }
 
 canvas.addEventListener('mousemove', e => {
-    const rect = canvas.getBoundingClientRect();
-    Object.assign(mouse, mouseToTile(e), { over: true, fx: (e.clientX - rect.left) / rect.width, fy: (e.clientY - rect.top) / rect.height }); // fx, fy: posición en pantalla (ver cursorWorld)
+    Object.assign(mouse, mouseToTile(e), { over: true }, mouseScreen(e)); // fx, fy: posición en pantalla (ver cursorWorld)
 });
 canvas.addEventListener('mouseleave', () => { mouse.over = false; });
 canvas.addEventListener('contextmenu', e => e.preventDefault());
@@ -193,5 +197,5 @@ function drawMouseOverlay(arena, noHint) {
 function drawTargetingHint() {
     if (!targeting) return;
     ctx.font = 'bold 12px monospace'; ctx.fillStyle = '#ffd166'; ctx.textAlign = 'center';
-    ctx.fillText(`${targeting.skill.name}: clic izquierdo para lanzar · clic derecho o Esc para cancelar`, screenW() / 2, screenH() - 12);
+    ctx.fillText(`${targeting.skill.name}: clic izquierdo para lanzar · clic derecho o Esc para cancelar`, screenW() / 2, screenH() * 0.72);
 }

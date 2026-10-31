@@ -2,7 +2,7 @@
 //
 //   Esc (o el botón ⏸ arriba del mapa) pausa la partida: se congelan el combate, los temporizadores y los efectos.
 //   El menú de pausa tiene: Continuar, Tutorial, Glosario (Héroes, Creeps y Jefes, Ítems), Opciones (sonido, gráficos,
-//   habilidades automáticas, piloto automático, mapa grande) y Salir al menú.
+//   habilidades automáticas, piloto automático, pantalla completa) y Salir al menú.
 //   El glosario también se abre desde el menú de inicio. Cada códice se muestra como una ventana a pantalla completa.
 
 let paused = false;
@@ -33,7 +33,7 @@ function renderPauseMenu() {
         opt('quickcast', '⚡ Lanzamiento rápido (la habilidad sale al apretar la tecla)', quickCast) +
         opt('autocast', '✨ Habilidades automáticas (H)', autoCast) +
         opt('autopilot', '🤖 Piloto automático (P)', autopilot) +
-        opt('bigmap', '⤢ Mapa grande (M)', mapScale > 1);
+        opt('fullscreen', '⤢ Pantalla completa (M)', !!document.fullscreenElement);
     // Deslizadores: volumen general, música, efectos y temblor de pantalla
     const slider = (key, label, max = 1) => `<label class="pm-slider">${label}<input type="range" min="0" max="${max * 100}" step="5" value="${Math.round(VOLUME[key] * 100)}" data-vol="${key}"><b>${Math.round(VOLUME[key] * 100)}%</b></label>`;
     document.getElementById('pause-options').insertAdjacentHTML('afterbegin',
@@ -51,7 +51,7 @@ function renderPauseMenu() {
     document.querySelectorAll('#pause-options .pm-toggle').forEach(btn => {
         btn.onclick = () => {
             ({ sound: () => setSound(!soundOn), music: () => setMusic(!musicOn), colorblind: () => setA11y('colorblind', !A11Y.colorblind), sprites: () => setSprites(!spritesOn), autocast: () => setAutoCast(!autoCast), quickcast: () => setQuickCast(!quickCast),
-               autopilot: () => setAutopilot(!autopilot), bigmap: toggleBigMap })[btn.dataset.opt]();
+               autopilot: () => setAutopilot(!autopilot), fullscreen: toggleFullscreen })[btn.dataset.opt]();
             renderPauseMenu();
         };
     });

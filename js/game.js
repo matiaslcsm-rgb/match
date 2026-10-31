@@ -36,10 +36,10 @@ window.addEventListener('keydown', e => {
     const act = actionForKey(k); // teclas configurables (keymap.js)
     if (skillKeysOpen) { if (k === 'escape' || act === 'skillKeys') toggleSkillKeys(false); return; }
     if (act === 'skillKeys') { toggleSkillKeys(); return; }
-    if (act === 'panels') { togglePanels(); return; }
+    if (act === 'panels') { toggleLogPanel(); return; }
     if (act === 'autopilot') { setAutopilot(!autopilot); return; }
     if (act === 'shop') { toggleShop(); return; }
-    if (act === 'map') { toggleBigMap(); return; }
+    if (act === 'map') { toggleFullscreen(); return; }
     if (act === 'autocast') { setAutoCast(!autoCast); return; }
     if (k === 'g') { setSprites(!spritesOn); return; }
     if (k === 'escape') { handleEscape(); return; }

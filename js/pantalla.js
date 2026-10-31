@@ -4,7 +4,7 @@
 const camera = { x: 0, y: 0 };
 function viewCols() { return VIEW_COLS; }
 function viewRows() { return VIEW_ROWS; }
-function screenW() { return MAP_W; }
+function screenW() { return viewW; }
 function screenH() { return MAP_H; }
 // Tema de la interfaz en pixel art (paneles oscuros con borde de píxeles y fuente Tiny5, style.css): en todo menos la portada
 function pxUiSync() { document.body.classList.toggle('pixel-ui', gameState !== 'MENU'); }

@@ -130,10 +130,10 @@ const TUTORIAL_PAGES = [
             ${tutKey(['Q', 'W', 'E', 'R', 'D', 'F'], 'Tus habilidades: definitivas en R (si no, D o F), pasivas en W o E y activas en Q. Las que se apuntan se confirman con clic.')}
             ${tutKey(['K'], 'Acomodar habilidades: las arrastrás a la tecla que quieras.')}
             ${tutKey(['1', '2', '3', '4', '5', '6'], 'Los ítems, según su casilla. Los activos se usan así; los acomodás arrastrándolos.')}
-            ${tutKey(['L'], 'Retraer los paneles de los costados y dejarle la pantalla al juego.')}
+            ${tutKey(['L'], 'Abrir o cerrar el historial de eventos.')}
             ${tutKey(['H'], 'Habilidades automáticas: se lanzan solas y vos solo te movés.')}
             ${tutKey(['B'], 'Abrir o cerrar la tienda (en la preparación).')}
-            ${tutKey(['M'], 'Agrandar el mapa.')}
+            ${tutKey(['M'], 'Pantalla completa. En el minimapa: clic para mirar, clic derecho para caminar.')}
             ${tutKey(['G'], 'Pixel art o letras ASCII.')}
             ${tutKey(['P'], 'Piloto automático: la IA juega por vos.')}
             ${tutKey(['Esc'], 'Pausa: tutorial, glosario y opciones.')}

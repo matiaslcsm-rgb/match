@@ -12,6 +12,7 @@ function log(msg) {
     const box = document.getElementById('combat-log');
     const p = document.createElement('p'); p.textContent = msg;
     box.appendChild(p); box.scrollTop = box.scrollHeight;
+    if (typeof hudToast === 'function') hudToast(msg); // el aviso que aparece y se va (hud.js)
 }
 
 // Mezcla un array en el lugar (Fisher-Yates) y lo devuelve.

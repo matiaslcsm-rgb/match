@@ -239,11 +239,12 @@ const rangeRing = ringMesh(0.97, 1, '#e8b4a0', 0.55); scene.add(rangeRing); // (
 // Cámara: arriba y atrás, mirando el centro de la arena con unos 55° de inclinación (como Dota)
 // La cámara se acerca y sigue a tu competidor (2026-10-30, pedido del usuario: los robots se veían chicos). En el duelo encuadra
 // a los dos y se aleja lo que haga falta; en los boxes se ve todo. Nunca muestra lo que está afuera de la arena.
-const ZOOM = 0.7, cam = { x: COLS / 2, z: ROWS / 2 + 0.9, k: 1, arena: null };
+const ZOOM = 0.92, VIEW_SHIFT = 0.08, cam = { x: COLS / 2, z: ROWS / 2 + 0.9, k: 1, arena: null, peek: null };
 const clampTo = (v, half, size) => half * 2 >= size ? size / 2 : Math.max(half, Math.min(size - half, v));
 function cameraGoal(arena) {
     const full = { x: COLS / 2, z: ROWS / 2 + 0.9, k: 1 };
     if (arena.kind === 'rest') return full;
+    if (cam.peek && performance.now() < cam.peek.until) return { x: clampTo(cam.peek.x, COLS * ZOOM / 2, COLS), z: clampTo(cam.peek.z, ROWS * ZOOM / 2, ROWS) + 0.9, k: ZOOM }; // clic en el minimapa (hud.js)
     const me = [viewedHero, player].find(h => h && arena.heroes.includes(h)) || arena.heroes[0];
     if (!me) return full;
     const spot = u => ({ x: (u.rx ?? u.x) + 0.5, z: (u.ry ?? u.y) + 0.5 });
@@ -259,7 +260,9 @@ function placeCamera(aspect, arena, dt) {
     const pitch = 55 * Math.PI / 180, dist = (18.8 + Math.max(0, 1.75 - aspect) * 8) * cam.k;
     camera.position.set(cam.x, Math.sin(pitch) * dist, cam.z + Math.cos(pitch) * dist + 0.3);
     camera.lookAt(cam.x, 0, cam.z);
-    camera.updateProjectionMatrix();
+    // El HUD de abajo tapa parte de la pantalla: la imagen sube para que tu competidor quede en el centro de lo que se ve
+    const size = 1000, shift = arena.kind === 'rest' ? 0 : VIEW_SHIFT;
+    camera.setViewOffset(aspect * size, size, 0, shift * size, aspect * size, size);
 }
 
 // --- LAS UNIDADES ---
@@ -556,7 +559,7 @@ function hide() { cv.style.display = 'none'; }
 // De un punto del mundo (casillas, altura en casillas) a coordenadas del mapa 2D (MAP_W × MAP_H)
 function project(x, y, h = 0) {
     tmp.set((x + 0.5) * U, h * U, (y + 0.5) * U).project(camera);
-    return { x: (tmp.x + 1) / 2 * MAP_W, y: (1 - tmp.y) / 2 * MAP_H, behind: tmp.z > 1 };
+    return { x: (tmp.x + 1) / 2 * viewW, y: (1 - tmp.y) / 2 * MAP_H, behind: tmp.z > 1 };
 }
 // Altura de la cabeza de una unidad (para la barra de vida)
 function headHeight(u) { return sizeOf(u) + 0.15; }
@@ -603,6 +606,13 @@ function portrait(u, key, full = false) {
 // Siempre, salvo en las pruebas (index.html?test: corren sin dibujar) o con ?view3d=0 (para revisar el 2D)
 const enabled = !/[?&]test/.test(location.search) && !/[?&]view3d=0/.test(location.search);
 window.M3D = {
+    // Minimapa (hud.js): mirar un lugar por un momento, y las cuatro esquinas de lo que muestra la cámara
+    peek: (x, y) => { cam.peek = { x: x + 0.5, z: y + 0.5, until: performance.now() + 3000 }; },
+    viewCorners: () => {
+        const r = canvas2d.getBoundingClientRect();
+        const pts = [[0, 0.1], [1, 0.1], [1, 0.8], [0, 0.8]].map(([fx, fy]) => screenToTile(r.left + fx * r.width, r.top + fy * r.height));
+        return pts.every(Boolean) ? pts : null;
+    },
     // ¿Se dibuja esta arena en 3D? (combate: oleada, duelo o jefe)
     wants: arena => enabled && arena && ['wave', 'duel', 'boss'].includes(arena.kind),
     // los boxes (el descanso) también: ui.js arma una arena de mentira { kind: 'rest', heroes, creeps: [], projectiles: [], fx: [] }

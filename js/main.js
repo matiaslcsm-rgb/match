@@ -1,7 +1,7 @@
 ﻿// Punto de entrada: conecta los botones y arranca el bucle principal.
 
 // Versión visible en el menú: si no coincide con la última subida, el navegador muestra una copia vieja (Ctrl+F5).
-const GAME_VERSION = '2026-10-30 · MATCH: Vector reemplaza al Asesino';
+const GAME_VERSION = '2026-10-31 · MATCH: HUD estilo Dota';
 document.getElementById('game-version').textContent = `Versión ${GAME_VERSION}`;
 // Se actualiza solo (2026-10-17, "no se actualizó"): GitHub Pages deja el juego en la caché del navegador hasta 10 min.
 // Si el main.js del servidor trae otra versión, se vuelven a bajar la página y sus archivos y se recarga (una vez por versión).
@@ -27,9 +27,7 @@ document.getElementById('pause-quit').onclick = quitToMenu;
 document.querySelectorAll('[data-glossary]').forEach(btn => { btn.onclick = () => openGlossary(btn.dataset.glossary); });
 document.querySelectorAll('.back-btn').forEach(btn => { btn.onclick = closeGlossary; });
 document.getElementById('shop-close').onclick = closeShop;
-document.getElementById('map-toggle').onclick = toggleBigMap;
-document.getElementById('panel-left').onclick = () => togglePanel('left');
-document.getElementById('panel-right').onclick = () => togglePanel('right');
+document.getElementById('map-toggle').onclick = toggleFullscreen;
 document.getElementById('shop-container').onclick = e => { if (e.target.id === 'shop-container') closeShop(); };
 window.addEventListener('resize', applyMapSize);
 { const input = document.getElementById('player-name'); input.value = playerName() === 'Vos' ? '' : playerName(); input.oninput = () => setPlayerName(input.value); }
@@ -67,6 +65,7 @@ function loop(ts) {
         if (player && gameState !== 'MENU' && gameState !== 'HERO_SELECT') updateRestArea(dt); // en la sala de espera se puede caminar
     }
     updateHud();
+    hudTick();
     renderTimer();
     render();
     requestAnimationFrame(loop);

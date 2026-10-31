@@ -4,41 +4,24 @@ const canvas = document.getElementById('ascii-canvas');
 let ctx = canvas.getContext('2d'); // let: los efectos del piso 3D lo cambian un momento por su canvas (withCtx, pixelFx.js)
 const TILE = 34; // más grande desde que se sacó la barra de arriba
 const MAP_W = VIEW_COLS * TILE, MAP_H = VIEW_ROWS * TILE; // tamaño lógico de la pantalla (se dibuja siempre en estas coordenadas)
+const TOP_LINE = TILE * 1.4; // primera línea de los carteles sobre la arena, debajo de la barra de arriba
 
-// Tamaño real del canvas: el mapa normal o agrandado (M), y multiplicado por la densidad de la pantalla para que se vea nítido.
-let mapScale = 1;
-const BIG_MAP_SCALE = 1.3;
+// Tamaño real del canvas: toda la ventana (HUD estilo Dota, hud.js), multiplicado por la densidad de la pantalla para que se vea
+// nítido. Lo lógico sigue midiendo MAP_H de alto y a lo ancho mide viewW, según la forma de la ventana.
+let mapScale = 1, viewW = MAP_W;
 function applyMapSize() {
-    const fit = panelsHidden.left || panelsHidden.right;
-    if (fit) mapScale = fitMapScale();
-    else if (mapScale !== BIG_MAP_SCALE) mapScale = 1;
-    document.getElementById('hud-main').style.gridTemplateColumns = fit
-        ? [!panelsHidden.left && '215px', `${Math.round(MAP_W * mapScale)}px`, !panelsHidden.right && '370px'].filter(Boolean).join(' ') : '';
-    const k = mapScale * (window.devicePixelRatio || 1);
-    canvas.width = Math.round(MAP_W * k); canvas.height = Math.round(MAP_H * k);
-    canvas.style.width = `${Math.round(MAP_W * mapScale)}px`; canvas.style.height = `${Math.round(MAP_H * mapScale)}px`;
-    document.body.classList.toggle('big-map', !fit && mapScale > 1);
-    document.body.classList.toggle('hide-left', panelsHidden.left);
-    document.body.classList.toggle('hide-right', panelsHidden.right);
+    const w = Math.max(320, window.innerWidth), h = Math.max(240, window.innerHeight), dpr = window.devicePixelRatio || 1;
+    mapScale = h / MAP_H; viewW = w / mapScale;
+    canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
+    canvas.style.width = `${w}px`; canvas.style.height = `${h}px`;
 }
-function toggleBigMap() {
-    if (panelsHidden.left || panelsHidden.right) { panelsHidden = { left: false, right: false }; savePanels(); mapScale = 1; }
-    else mapScale = mapScale > 1 ? 1 : BIG_MAP_SCALE;
-    applyMapSize();
-}
-// Paneles retráctiles (pedido del usuario 2026-10-30): el mapa ocupa lo que dejan libre, sin pasarse del alto de la ventana.
-let panelsHidden = { left: false, right: false };
-const panelsPersist = !/[?&](test|demo|banco)/.test(location.search);
-try { if (panelsPersist) Object.assign(panelsHidden, JSON.parse(localStorage.getItem('chc-paneles') || '{}')); } catch (e) { /* los dos a la vista */ }
-function savePanels() { try { if (panelsPersist) localStorage.setItem('chc-paneles', JSON.stringify(panelsHidden)); } catch (e) { /* no se guarda */ } }
-const PANEL_W = { left: 225, right: 380 }, MAP_RESERVED_H = 345; // lo que ocupan los paneles y, a lo alto, las barras y la del héroe
-function fitMapScale() {
-    const w = window.innerWidth - 24 - (panelsHidden.left ? 0 : PANEL_W.left) - (panelsHidden.right ? 0 : PANEL_W.right);
-    return Math.max(0.6, Math.min(w / MAP_W, (window.innerHeight - MAP_RESERVED_H) / MAP_H));
-}
-function togglePanel(side) { panelsHidden[side] = !panelsHidden[side]; savePanels(); applyMapSize(); }
-function togglePanels() { const hide = !(panelsHidden.left && panelsHidden.right); panelsHidden = { left: hide, right: hide }; savePanels(); applyMapSize(); }
 applyMapSize();
+// Lo que sobra a los costados cuando la arena se dibuja en 2D (sin WebGL), que va centrada
+function canvasShift() { return (viewW - MAP_W) / 2; }
+function setCanvasTransform(centered) {
+    const k = mapScale * (window.devicePixelRatio || 1);
+    ctx.setTransform(k, 0, 0, k, centered ? canvasShift() * k : 0, 0);
+}
 
 function setStateText(text) { document.getElementById('game-state-text').textContent = text; }
 function showPanel(id, visible) { document.getElementById(id).style.display = visible ? 'block' : 'none'; }
@@ -922,7 +905,7 @@ function tvRankHtml(ranked) {
         const url = heroSpriteUrl(h);
         const cls = 'tv-cell' + (h === player ? ' you' : '') + (h === (viewedHero || player) ? ' viewed' : '') + (h.eliminated ? ' out' : '') + (isFighting(h) && h.arena.kind === 'duel' ? ' dueling' : '');
         return `<div class="${cls}" title="${h.displayName} · ${h.points} pts"><span class="tv-pos">${i + 1}º</span>${url ? `<img src="${url}" alt="${h.symbol}" class="pixel-img tiny">` : ''}` +
-            `<span class="tv-name">${h.ownerName || h.name}</span><span class="tv-pts">${h.points}</span></div>`;
+            `<span class="tv-name">${h.ownerName || h.name}</span><span class="tv-line"><span class="tv-lives">${h.eliminated ? '💀' : '♥'.repeat(Math.max(0, h.lives))}</span><span class="tv-pts">${h.points}</span></span></div>`;
     }).join('');
 }
 function renderTvRank(ranked) {
@@ -1123,7 +1106,7 @@ function drawRivalPanel(arena) {
     const r = rivalOf(arena);
     if (!r || r.eliminated) return;
     const skills = r.skills.filter(s => s.kind === 'active' && skillLevel(r, s) > 0);
-    const w = 150, row = 13, x = MAP_W - w - 6, y = TILE * 1.05, h = 30 + skills.length * row;
+    const w = 150, row = 13, x = viewW - w - 6, y = TOP_LINE + 14, h = 30 + skills.length * row;
     ctx.save();
     ctx.fillStyle = 'rgba(12,13,16,0.82)'; ctx.fillRect(x, y, w, h);
     ctx.strokeStyle = '#ffb703'; ctx.lineWidth = 1; ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
@@ -1152,15 +1135,16 @@ function render3d(arena, dt) {
     updateArenaFx(arena, dt);
     M3D.active = true;
     canvas.style.backgroundColor = 'transparent';
-    ctx.clearRect(0, 0, MAP_W, MAP_H);
+    setCanvasTransform(false);
+    ctx.clearRect(0, 0, viewW, MAP_H);
     M3D.frame(arena, dt);
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    if (arena.kind === 'duel') { ctx.font = 'bold 13px monospace'; ctx.fillStyle = '#ffb703'; ctx.fillText(`⚔ DUELO: ${arena.heroes[0].displayName}  vs  ${arena.heroes[1].displayName}`, MAP_W / 2, TILE * 0.5); drawRivalPanel(arena); }
+    if (arena.kind === 'duel') { ctx.font = 'bold 13px monospace'; ctx.fillStyle = '#ffb703'; ctx.fillText(`⚔ DUELO: ${arena.heroes[0].displayName}  vs  ${arena.heroes[1].displayName}`, viewW / 2, TOP_LINE); drawRivalPanel(arena); }
     if (arena.kind === 'boss' && arena.boss) {
-        const b = arena.boss;
-        ctx.font = 'bold 13px monospace'; ctx.fillStyle = b.color; ctx.fillText(`👹 ${b.label}: ${Math.max(0, b.hp)} / ${b.maxHp}`, MAP_W / 2, TILE * 0.5);
-        ctx.fillStyle = '#330010'; ctx.fillRect(TILE * 3, TILE * 0.8, MAP_W - TILE * 6, 5);
-        ctx.fillStyle = '#ff0055'; ctx.fillRect(TILE * 3, TILE * 0.8, (MAP_W - TILE * 6) * Math.max(0, b.hp) / b.maxHp, 5);
+        const b = arena.boss, x = (viewW - MAP_W) / 2 + TILE * 3, w = MAP_W - TILE * 6;
+        ctx.font = 'bold 13px monospace'; ctx.fillStyle = b.color; ctx.fillText(`👹 ${b.label}: ${Math.max(0, b.hp)} / ${b.maxHp}`, viewW / 2, TOP_LINE);
+        ctx.fillStyle = '#330010'; ctx.fillRect(x, TOP_LINE + 10, w, 5);
+        ctx.fillStyle = '#ff0055'; ctx.fillRect(x, TOP_LINE + 10, w * Math.max(0, b.hp) / b.maxHp, 5);
     }
     const bar = u => {
         const p = M3D.project(u.rx ?? u.x, u.ry ?? u.y, M3D.headHeight(u)), w = u.isRoundBoss ? 56 : u.isHero ? 34 : 24, top = p.y - 4;
@@ -1184,9 +1168,9 @@ function render3d(arena, dt) {
     ctx.globalAlpha = 1;
     if (targeting && !canControlPlayer()) cancelTargeting();
     drawTargetingHint(); // la mira y el área de la habilidad van en el piso 3D (match3d.js)
-    drawUltBanner(MAP_W / 2, MAP_H * 0.72);
-    if (viewedHero && viewedHero !== player) { ctx.font = '11px monospace'; ctx.fillStyle = '#ffb703'; ctx.fillText(`👁 Mirando a ${viewedHero.displayName} (clic en tu fila del ranking para volver)`, MAP_W / 2, MAP_H - 8); }
-    if (paused) { ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(0, 0, MAP_W, MAP_H); ctx.font = 'bold 30px monospace'; ctx.fillStyle = '#ffb703'; ctx.fillText('PAUSA', MAP_W / 2, MAP_H / 2); }
+    drawUltBanner(viewW / 2, MAP_H * 0.66);
+    if (viewedHero && viewedHero !== player) { ctx.font = '11px monospace'; ctx.fillStyle = '#ffb703'; ctx.fillText(`👁 Mirando a ${viewedHero.displayName} (clic en tu foto de arriba para volver)`, viewW / 2, TOP_LINE + 26); }
+    if (paused) { ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(0, 0, viewW, MAP_H); ctx.font = 'bold 30px monospace'; ctx.fillStyle = '#ffb703'; ctx.fillText('PAUSA', viewW / 2, MAP_H / 2); }
 }
 
 // MATCH 3D: los boxes del show (el área de descanso) en 3D; encima, el título, los nombres y la ayuda
@@ -1195,20 +1179,20 @@ function renderRest3d(dt) {
     restScene.heroes = heroes.filter(h => h.inRest && !h.eliminated);
     M3D.active = true;
     canvas.style.backgroundColor = 'transparent';
-    ctx.clearRect(0, 0, MAP_W, MAP_H);
+    setCanvasTransform(false);
+    ctx.clearRect(0, 0, viewW, MAP_H);
     M3D.frame(restScene, dt);
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.strokeStyle = 'rgba(0,0,0,0.85)';
     ctx.font = 'bold 16px monospace'; ctx.lineWidth = 4;
-    ctx.strokeText('BOXES DEL SHOW', MAP_W / 2, TILE * 0.6); ctx.fillStyle = '#f2c21a'; ctx.fillText('BOXES DEL SHOW', MAP_W / 2, TILE * 0.6);
+    ctx.strokeText('BOXES DEL SHOW', viewW / 2, TOP_LINE); ctx.fillStyle = '#f2c21a'; ctx.fillText('BOXES DEL SHOW', viewW / 2, TOP_LINE);
     ctx.font = '11px monospace'; ctx.lineWidth = 3;
-    const note = (t, y) => { ctx.strokeText(t, MAP_W / 2, y); ctx.fillStyle = '#e9e5d8'; ctx.fillText(t, MAP_W / 2, y); };
-    note('Caminá con clic derecho', TILE * 1.25);
-    note('Volvés al combate con vida y maná completos', MAP_H - TILE * 0.35);
+    const note = (t, y) => { ctx.strokeText(t, viewW / 2, y); ctx.fillStyle = '#e9e5d8'; ctx.fillText(t, viewW / 2, y); };
+    note('Caminá con clic derecho · Volvés al combate con vida y maná completos', TOP_LINE + 15);
     restScene.heroes.forEach(h => {
         const p = M3D.project(h.rx ?? h.x, h.ry ?? h.y, M3D.headHeight(h)), name = h.displayName;
         ctx.font = 'bold 10px monospace'; ctx.strokeText(name, p.x, p.y - 4); ctx.fillStyle = h === player ? '#00f5d4' : '#ffd27a'; ctx.fillText(name, p.x, p.y - 4);
     });
-    if (paused) { ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(0, 0, MAP_W, MAP_H); ctx.font = 'bold 30px monospace'; ctx.fillStyle = '#ffb703'; ctx.fillText('PAUSA', MAP_W / 2, MAP_H / 2); }
+    if (paused) { ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(0, 0, viewW, MAP_H); ctx.font = 'bold 30px monospace'; ctx.fillStyle = '#ffb703'; ctx.fillText('PAUSA', viewW / 2, MAP_H / 2); }
 }
 
 function render() {
@@ -1217,12 +1201,12 @@ function render() {
     pxUiSync(); // tema de interfaz en pixel art (pantalla.js)
     document.body.classList.toggle('on-title', gameState === 'MENU'); // portada (titleScreen.js)
     musicTick(dt); // music.js
-    const k = mapScale * (window.devicePixelRatio || 1);
-    ctx.setTransform(k, 0, 0, k, 0, 0);
+    setCanvasTransform(false);
     const hero = viewedHero || player;
-    if (hero && (hero.inRest || !hero.arena) && gameState !== 'HERO_SELECT' && gameState !== 'MENU') { if (window.M3D && M3D.enabled()) renderRest3d(dt); else renderRestArea(dt); return; }
-    ctx.fillStyle = '#050507'; ctx.fillRect(0, 0, MAP_W, MAP_H);
+    if (hero && (hero.inRest || !hero.arena) && gameState !== 'HERO_SELECT' && gameState !== 'MENU') { if (window.M3D && M3D.enabled()) renderRest3d(dt); else { ctx.fillStyle = '#050507'; ctx.fillRect(0, 0, viewW, MAP_H); setCanvasTransform(true); renderRestArea(dt); } return; }
+    ctx.fillStyle = '#050507'; ctx.fillRect(0, 0, viewW, MAP_H);
     if (gameState === 'MENU' || gameState === 'HERO_SELECT' || !hero || !hero.arena || !inCombat()) {
+        setCanvasTransform(true);
         ctx.strokeStyle = '#151821';
         for (let c = 0; c < VIEW_COLS; c++) for (let r = 0; r < VIEW_ROWS; r++) ctx.strokeRect(c * TILE, r * TILE, TILE, TILE);
         if (gameState === 'MENU' || gameState === 'HERO_SELECT') renderTitle();
@@ -1231,6 +1215,7 @@ function render() {
     const arena = hero.arena;
     if (window.M3D && M3D.wants(arena)) { render3d(arena, dt); return; } // la arena en 3D (js/m3d/match3d.js)
     // Sin WebGL (o en las pruebas): la arena en 2D, como antes del 3D
+    setCanvasTransform(true);
     updateArenaFx(arena, dt);
     ctx.save();
     if (shakeAmount) ctx.translate((Math.random() - 0.5) * shakeAmount * 2, (Math.random() - 0.5) * shakeAmount * 2);
@@ -1296,12 +1281,12 @@ function render() {
     if (arena.kind === 'duel') drawRivalPanel(arena);
     if (hero !== player) {
         ctx.font = '11px monospace'; ctx.fillStyle = '#ffb703';
-        ctx.fillText(`👁 Mirando a ${hero.displayName} (clic en tu fila del ranking para volver)`, MAP_W / 2, MAP_H - 8);
+        ctx.fillText(`👁 Mirando a ${hero.displayName} (clic en tu foto de arriba para volver)`, MAP_W / 2, TOP_LINE + 26);
     }
     if (paused) {
-        ctx.setTransform(mapScale * (window.devicePixelRatio || 1), 0, 0, mapScale * (window.devicePixelRatio || 1), 0, 0);
-        ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(0, 0, MAP_W, MAP_H);
+        setCanvasTransform(false);
+        ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(0, 0, viewW, MAP_H);
         ctx.font = 'bold 30px monospace'; ctx.textAlign = 'center'; ctx.fillStyle = '#ffb703';
-        ctx.fillText('PAUSA', MAP_W / 2, MAP_H / 2);
+        ctx.fillText('PAUSA', viewW / 2, MAP_H / 2);
     }
 }

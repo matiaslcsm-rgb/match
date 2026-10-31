@@ -62,11 +62,8 @@
                     <span class="mh-item"><span id="game-state-text">MENÚ</span> <span id="phase-timer"></span></span>
                     <span class="mh-spacer"></span>
                     <span class="mh-item" id="lives-text" title="Vidas"></span>
-                    <span class="mh-item mh-gold" title="Oro">💰 <span id="player-gold">0</span>g <span id="player-income" class="mh-income" title="Lo que cobrás al terminar la ronda: interés (+1 cada 10g ahorrados, tope 5) y la racha (🔥 ganadas / 🧊 perdidas seguidas)"></span></span>
                     <span class="mh-item" id="points-text" title="Puntos y puesto en el ranking"></span>
-                    <button id="panel-left" title="Retraer o mostrar el ranking y las estadísticas">◧</button>
-                    <button id="panel-right" title="Retraer o mostrar la fase y el registro">◨</button>
-                    <button id="map-toggle" title="Agrandar o achicar el mapa (tecla M)">⤢</button>
+                    <button id="map-toggle" title="Pantalla completa (tecla M)">⤢</button>
                     <button id="pause-btn" title="Pausa, tutorial, glosario y opciones (Esc)">⏸</button>
                 </div>
                 <!-- Contador grande de la fase (arriba al centro, visible también sobre las ventanas) -->
@@ -84,6 +81,7 @@
                         <div id="hb-level"></div>
                         <div id="hb-xp"><div id="hb-xp-fill"></div></div>
                     </div>
+                    <div id="hb-quick"></div>
                     <div id="hb-main">
                         <div id="hb-name-line"><span id="hb-name"></span><span id="hb-stats"></span></div>
                         <div class="hb-bar hp"><div id="hb-hp-fill"></div><span id="hb-hp-text"></span></div>
@@ -98,8 +96,17 @@
                     </div>
                 </div>
                 <div id="controls-hint">Caminar: clic derecho · Atacar: clic derecho sobre un rival · Habilidades: Q W E R D F (se acomodan con K) y clic para apuntar · Ítems activos: 1 a 6 · Objetivo: clic izquierdo · Ítems: arrastralos a la casilla que quieras · Retraer paneles: L · Lanzamiento rápido: en Opciones · Automáticas: H · Tienda: B · Piloto: P</div>
-                <!-- Zócalo de TV con el ranking, durante el combate (ui.js) -->
+                <!-- Los 8 competidores, arriba, a los costados del reloj (ui.js) -->
                 <div id="tv-rank"></div>
+                <!-- Minimapa, oro y tienda, avisos y descripciones (hud.js) -->
+                <div id="hud-map"><canvas id="minimap"></canvas></div>
+                <div id="hud-shop">
+                    <div class="mh-gold" title="Oro">💰 <span id="player-gold">0</span>g <span id="player-income" class="mh-income" title="Lo que cobrás al terminar la ronda: interés (+1 cada 10g ahorrados, tope 5) y la racha (🔥 ganadas / 🧊 perdidas seguidas)"></span></div>
+                    <button id="hud-shop-btn" class="secondary-btn">🛒 Tienda (B)</button>
+                    <button id="hud-start" class="primary-btn" style="display: none;">⚔ Comenzar</button>
+                </div>
+                <div id="hud-toasts"></div>
+                <div id="hud-tip"></div>
             </div>
 
             <!-- Derecha: lo que toca en esta fase y el registro -->
@@ -347,6 +354,7 @@
     <script src="js/titleScreen.js"></script>
     <script src="js/mouse.js"></script>
     <script src="js/pause.js"></script>
+    <script src="js/hud.js"></script>
     <script src="js/main.js"></script>
     <!-- MATCH 3D (js/m3d/): three.js y el motor de robots de arena-robots, como módulos -->
     <script type="importmap">{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }</script>
