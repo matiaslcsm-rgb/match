@@ -187,3 +187,8 @@ Diagnóstico: el Sabio salía en la ronda 18,8 con la build de Inteligencia, que
 Victorias del Sabio: 19 → 43 de 406. Sale del grupo de abajo, pero parte de lo que gana sale de los de abajo y del medio: Alquimista 48 → 37, Nigromante 35 → 24, Rec 9 → 4 (con estos totales, cambios así pueden ser en parte ruido). Duelos: mediana 14,3 → 14,2 s (meta 15-30 ✘), 13% por tiempo, 0,85 cambios de ventaja, esquive 43%.
 Probado y descartado, a 528 partidas: Báculo, Cetro, Corazón y Égida, la de la Bruja (8%, puesto 4,5, afuera 19,7). Se mide igual que la tanda anterior: 4 partes de semillas en paralelo sobre copias exportadas.
 **Corrección:** la tabla de arriba se midió sobre `4a22343`, con el Asesino y antes de Vector. Repetido a 528 partidas sobre `21f36b4` (con Vector en ajuste), sin → con la build: Sabio 5,7 → 9,4% de victorias, puesto 5,07 → 4,05, afuera 18,5 → 20,2. El resultado se sostiene. Con esta medición, las bajas de la tabla de arriba no se repiten igual: Nigromante 12,8 → 10,6 y Alquimista 11,0 → 14,6 (el Alquimista sube), o sea que eran en buena parte ruido. Vector: 2-3% de victorias, puesto 5,3-5,6.
+
+### 2026-10-30: Vector reemplaza al Asesino (264 partidas)
+% de victorias y puesto: Zeus 26 / 4,2 · Danzante 25 / 3,9 · Vampiro 25 / 4,3 · Alquimista 16 / 3,4 · Arcanista 16 / 3,5 · Nigromante 10 / 5,8 · Sabio 7 / 4,2 · Bruja 7 / 4,7 · Rec 2 / 4,4 · Vector 2 / 5,5 · Grúa 1 / 5,6.
+Duelos: mediana 17,7 s (meta 15-30 ✔, antes 13,1), 15% por tiempo (meta <10 ✘), 0,9 cambios de ventaja (meta >1 ✘). Vector 46% y Grúa 52% de sus duelos, los dos en la meta. Alquimista (80%) y Nigromante (22%) son los extremos en duelos. Los Drones Emisores siguen siendo lo que más vidas saca a los de cuerpo a cuerpo desde la ronda 15.
+

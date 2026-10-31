@@ -1,7 +1,6 @@
 # Ficha: Vector, el esgrimista de la hoja de luz
 
-> **Estado: (decisión) borrador para aprobar** (2026-10-30). Nada de esto está programado. Los números son propuestas sin medir.
-> **Reemplaza al Asesino**, un héroe copiado de Dota que hoy gana 17% con duelos flojos (42%).
+> **Estado: aprobada por el usuario el 2026-10-30 y programada** (`js/data/heroes/vector.js`, robot en `js/m3d/heroes3d.js`). Reemplazó al Asesino, que se retiró. Decisiones: reemplaza al Asesino y la Guardia frena solo golpes directos: las áreas y el daño en el tiempo pasan.
 
 ## Quién es
 El duelista elegante del show: un robot flaco de competición, con una hoja de luz y una máscara de esgrima. Es el favorito de la tribuna y lo sabe.
@@ -46,6 +45,9 @@ El primer ataque básico después de 4 s sin pegar sale con +50% de daño y no s
 ## Qué medir cuando esté jugable
 Entre 45% y 55% de sus duelos; más de 1 cambio de ventaja en sus duelos; ningún cruce 80 a 20.
 
-## (decisión) Qué falta decidir
-1. **A quién reemplaza:** a) al Asesino (recomendada: mismo lugar en el plantel); b) al Danzante, que también es duelista.
-2. **La Guardia contra habilidades de área:** a) solo frena golpes directos (recomendada: deja una respuesta clara); b) frena todo.
+## Números jugables (medidos el 2026-10-30)
+Los números de arriba eran propuestas sin medir. Programados: vida 165, daño 12, velocidad de ataque 1,05, armadura 3, resistencia mágica 30, regeneración 1,5 y 8% de robo de vida (lo aprendido con Grúa: sin eso, los de cuerpo a cuerpo no pasan los jefes). La IA levanta la Guardia con el rival a 2,5 casillas o menos, usa el Amago solo contra competidores y compra la Batería de Arranque.
+**Una diferencia con la ficha:** Punto de Partido además hace recibir 15-25% más de daño al marcado. Sin eso no servía contra creeps ni para quien la consiga en el draft sin tener la Guardia.
+El Amago no se ve todavía en el panel del rival: se ve un cartel sobre el competidor.
+Banco de 264: gana 46% de sus duelos (meta 45-55% ✔), puesto 5,5, afuera en la ronda 19, 5 victorias en 201 partidas.
+**Tiene 4 habilidades normales**, como Grúa.

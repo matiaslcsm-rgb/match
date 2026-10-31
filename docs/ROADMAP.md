@@ -85,9 +85,10 @@ copiado de Dota.
     velocidad 2,3 y la IA no tira el Acople ni la Cámara Fija con el rival encima.
 - [x] **Grúa** reemplaza a Axe (2026-10-30, ficha `docs/competidores/grua.md`): gancho, viga, contrapeso, cabina y demolición. Piezas nuevas
   del motor: mover a la fuerza (`dragUnit`), inamovible (`anchored`) y escudo (`addShield`). Reforzada con robo de vida: gana 50% de sus duelos, puesto 5,6.
+- [x] **Vector** reemplaza al Asesino (2026-10-30, ficha `docs/competidores/vector.md`): Guardia, Estocada, Amago, Ritmo de Pista y Punto
+  de Partido. Piezas nuevas del motor: guardia (`isDirectHit`) y Amago sobre `startWindup`. Gana 46% de sus duelos; duelo mediano 17,7 s.
 - [ ] Los otros siete del show (borrador en `docs/MATCH.md` §4): Grúa, Eco, Flash, Kilo, Parche, Vector, Viral, Glitch.
   Antes de cada uno, su ficha para aprobar.
-  **(decisión)** Ficha lista para aprobar (2026-10-30): `docs/competidores/vector.md` (reemplaza al Asesino).
 - [ ] El Danzante, el Arcanista y el Sabio del Vacío pasados al estilo nuevo (su lectura y su respuesta).
 
 **Cierra cuando:** no queda ningún héroe de Dota y ningún cruce de competidores gana más del 65% de las veces.
