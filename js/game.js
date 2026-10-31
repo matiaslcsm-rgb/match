@@ -170,7 +170,7 @@ function toggleShop() {
 // Al terminar su oleada (y en la fase F2, su duelo) cada héroe va al Área de Descanso hasta que terminen todos,
 // y vuelve al combate con la vida y el maná completos. Las mejoras temporales se pierden.
 const REST_SPOT = { x: 10, y: 7 };
-const WAVE_START = { x: 3, y: 6 };
+const WAVE_START = { x: 10, y: 6 }; // el centro de la arena (pedido del usuario 2026-10-31)
 // Lugares alrededor de la fuente para los 8 héroes
 const REST_SPOTS = [[10, 7], [8, 6], [12, 6], [7, 8], [13, 8], [9, 9], [11, 9], [10, 5]];
 

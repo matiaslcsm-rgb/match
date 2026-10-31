@@ -237,17 +237,26 @@ const rangeRing = ringMesh(0.97, 1, '#e8b4a0', 0.55); scene.add(rangeRing); // (
 // Cámara: arriba y atrás, mirando el centro de la arena con unos 55° de inclinación (como Dota)
 // La cámara se acerca y sigue a tu competidor (2026-10-30, pedido del usuario: los robots se veían chicos). En el duelo encuadra
 // a los dos y se aleja lo que haga falta; en los boxes se ve todo. Nunca muestra lo que está afuera de la arena.
-const ZOOM = 0.92, VIEW_SHIFT = 0.08, cam = { x: COLS / 2, z: ROWS / 2 + 0.9, k: 1, arena: null, peek: null };
+// El zoom se cambia con la rueda del mouse: VIEW_K deja ver toda la arena por encima del HUD; ZOOM_MIN es lo más cerca.
+const VIEW_K = 1.22, ZOOM_MIN = 0.55, ZOOM_STEP = 0.08, VIEW_SHIFT = 0.08;
+let zoom = VIEW_K;
+try { zoom = Math.max(ZOOM_MIN, Math.min(VIEW_K, Number(localStorage.getItem('chc-zoom')) || VIEW_K)); } catch (e) { /* toda la arena */ }
+canvas2d.addEventListener('wheel', e => {
+    e.preventDefault();
+    zoom = Math.max(ZOOM_MIN, Math.min(VIEW_K, zoom + Math.sign(e.deltaY) * ZOOM_STEP));
+    try { localStorage.setItem('chc-zoom', zoom); } catch (err) { /* no se guarda */ }
+}, { passive: false });
+const cam = { x: COLS / 2, z: ROWS / 2 + 0.9, k: 1, arena: null, peek: null };
 const clampTo = (v, half, size) => half * 2 >= size ? size / 2 : Math.max(half, Math.min(size - half, v));
 function cameraGoal(arena) {
     const full = { x: COLS / 2, z: ROWS / 2 + 0.9, k: 1 };
     if (arena.kind === 'rest') return full;
-    if (cam.peek && performance.now() < cam.peek.until) return { x: clampTo(cam.peek.x, COLS * ZOOM / 2, COLS), z: clampTo(cam.peek.z, ROWS * ZOOM / 2, ROWS) + 0.9, k: ZOOM }; // clic en el minimapa (hud.js)
+    if (cam.peek && performance.now() < cam.peek.until) return { x: clampTo(cam.peek.x, COLS * zoom / 2, COLS), z: clampTo(cam.peek.z, ROWS * zoom / 2, ROWS) + 0.9, k: zoom }; // clic en el minimapa (hud.js)
     const me = [viewedHero, player].find(h => h && arena.heroes.includes(h)) || arena.heroes[0];
     if (!me) return full;
     const spot = u => ({ x: (u.rx ?? u.x) + 0.5, z: (u.ry ?? u.y) + 0.5 });
     const a = spot(me), other = arena.kind === 'duel' ? arena.heroes.find(h => h !== me) : null, b = other ? spot(other) : a;
-    const k = Math.min(1, Math.max(ZOOM, (Math.abs(a.x - b.x) + 5) / COLS, (Math.abs(a.z - b.z) + 4) / ROWS));
+    const k = Math.min(VIEW_K, Math.max(zoom, (Math.abs(a.x - b.x) + 5) / COLS, (Math.abs(a.z - b.z) + 4) / ROWS));
     return { x: clampTo((a.x + b.x) / 2, COLS * k / 2, COLS), z: clampTo((a.z + b.z) / 2, ROWS * k / 2, ROWS) + 0.9, k };
 }
 function placeCamera(aspect, arena, dt) {
