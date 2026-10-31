@@ -17,7 +17,7 @@ const SKILL_VFX = {
     ADVENTURER_GOLPE: { el: 'steel', shape: 'strike' }, ADVENTURER_VOLLEY: { el: 'steel', shape: 'shot' }, ADVENTURER_BOLT: { el: 'arcane', shape: 'proj' },
     ALCHEMIST_ACID: { el: 'poison', shape: 'cone' }, ALCHEMIST_BREW: { el: 'fire', shape: 'proj' }, ALCHEMIST_CHEMICAL: { el: 'poison', shape: 'aura' },
     ARCANIST_BOLT: { el: 'arcane', shape: 'proj' }, ARCANIST_SHIELD: { el: 'arcane', shape: 'shield' }, ARCANIST_OVERLOAD: { el: 'arcane', shape: 'meteor' },
-    ASSASSIN_BLINK: { el: 'shadow', shape: 'blink' }, ASSASSIN_LETHALSPEED: { el: 'blood', shape: 'aura' }, ASSASSIN_MASACRE: { el: 'blood', shape: 'whirl' },
+    VECTOR_GUARD: { el: 'steel', shape: 'shield' }, VECTOR_LUNGE: { el: 'steel', shape: 'dash' }, VECTOR_MATCHPOINT: { el: 'blood', shape: 'aura' },
     CRANE_HOOK: { el: 'steel', shape: 'proj' }, CRANE_BEAM: { el: 'steel', shape: 'whirl' }, CRANE_ANCHOR: { el: 'steel', shape: 'shield' }, CRANE_DEMOLITION: { el: 'steel', shape: 'meteor' },
     DANCER_CUT: { el: 'steel', shape: 'dash' }, DANCER_GHOSTSTEP: { el: 'shadow', shape: 'blink' }, DANCER_STORM: { el: 'steel', shape: 'whirl' },
     FROSTWITCH_BLAST: { el: 'ice', shape: 'proj' }, FROSTWITCH_ARMOR: { el: 'ice', shape: 'shield' }, FROSTWITCH_ZERO: { el: 'ice', shape: 'nova' },
@@ -155,7 +155,7 @@ function fxSkill(hero, skill, from) {
 
 // --- Ataque básico según el arma de cada competidor ---
 const WEAPON_FX = {
-    CRANE: { el: 'steel', kind: 'heavy' }, VAMPIRE: { el: 'blood', kind: 'slash' }, ASSASSIN: { el: 'shadow', kind: 'twin' },
+    CRANE: { el: 'steel', kind: 'heavy' }, VAMPIRE: { el: 'blood', kind: 'slash' }, VECTOR: { el: 'steel', kind: 'slash' },
     DANCER: { el: 'steel', kind: 'twin' }, ARCANIST: { el: 'arcane', kind: 'orb' }, FROSTWITCH: { el: 'ice', kind: 'orb' }, NECROMANCER: { el: 'shadow', kind: 'scythe' },
     VOIDSAGE: { el: 'void', kind: 'orb' }, ALCHEMIST: { el: 'poison', kind: 'orb' }, ZEUS: { el: 'lightning', kind: 'zap' }, REC: { el: 'steel', kind: 'shot' }, FISTS: { el: 'steel', kind: 'punch' }
 };

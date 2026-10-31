@@ -80,7 +80,7 @@ function paletteFrom(color, extra = {}) {
 const HERO_SPRITES = {
     CRANE: ['humanoid', { h: '#f2c230', s: '#7d8386', e: '#111', b: '#c98a12', a: '#ff9a2e', l: '#3a3e43', d: '#1b1b1b', w: '#a2a8ad' }],
     REC: ['humanoid', { h: '#d2cdbb', s: '#7d8386', e: '#3cd8f0', b: '#6c7448', a: '#f2c21a', l: '#3a3e43', d: '#1b1b1b', w: '#a2a8ad' }],
-    ASSASSIN: ['humanoid', { h: '#2b2d42', s: '#d4a373', e: '#e63946', b: '#1d1d1d', a: '#8d99ae', l: '#2b2d42', d: '#111', w: '#e0e1dd' }],
+    VECTOR: ['humanoid', { h: '#e6e3d3', s: '#7d8386', e: '#ff9a2e', b: '#3a3e43', a: '#ff9a2e', l: '#2a2d2e', d: '#111', w: '#ffb347' }],
     VAMPIRE: ['humanoid', { h: '#111111', s: '#f1f3f5', e: '#d00000', b: '#6a040f', a: '#ffd166', l: '#1b1b1b', d: '#111', w: '#9d0208' }],
     ARCANIST: ['robed', { h: '#3a0ca3', s: '#f1c27d', e: '#111', b: '#4361ee', a: '#f72585', d: '#1b1b1b', w: '#b08968' }],
     FROSTWITCH: ['robed', { h: '#caf0f8', s: '#e9ecef', e: '#0077b6', b: '#48cae4', a: '#ffffff', d: '#023e8a', w: '#90e0ef' }],

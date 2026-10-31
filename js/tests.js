@@ -299,27 +299,6 @@ test('Hambre: cada baja cura 5% de la vida máxima', () => {
     checkEq(player.hp - 50, Math.round(player.maxHp * 0.05), 'curación por baja');
 });
 
-test('Velocidad Letal: +5% por golpe al mismo objetivo, se reinicia al cambiar', () => {
-    newGame('ASSASSIN');
-    const a = dummy({ hp: 9999, maxHp: 9999 }), b = dummy({ y: player.y + 1 });
-    learn('ASSASSIN_LETHALSPEED', 2).cast(player);
-    const base = effAttack(player);
-    const hits = [1, 2, 3].map(() => rollAttackDamage(player, a).dmg);
-    checkEq(hits.join(','), [0, 1, 2].map(k => Math.round(base * (1 + k * 0.05))).join(','), 'combo');
-    checkEq(rollAttackDamage(player, b).dmg, Math.round(base), 'al cambiar de objetivo se reinicia');
-});
-
-// ============================================================ DEFINITIVAS Y ASCENSO
-test('Masacre: cada baja extiende la duración y da crítico permanente', () => {
-    newGame('ASSASSIN');
-    const ult = learn('ASSASSIN_MASACRE', 2);
-    ult.cast(player);
-    const until = getEffect(player, 'ASSASSIN_MASACRE').until, crit = player.critChance;
-    dealDamage(player, dummy(), 99999, 'pure'); dealDamage(player, dummy(), 99999, 'pure');
-    checkNear(getEffect(player, 'ASSASSIN_MASACRE').until - until, 2 * valueAt(ult, 'extendPerKill', 2), 'extensión');
-    checkNear(player.critChance - crit, 2 * valueAt(ult, 'critPerKill', 2), 'crítico permanente');
-});
-
 test('Forma Inmortal: no baja de 1, paga al terminar y da HP máximo por curación', () => {
     newGame('VAMPIRE');
     const ult = learn('VAMP_IMMORTAL', 1);
@@ -1120,7 +1099,7 @@ test('Cuerpos físicos: un creep bloqueado prueba el otro camino si está libre'
     checkEq([b.x, b.y].join(), '11,4', 'rodea por y');
 });
 
-test('Pasivas nuevas: Trípode, Golpe Crítico y Sangre Oscura', () => {
+test('Pasivas nuevas: Trípode y Sangre Oscura', () => {
     newGame('REC');
     const tri = learn('REC_TRIPODE', 2), as0 = effAtkSpeed(player);
     gameClock += 2; // quieto hace más de 1 s
@@ -1129,11 +1108,6 @@ test('Pasivas nuevas: Trípode, Golpe Crítico y Sangre Oscura', () => {
     player.skillLevels.REC_TRIPODE = 0; player.skills = player.skills.filter(s => s !== tri);
     updateArena(player.arena, 0.016);
     checkNear(effAtkSpeed(player), as0, 'si deja el kit, se va el bonus');
-    newGame('ASSASSIN');
-    learn('ASSASSIN_CRITSTRIKE', 4);
-    updateArena(player.arena, 0.016);
-    const saved = Math.random; Math.random = () => 0;
-    try { checkEq(rollAttackDamage(player, dummy()).dmg, Math.round(Math.round(effAttack(player)) * 2.8), 'crítico x2,8'); } finally { Math.random = saved; }
     newGame('VAMPIRE');
     const dark = learn('VAMP_DARKBLOOD', 4);
     player.hp = player.maxHp * 0.5;
@@ -2290,6 +2264,88 @@ test('Escudo: se come el daño, en duelo vale menos y Cabina Reforzada salta una
     removeEffect(a, 'SHIELD');
     emit(a, 'onDamaged', {});
     check(!getEffect(a, 'SHIELD'), 'una vez por pelea');
+});
+
+test('Vector: la Guardia anula un golpe directo y responde; las áreas la atraviesan', () => {
+    toDuels('VECTOR');
+    const [a, b] = arenas[0].heroes;
+    const g = HERO_SKILLS.VECTOR.VECTOR_GUARD;
+    a.skills = [g]; a.skillLevels.VECTOR_GUARD = 2;
+    g.cast(a);
+    const hp = a.hp, hpB = b.hp;
+    const r = dealDamage(b, a, 100, 'physical', { isAttack: true });
+    check(r.evaded && a.hp === hp, 'el golpe no entra');
+    check(b.hp < hpB, 'responde');
+    check(hasFlag(b, 'stun'), 'y aturde');
+    check(!getEffect(a, g.id), 'la guardia se gasta');
+    g.cast(a);
+    dodgeableHit = { radius: 2.5 };
+    try { dealDamage(b, a, 100, 'magical'); } finally { dodgeableHit = null; }
+    check(a.hp < hp, 'un área pasa');
+    check(getEffect(a, g.id), 'y no gasta la guardia');
+    const h2 = a.hp;
+    dealDamage(b, a, 5, 'pure');
+    check(a.hp < h2, 'el daño en el tiempo también pasa');
+    removeEffect(a, g.id);
+    const eff = addEffect(a, { id: 'X', name: 'x', duration: 1 });
+    g.cast(a);
+    getEffect(a, g.id).hooks.onExpire(a);
+    check(a.exposedUntil > gameClock, 'si nadie pega, queda expuesto');
+});
+
+test('Vector: Primera Sangre, una vez por descanso y no se esquiva', () => {
+    toDuels('VECTOR');
+    const [a, b] = arenas[0].heroes;
+    gameClock += 10;
+    emit(a, 'onTick', { dt: 0.05 });
+    check(hasFlag(a, 'trueStrike'), 'lista: no se esquiva');
+    const hit = () => { const c = { target: b, dmg: 100 }; emit(a, 'beforeAttack', c); return c.dmg; };
+    checkEq(hit(), 150, '+50%');
+    emit(a, 'onHit', { target: b });
+    checkEq(hit(), 100, 'el siguiente, normal');
+    check(!hasFlag(a, 'trueStrike'), 'ya se esquiva');
+    emit(a, 'onTick', { dt: 0.05 });
+    check(!getEffect(a, 'VECTOR_FIRST'), 'sin descansar no vuelve');
+});
+
+test('Vector: el Amago demora la próxima habilidad y se puede cortar', () => {
+    toDuels('VECTOR');
+    const [a, b] = arenas[0].heroes;
+    b.x = a.x + 2; b.y = a.y;
+    const s = HERO_SKILLS.CRANE.CRANE_ANCHOR;
+    b.addSkill(s); b.skillLevels[s.id] = 1; b.mana = b.maxMana;
+    check(HERO_SKILLS.VECTOR.VECTOR_FEINT.cast(a), 'amaga');
+    check(tryCastSkill(b, s), 'arranca');
+    check(!getEffect(b, s.id), 'todavía no salió');
+    check(b.windup, 'preparando: se puede cortar');
+    checkEq(b.windup.until - gameClock, 0.4, 'tarda lo del Amago');
+    check(!getEffect(b, 'VECTOR_FEINT'), 'se gasta');
+    gameClock += 0.5; tickWindup(b);
+    check(getEffect(b, s.id), 'después sale');
+    const m = dummy && a;
+    check(!HERO_SKILLS.VECTOR.VECTOR_FEINT.cast({ ...a, arena: { heroes: [], creeps: [] } }) , 'sin rival no se gasta');
+});
+
+test('Vector: la definitiva marca y el contraataque pega el doble; la Estocada no atraviesa a nadie', () => {
+    toDuels('VECTOR');
+    const [a, b] = arenas[0].heroes;
+    const g = HERO_SKILLS.VECTOR.VECTOR_GUARD, ult = HERO_SKILLS.VECTOR.VECTOR_MATCHPOINT;
+    a.skills = [g, ult]; a.skillLevels.VECTOR_GUARD = 1; a.skillLevels.VECTOR_MATCHPOINT = 1;
+    b.x = a.x + 2; b.y = a.y;
+    b.hp = b.maxHp;
+    g.cast(a); dealDamage(b, a, 10, 'physical', { isAttack: true });
+    const normal = b.maxHp - b.hp;
+    b.hp = b.maxHp; removeEffect(b, 'STUN');
+    ult.cast(a);
+    check(getEffect(b, 'VECTOR_MARK'), 'marcado');
+    g.cast(a); dealDamage(b, a, 10, 'physical', { isAttack: true });
+    check(b.maxHp - b.hp > normal * 1.9, 'el doble o más');
+    a.x = 3; a.y = 6; b.x = 5; b.y = 6;
+    const hp = b.hp;
+    a.mana = a.maxMana;
+    HERO_SKILLS.VECTOR.VECTOR_LUNGE.cast(a);
+    checkEq(a.x, 4, 'frena pegado al rival');
+    check(b.hp < hp, 'y le pega');
 });
 
 test('Zócalo de TV: en combate muestra la tabla y un clic mira la arena de ese competidor', () => {

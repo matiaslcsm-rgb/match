@@ -349,9 +349,15 @@ function handleSkillKeypress(k) {
 const WINDUP_EXPOSED = 0.4;
 const windupStats = { fired: 0, hit: 0 }; // en los duelos: golpes anunciados que salieron y que pegaron (banco)
 function startWindup(hero, skill) {
+    const feint = getEffect(hero, 'VECTOR_FEINT'); // el Amago de Vector demora lo que venga, y lo vuelve cortable
     let aim = hero.aimPoint;
-    if (!aim) { const t = nearestEnemy(hero, aimRange(skill, hero)); if (!t) return false; aim = { x: t.x, y: t.y }; }
-    hero.windup = { skill, at: gameClock, until: gameClock + skill.windup, fromX: hero.x, fromY: hero.y, aimX: aim.x, aimY: aim.y, r: skillRadius(skill, hero) };
+    if (!aim) {
+        const t = nearestEnemy(hero, aimRange(skill, hero));
+        if (!t && skill.windup) return false;
+        aim = t ? { x: t.x, y: t.y } : { x: hero.x, y: hero.y };
+    }
+    if (feint) removeEffect(hero, 'VECTOR_FEINT');
+    hero.windup = { skill, at: gameClock, until: gameClock + (skill.windup || 0) + (feint ? feint.data.delay : 0), fromX: hero.x, fromY: hero.y, aimX: aim.x, aimY: aim.y, r: skillRadius(skill, hero) };
     hero.moveTarget = null;
     return true;
 }
@@ -404,7 +410,7 @@ function tryCastSkill(hero, skill, opts = {}) {
         if (!opts.quiet) log(`❌ Maná insuficiente para ${skill.name} (necesitás ${manaCost}).`);
         return false;
     }
-    if (skill.windup && !opts.released) return startWindup(hero, skill); // golpe anunciado: sale después (tickWindup)
+    if ((skill.windup || getEffect(hero, 'VECTOR_FEINT')) && !opts.released) return startWindup(hero, skill); // golpe anunciado: sale después (tickWindup)
     const outerBuffer = logBuffer;
     logBuffer = [];
     let ok;

@@ -44,16 +44,15 @@ export const HERO_ROBOTS = {
             ...both(box('thigh', [0.05, 0.75, 0.05], [0.14, -0.35, -0.12], 'metal', [-0.3, 0, 0])) // las patas del trípode
         ]
     },
-    // Asesino: flaco y negro, capucha, dos hojas largas y una bufanda que brilla
-    ASSASSIN: {
-        build: { legs: 'bipedo', core: 'liviano', head: 'sensor', armL: 'pinza', armR: 'pinza' }, paint: '#2e3038', glow: '#b06bff', size: 0.94,
+    // Vector: bípedo fino de competición, máscara de esgrima, un brazo en guardia y una hoja de luz larguísima
+    VECTOR: {
+        build: { legs: 'bipedo', core: 'liviano', head: 'domo', armL: 'pinza', armR: 'pinza' }, paint: '#d6d2c2', glow: '#ff9a2e', size: 1.05,
         extras: [
-            ...both(box('forearm', [0.03, 1.15, 0.14], [0.1, -0.8, 0.12], 'metal')),               // las hojas
-            box('head', [0.42, 0.16, 0.44], [0, 0.32, -0.01], 'carbon'),                           // la capucha
-            box('head', [0.4, 0.3, 0.1], [0, 0.14, -0.2], 'carbon'),
-            box('head', [0.26, 0.05, 0.02], [0, 0.17, 0.225], 'glow'),
-            box('chest', [0.44, 0.1, 0.34], [0, 0.56, 0], 'glow'),                                 // la bufanda
-            box('chest', [0.13, 1.05, 0.03], [0.14, 0.02, -0.28], 'glow', [0.25, 0, 0.1])
+            box('handR', [0.05, 0.05, 1.9], [0, 0, 1.0], 'glow'),                  // la hoja de luz
+            box('handR', [0.32, 0.06, 0.07], [0, 0, 0.1], 'metal'),                // la guarnición
+            box('head', [0.36, 0.34, 0.03], [0, 0.04, 0.24], 'carbon'),            // la máscara de esgrima
+            box('head', [0.3, 0.05, 0.02], [0, 0.08, 0.26], 'glow'),
+            box('chest', [0.5, 0.42, 0.04], [0, 0.2, 0.36], 'hueso')               // el peto
         ]
     },
     // Danzante Cinético: chiquito y turquesa, sobre patines, con dos aros que giran en la cintura y abanicos en las manos

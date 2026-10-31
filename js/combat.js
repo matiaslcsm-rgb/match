@@ -120,6 +120,10 @@ function dealDamage(source, target, amount, type = 'physical', opts = {}) {
     if (!target.isAlive() || hasFlag(target, 'invulnerable')) return { dealt: 0, evaded: false };
     if (type === 'magical' && hasFlag(target, 'magicImmune')) return { dealt: 0, evaded: false };
     if (type === 'physical' && hasFlag(target, 'physicalImmune')) return { dealt: 0, evaded: false };
+    if (source && target.effects && hasFlag(target, 'guard') && isDirectHit(opts)) { // la Guardia de Vector
+        emit(target, 'onGuard', { source });
+        return { dealt: 0, evaded: true };
+    }
     const canEvade = opts.isAttack && !(source && hasFlag(source, 'trueStrike'));
     if (canEvade && Math.random() < effEvasion(target) / 100) { fxText(target, 'esquiva', '#8ecae6', 10); return { dealt: 0, evaded: true }; }
     let final = amount;
@@ -147,6 +151,13 @@ function dealDamage(source, target, amount, type = 'physical', opts = {}) {
     if (source && hpLost > 0) emit(source, 'onDealDamage', { target, dealt: hpLost, type, isCrit: opts.isCrit, relic: opts.relic });
     if (!target.isAlive()) onUnitDeath(target, source);
     return { dealt: hpLost, evaded: false };
+}
+
+// ¿Golpe directo? Un ataque básico o una habilidad a un solo objetivo. Ni las áreas ni el daño en el tiempo lo son.
+function isDirectHit(opts) {
+    if (opts.isAttack) return true;
+    if (dodgeableHit) return dodgeableHit.radius <= 1;
+    return !!fxCastingSkill && !fxCastingSkill.tags.includes('ÁREA');
 }
 
 // Escudo: un efecto que se come el daño hasta que se gasta o se termina. En duelo vale menos, como las curaciones.

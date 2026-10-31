@@ -123,6 +123,7 @@ function aiWantsToCast(hero, skill, nearCount, bossNear, nearestDist = Infinity,
     // (antes los usaba apenas estaban listos, aunque ya estuviera pegado, y después no podía alcanzar a los que se alejaban).
     if (skill.aiMinDist && nearestDist < skill.aiMinDist) return false; // no con el enemigo encima (ej: canalizar)
     if (skill.aiMaxDist && nearestDist > skill.aiMaxDist) return false; // solo con el enemigo encima (ej: anclarse)
+    if (skill.aiHeroOnly && !(nearest && nearest.isHero)) return false; // solo contra competidores (ej: Amago)
     if (skill.tags.includes('ESCAPE')) return nearestDist <= 2.5; // para alejarse (Travelling de Rec): cuando lo alcanzan
     if (skill.tags.includes('MOVILIDAD') && !isRanged(hero)) return nearestDist > hero.attackRange + 0.5 && nearestDist <= 8;
     // En un duelo (o contra el jefe de ronda) hay un enemigo principal: definitiva y área apenas lo tiene cerca
@@ -242,7 +243,7 @@ const AI_HERO_ITEMS = {
     VOIDSAGE: { late: ['STASIS_DOME', 'EMERGENCY_CELL'] },
     VAMPIRE: { late: ['CLAMP'] },
     DANCER: { late: ['CLAMP'] },
-    ASSASSIN: { late: ['SHOCK_MACE'] },
+    VECTOR: { early: ['STARTER_CELL'], late: ['SHOCK_MACE'] },
     NECROMANCER: { late: ['NET_GUN'] },
     ZEUS: { late: ['INHIBITOR'] }
 };

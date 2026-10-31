@@ -12,10 +12,11 @@ const BUILD_GUIDES = {
         why: 'Sus drones pegan en cada ataque: velocidad de ataque y daño (el aéreo es su golpe básico); maná para Acople y Cámara Fija.',
         early: ['QUICK_GLOVES', 'BLADE'], core: ['JET_PACK', 'BOSS_PLATE', 'SWIFT_BLADE', 'GLOVES', 'MANA_CRYSTAL'], late: ['NET_GUN', 'EVO_CORE', 'HAMMER', 'SKADI']
     },
-    ASSASSIN: {
-        why: 'Críticos enormes cuerpo a cuerpo: más crítico y velocidad, y robo de vida para sostenerse.',
-        early: ['FANG', 'BLADE'], core: ['SWIFT_BLADE', 'CRIMSON', 'TRUESTRIKE'], late: ['SHOCK_MACE', 'HAMMER', 'BOOTS']
+    VECTOR: {
+        why: 'Gana leyendo al rival: daño para que el contraataque duela, robo de vida para sostenerse y control para castigar al que queda aturdido.',
+        early: ['BLADE', 'VAMP_MASK'], core: ['CRIMSON', 'SWIFT_BLADE', 'GLOVES'], late: ['SHOCK_MACE', 'CLAMP', 'SKADI']
     },
+
     VAMPIRE: {
         why: 'Se cura pegando: robo de vida y fuerza, y vida extra para que Forma Inmortal rinda más.',
         early: ['VAMP_MASK', 'VITALITY'], core: ['CRIMSON', 'BELT', 'HEART'], late: ['CLAMP', 'THORNS', 'AEGIS']

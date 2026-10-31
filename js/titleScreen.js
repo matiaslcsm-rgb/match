@@ -102,7 +102,7 @@ function tsFrame(now) {
     tsDrawWord(g, 'MATCH', sc.x + sc.w / 2, sc.y + sc.h / 2, Math.max(1, Math.floor(sc.h / 9)), '#ff9a2e');
     if (Math.floor(tsT * 1.6) % 2) { g.fillStyle = '#ff2a2a'; g.fillRect(sc.x + 2, sc.y + 2, 2, 2); }
     // Los competidores, adelante, mirando al estadio
-    const heroes = ['CRANE', 'ZEUS', 'REC', 'FROSTWITCH', 'ASSASSIN'].map(k => { const shot = portraitImg(`hero:${k}:full`, { isHero: true, key: k }, true); return shot ? { img: shot, scale: 0.55 } : spriteFor({ isHero: true, key: k }); }).filter(Boolean);
+    const heroes = ['CRANE', 'ZEUS', 'REC', 'FROSTWITCH', 'VECTOR'].map(k => { const shot = portraitImg(`hero:${k}:full`, { isHero: true, key: k }, true); return shot ? { img: shot, scale: 0.55 } : spriteFor({ isHero: true, key: k }); }).filter(Boolean);
     const gy = S.base + Math.round((h - S.base) * 0.55), step = Math.round(w * 0.07);
     heroes.forEach((sp, i) => {
         const x = Math.round(w / 2 + (i - (heroes.length - 1) / 2) * step), bob = Math.round(Math.sin(tsT * 3 + i) * 0.6), im = sp.img, k = sp.scale || 1;
@@ -119,7 +119,7 @@ function tsDrawWord(g, word, cx, cy, s, color) {
 }
 // El dibujito de la tarjeta
 function tsCardArt() {
-    const urls = ['CRANE', 'ASSASSIN', 'ZEUS', 'FROSTWITCH'].map(k => heroSpriteUrl({ key: k })).filter(Boolean);
+    const urls = ['CRANE', 'VECTOR', 'ZEUS', 'FROSTWITCH'].map(k => heroSpriteUrl({ key: k })).filter(Boolean);
     document.getElementById('ts-art-normal').innerHTML = urls.map(u => `<img src="${u}" style="width:74px;height:74px">`).join('');
 }
 tsCardArt();
