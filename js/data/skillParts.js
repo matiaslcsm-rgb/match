@@ -189,7 +189,7 @@ function partMult(skill, caster, target) {
     let m = skill.windup ? 1 + WINDUP_BONUS : 1;
     const d = Math.hypot(target.x - caster.x, target.y - caster.y);
     twistsOf(skill.parts).forEach(t => {
-        if (t.type === 'crusher') m *= 1 + consumeDents(target) * t.perDent;
+        if (t.type === 'crusher') { const n = consumeDents(target); m *= 1 + n * t.perDent; if (n) { fxText(target, `¡Aplastado ×${n}!`, '#c9c9c9', 12); fxCombo(target, 'crush', n); } }
         if (t.type === 'execute' && target.hp < target.maxHp * t.below) m *= 1 + t.bonus;
         if (t.type === 'close' && d <= 2) m *= 1 + t.bonus;
         if (t.type === 'far' && d >= 4) m *= 1 + t.bonus;
@@ -332,6 +332,17 @@ const PART_CAST = {
         return true;
     }
 };
+
+// For the draft card: the statuses the skill puts and the ones it cashes in ({ puts: [key], uses: [key], short: bool })
+function partStatusInfo(skill) {
+    if (!skill.parts) return null;
+    const types = skill.parts.hits.map(h => h.type), puts = [], uses = [];
+    [['overcharge', 'overcharge'], ['dent', 'dent'], ['overheat', 'overheat'], ['mark', 'mark']].forEach(([t, k]) => { if (types.includes(t)) puts.push(k); });
+    if (types.includes('push') && !puts.includes('dent')) puts.push('dent'); // into a column
+    if (types.includes('discharge')) uses.push('overcharge');
+    if (twistsOf(skill.parts).some(t => t.type === 'crusher')) uses.push('dent');
+    return { puts, uses, spread: types.includes('spread'), short: puts.includes('overcharge') && puts.includes('overheat') };
+}
 
 function buildShowSkill(def) {
     const passive = PASSIVE_SHAPES.includes(def.shape.type);

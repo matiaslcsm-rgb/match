@@ -420,6 +420,7 @@ kbd { background: #2f342c; border: 1px solid #555; border-bottom-width: 3px; pad
 .draft-card-head { display: flex; align-items: center; gap: 8px; }
 .draft-card-head h4 { font-size: 1rem; }
 .draft-card p { font-size: 0.8rem; }
+.draft-card p.status-line { font-size: 0.74rem; margin: 2px 0 4px; color: #b9b4a6; }
 .draft-type { font-size: 0.72rem !important; font-weight: bold; color: #a3b5a0 !important; }
 .draft-type.passive { color: #b7c97a !important; }
 .draft-type.ult { color: #ff9a2e !important; }

@@ -49,6 +49,12 @@ medida con el banco).
   +40% (antes +25%) y es más barato, las 11 más flojas más baratas, y todas las del Show un 4% más (`SHOW_PRICE` 0,88:
   seguían 0,4 puestos detrás de las naturales). Los ajustes de la tanda 1 y 2 se confirmaron: Placa Blindada pasó de
   -0,50 a -0,18 y Escape de Nafta de -0,49 a -0,36. **Pendiente:** confirmar este ajuste con el próximo banco de 528.
+- [x] **Estados visibles** (2026-11-02, recomendado y aprobado: "la profundidad no le llegaba al que juega"):
+  `js/statusFx.js`. Debajo de cada barra de vida, un ícono por estado (rayo con sus cargas, que titila cuando falta
+  una para explotar; abolladura con su número; llama del recalentado) y una mira rosa que gira sobre la cabeza del
+  Marcado. Cuando un estado se cobra hay golpe: rayo del cielo y sacudida en la descarga, rayo con fuego y una pausa
+  más larga en el cortocircuito, chispas de metal que crecen con las abolladuras aplastadas, impacto en la marca. En el
+  draft, cada habilidad del Show dice qué estado pone y cuál usa, en sus colores.
 
 ---
 

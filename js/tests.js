@@ -3149,6 +3149,20 @@ test('Piezas: el contagio pasa los estados a los de al lado y el robo de vida cu
     check(player.hp > 50, 'Enchufe Robado cura con el daño');
 });
 
+test('Estados visibles: los indicadores, el dibujo y la línea del draft', () => {
+    const [a, b] = partsDuel();
+    checkEq(unitStatuses(b).length, 0, 'sin estados, nada');
+    applyOvercharge(a, b, 2, 10); applyDent(b, 3); applyMark(b);
+    checkEq(unitStatuses(b).map(s => s.key + s.n).join(','), 'overcharge2,dent3,mark0', 'en orden y con sus cargas');
+    const g = document.createElement('canvas').getContext('2d');
+    drawStatusBadges(g, b, 50, 50, 40); // no rompe al dibujar
+    fxCombo(b, 'short'); fxCombo(b, 'crush', 3);
+    const html = statusLineHtml(SHOW_SKILLS.SHOW_SCREWDRIVER);
+    check(html.includes('Usa') && html.includes('Sobrecarga') && html.includes('Abolladura'), 'Desarmador usa Sobrecarga y Abolladura');
+    check(statusLineHtml(SHOW_SKILLS.SHOW_GRAND_FINALE).includes('Cortocircuito'), 'Gran Final avisa que hace cortocircuito sola');
+    checkEq(statusLineHtml(Object.values(HERO_SKILLS.ZEUS)[0]), '', 'las de los competidores no muestran la línea');
+});
+
 function testSandbox() {
     autoCast = false; // las pruebas controlan a mano cuándo se lanza cada habilidad (la de habilidades automáticas lo prende)
     keyboardMove = true; quickCast = false; // las pruebas de movimiento usan las flechas; las de controles estilo Dota lo apagan

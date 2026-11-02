@@ -38,8 +38,8 @@ function dischargeOvercharge(source, target, mult = 1) {
     const e = target.effects && getEffect(target, STATUS.overcharge.id);
     if (!e) return 0;
     removeEffect(target, e.id);
-    fxRing(target, '#ffe066', 1.4, 0.4);
     fxText(target, '¡Descarga!', '#ffe066', 12);
+    fxCombo(target, 'discharge');
     dealDamage(source || e.data.source, target, e.data.power * mult, 'magical');
     return e.data.stacks;
 }
@@ -81,6 +81,7 @@ function shortCircuit(source, target) {
     if (!target.isAlive() || !getEffect(target, STATUS.overheat.id) || !getEffect(target, STATUS.overcharge.id)) return false;
     removeEffect(target, STATUS.overheat.id);
     fxText(target, '¡Cortocircuito!', '#ff9f1c', 13, 1.1);
+    fxCombo(target, 'short');
     addEffect(target, { id: 'STUN', name: 'Aturdido', duration: STATUS.shortCircuit.stun, flags: ['stun'] });
     dischargeOvercharge(source, target, 1);
     return true;
@@ -114,5 +115,6 @@ function consumeMark(target) {
     if (!target.effects || !getEffect(target, STATUS.mark.id)) return false;
     removeEffect(target, STATUS.mark.id);
     fxText(target, '¡Marcado!', '#ff5d8f', 12);
+    fxCombo(target, 'mark');
     return true;
 }

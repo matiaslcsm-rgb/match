@@ -226,7 +226,19 @@ function skillCardHtml(s, level = 0) {
         `<h4>${abilityLabel(s.name, s.isUltimate ? 'ult' : '')}${level ? ` <span class="item-meta">nivel ${level}</span>` : ''}</h4>` +
         `<p class="meta"><span class="${natural ? 'natural' : ''}" style="${natural ? '' : `color:${color}`}">${natural ? '★ Natural' : skillOriginLabel(s)}</span></p></div></div>` +
         `<p class="draft-type ${s.isUltimate ? 'ult' : s.kind}">${type}${s.kind === 'passive' ? '' : ` &middot; ${skillCostLine(s, level)}`}</p>` +
-        `<p>${describeSkill(s, level)}</p><div class="tags">${tagChips(s.tags)}</div>`;
+        `<p>${describeSkill(s, level)}</p>${statusLineHtml(s)}<div class="tags">${tagChips(s.tags)}</div>`;
+}
+// Show skills: "Pone Sobrecarga · Usa Abolladura" in the status colors, so a combo can be planned while drafting
+function statusLineHtml(s) {
+    const info = typeof partStatusInfo === 'function' && partStatusInfo(s);
+    if (!info || (!info.puts.length && !info.uses.length && !info.spread)) return '';
+    const chip = k => `<b style="color:${STATUS_LOOK[k].color}">${STATUS_LOOK[k].label}</b>`;
+    const parts = [];
+    if (info.puts.length) parts.push('Pone ' + info.puts.map(chip).join(' + '));
+    if (info.uses.length) parts.push('Usa ' + info.uses.map(chip).join(' + '));
+    if (info.spread) parts.push('Contagia los estados');
+    if (info.short) parts.push('<b style="color:#ff9f1c">¡Cortocircuito solo!</b>');
+    return `<p class="status-line">${parts.join(' · ')}</p>`;
 }
 function draftCard(s, onPick, level = 0) {
     const origin = HERO_TEMPLATES[s.heroKey];
@@ -1158,6 +1170,7 @@ function render3d(arena, dt) {
         ctx.fillStyle = u.isHero ? (u === player ? '#2dc653' : '#e8a33a') : u.isMinion ? (u.owner === player ? '#2dc653' : '#e8a33a') : pct > 0.5 ? '#c8402e' : '#e0703a'; ctx.fillRect(p.x - w / 2, top, w * pct, 3);
         if (u.isHero && u.maxMana) { ctx.fillStyle = '#4895ef'; ctx.fillRect(p.x - w / 2, top + 4, w * Math.max(0, u.mana / u.maxMana), 2); }
         if (u.isHero) { ctx.font = 'bold 10px "Chakra Petch", sans-serif'; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,0.85)'; ctx.strokeText(u.displayName, p.x, top - 8); ctx.fillStyle = u === player ? '#00f5d4' : '#ffd27a'; ctx.fillText(u.displayName, p.x, top - 8); }
+        drawStatusBadges(ctx, u, p.x, top + (u.isHero ? 8 : 6), top); // show statuses (statusFx.js)
     };
     arena.creeps.forEach(c => { if (c.isAlive()) bar(c); });
     (arena.minions || []).forEach(m => { if (m.isAlive()) bar(m); });
