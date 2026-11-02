@@ -92,6 +92,12 @@ Ordenadas de más a menos valor según lo que dicen los jugadores del original. 
 2. **Medir cuánto oro da pelear un duelo contra cuánto da apostar.** Es el error que *Clash* le corrigió a *Chaos*.
    Con el banco de partidas: oro del ganador del duelo contra la ganancia promedio de las apuestas. Si apostar rinde más,
    subir lo del duelista. *Va al roadmap con el balance del final (C2).*
+   **Medido el 2026-11-02** (198 partidas del banco, 3.753 duelos): en MATCH pelear rinde más que apostar, al revés que
+   en *Chaos*. Ganar un duelo no da oro directo: da 3 puntos y el respaldo (25% de lo que le apostaron), que promedió
+   **+49g por duelo ganado**. Apostar pierde en promedio: las apuestas de la IA dejaron **-15g por apuesta** (acierta 52%).
+   Una persona que apuesta siempre al favorito (gana el 68% de los duelos) saca **+10g con 50g, +3g con 100g y -34g con
+   la mitad de su oro** (promedio 524g a la hora de apostar): con el pozo compartido, al favorito le apuesta casi todo el
+   mundo y queda poco para repartir. **No hace falta subir lo del duelista.**
 3. **Baneos antes de empezar** (decisión): (a) **banear 1 habilidad, que no salga en el draft de nadie (recomendada:
    da control sin hacer la partida más larga)**; (b) 1 habilidad y 1 héroe, como el original; (c) no tener baneos y, en
    cambio, sacar del draft las habilidades que el balance marque como rotas.

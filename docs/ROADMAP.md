@@ -173,6 +173,8 @@ Que se sienta un programa de TV (concepto en `docs/CONCEPTO-FUTURISTA.md`).
   - [x] Bruja y Rec con build propia (2026-10-30, sin tocar stats ni habilidades): a 528 partidas, Bruja puesto 5,6 → 5,1 y Rec 5,0 → 4,6. Nadie de arriba sube.
   - [x] Sabio con build propia (2026-10-30, sin tocar stats ni habilidades): Báculo, Corazón, Cetro y Botas. A 528 partidas con Vector, 5,7 → 9,4% de victorias y puesto 5,1 → 4,0.
   - [ ] Bruja (5%), Rec (1%), Grúa (1%) y Vector (2%) siguen muy abajo en victorias.
+  - [x] Oro de pelear contra oro de apostar (2026-11-02, idea 2 de `docs/REFERENCIA-CHC.md`): ganar un duelo deja +49g de
+    respaldo y apostar, en el mejor caso, +10g por ronda. Pelear rinde más; no se cambió nada. Detalle en ese documento.
 - [x] Tutorial al día con todo lo nuevo (2026-10-30).
 - [ ] Rendimiento: el 3D fluido en una compu común. Medido el 2026-10-28 (con tribunas, columnas y drones): 7,7 ms por
   cuadro en una oleada de 10 creeps y 6,6 ms en un duelo, lógica y dibujo, con una GTX 1650 (~130 cuadros por segundo).
