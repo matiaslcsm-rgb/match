@@ -18,7 +18,11 @@ para que el draft sea armar un combo y el pool crezca rápido (de ~64 a ~120 hab
 medida con el banco).
 - [x] **Piezas en el motor** (2026-11-02): `js/statuses.js` (Sobrecarga, Abolladura, Recalentado, Marcado y el
   cortocircuito) y `js/data/skillParts.js` (el armador: formas, golpes, giros y presupuesto de poder). 7 pruebas.
-- [ ] **Tanda 1:** 20 habilidades del Show, aprobadas por el usuario en una tabla antes de programarlas.
+- [x] **Tanda 1** (2026-11-02, aprobada por el usuario): 20 habilidades del Show en `js/data/showSkills.js`, 5 por
+  estado más 2 de control. Banco de 132, sin ellas → con ellas: ronda final 25 → 25, duelos 14,5 → 15,7 s; ningún
+  competidor se dispara (el mejor pasa de 29% a 28% de victorias). Grúa, Rec y Vector ya estaban abajo (0-2%) y siguen igual.
+- [ ] **Medir cada habilidad del Show:** la IA prefiere las naturales en el draft, así que las del Show casi solo
+  aparecen como relleno; falta un conteo de victorias por habilidad para ajustar números.
 - [ ] **Tanda 2 y 3**, después de medir la primera.
 
 ---

@@ -3,7 +3,7 @@
 // read them) and cast()/hooks, and prices cooldown and mana from a power budget, so a new skill is born roughly balanced.
 // They have no natural competitor (heroKey SHOW_KEY, progression.js). The skills themselves live in data/showSkills.js.
 //
-// def: { id, name, shape: { type, ... }, hits: [{ type, ... }], twist: { type, ... } (optional) }
+// def: { id, name, shape: { type, ... }, hits: [{ type, ... }], twist: { type, ... } or a list of them (optional) }
 //   shapes  strike { range }                 the nearest enemy in range (1.5 = melee)
 //           bolt { range, radius, pierce }   projectile toward the aim point; stops on the first one unless pierce
 //           blast { range, radius }          area at the aim point (or on the nearest enemy)
@@ -40,9 +40,10 @@ const TWIST_POINTS = { windup: 0.8, crusher: 1.15, execute: 1.15, close: 1.1, fa
 function partPoints(def) {
     let pts = def.hits.reduce((s, h) => s + PART_POINTS[h.type](h) * (def.shape.type === 'zone' && h.type === 'damage' ? def.shape.duration * 0.8 : 1), 0);
     pts *= SHAPE_POINTS[def.shape.type] * (def.shape.pierce ? 1.2 : 1);
-    if (def.twist) pts *= TWIST_POINTS[def.twist.type];
+    twistsOf(def).forEach(t => { pts *= TWIST_POINTS[t.type]; });
     return pts;
 }
+function twistsOf(def) { return [].concat(def.twist || []); }
 const round5 = x => Math.round(x / 5) * 5;
 function partCosts(def) {
     const pts = partPoints(def);
@@ -75,12 +76,13 @@ function partValues(def) {
         if (h.type === 'shield') { v.shield = perLevel(h.amount).map(Math.round); v.shieldDur = h.duration; }
         if (h.type === 'heal') v.heal = perLevel(h.amount).map(Math.round);
     });
-    const t = def.twist;
-    if (t && t.type === 'windup') v.windupTime = t.time;
-    if (t && t.type === 'crusher') v.perDent = t.perDent;
-    if (t && t.type === 'execute') { v.execBelow = t.below; v.execBonus = t.bonus; }
-    if (t && t.type === 'close') v.closeBonus = t.bonus;
-    if (t && t.type === 'far') v.farBonus = t.bonus;
+    twistsOf(def).forEach(t => {
+        if (t.type === 'windup') v.windupTime = t.time;
+        if (t.type === 'crusher') v.perDent = t.perDent;
+        if (t.type === 'execute') { v.execBelow = t.below; v.execBonus = t.bonus; }
+        if (t.type === 'close') v.closeBonus = t.bonus;
+        if (t.type === 'far') v.farBonus = t.bonus;
+    });
     if (s.type !== 'everyHit') Object.assign(v, partCosts(def));
     return v;
 }
@@ -127,7 +129,7 @@ function partDescription(def) {
     const self = def.hits.filter(h => SELF_HITS.includes(h.type)).map(h => HIT_TEXT[h.type]);
     let text = `${lead} ${joinList(onTarget)}.`;
     if (self.length) text += ` Además, ${joinList(self)}.`;
-    if (def.twist) text += ' ' + TWIST_TEXT[def.twist.type];
+    twistsOf(def).forEach(t => { text += ' ' + TWIST_TEXT[t.type]; });
     return text;
 }
 
@@ -151,12 +153,13 @@ function partStat(caster, dmgType) { return dmgType === 'physical' ? effAttack(c
 // Extra damage on this target from the twist (and the windup)
 function partMult(skill, caster, target) {
     let m = skill.windup ? 1 + WINDUP_BONUS : 1;
-    const t = skill.parts.twist, d = Math.hypot(target.x - caster.x, target.y - caster.y);
-    if (!t) return m;
-    if (t.type === 'crusher') m *= 1 + consumeDents(target) * t.perDent;
-    if (t.type === 'execute' && target.hp < target.maxHp * t.below) m *= 1 + t.bonus;
-    if (t.type === 'close' && d <= 2) m *= 1 + t.bonus;
-    if (t.type === 'far' && d >= 4) m *= 1 + t.bonus;
+    const d = Math.hypot(target.x - caster.x, target.y - caster.y);
+    twistsOf(skill.parts).forEach(t => {
+        if (t.type === 'crusher') m *= 1 + consumeDents(target) * t.perDent;
+        if (t.type === 'execute' && target.hp < target.maxHp * t.below) m *= 1 + t.bonus;
+        if (t.type === 'close' && d <= 2) m *= 1 + t.bonus;
+        if (t.type === 'far' && d >= 4) m *= 1 + t.bonus;
+    });
     return m;
 }
 
@@ -273,7 +276,8 @@ function buildShowSkill(def) {
         id: def.id, name: def.name, kind: passive ? 'passive' : 'active', parts: def,
         tags: partTags(def), values: partValues(def), description: partDescription(def)
     };
-    if (def.twist && def.twist.type === 'windup') skill.windup = def.twist.time;
+    const windup = twistsOf(def).find(t => t.type === 'windup');
+    if (windup) skill.windup = windup.time;
     if (['bolt', 'blast', 'zone'].includes(def.shape.type)) skill.pointTarget = true;
     if (passive) {
         skill.hooks = {
