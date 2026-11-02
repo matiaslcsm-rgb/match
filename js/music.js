@@ -3,7 +3,8 @@
 // combate; los jefes de ronda con la de jefe. Cambia con fundido; lo que queda en silencio un rato se pausa.
 // User request 2026-11-02: show music instead of the medieval tracks left over from the Tower, with its own duel track.
 const MUSIC_TRACKS = { town: 'music/show-menu.ogg', combat: 'music/show-waves.mp3', duel: 'music/show-duel.ogg', boss: 'music/show-boss.mp3' };
-const MUSIC_GAIN = { town: 0.5, combat: 0.5, duel: 0.5, boss: 0.55 }; // las grabaciones vienen a niveles distintos
+// The show tracks are mastered much louder than the old ones: the user had to turn the volume down 70% (2026-11-02)
+const MUSIC_GAIN = { town: 0.15, combat: 0.15, duel: 0.15, boss: 0.165 }; // las grabaciones vienen a niveles distintos
 const MUSIC = { volume: 0.6, fade: 1.6, idlePause: 6 };
 let musicOn = true;
 try { musicOn = localStorage.getItem('chc-music') !== 'off'; } catch (e) { /* sin almacenamiento: prendida */ }
