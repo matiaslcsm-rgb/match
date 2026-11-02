@@ -13,8 +13,18 @@ const WAVE_HARD_LIMIT = 120;
 // Moverse reinicia el ataque (como la animación de ataque de Dota): sin esto los héroes a distancia se alejaban y disparaban
 // a la vez sin costo, y los cuerpo a cuerpo casi no ganaban duelos.
 // Qué pasa con el ataque al moverse: 'reset' (arranca de cero), 'pause' (no avanza mientras caminás, pero no se pierde)
-// 'reset-ranged' (solo los de distancia reinician) o 'free' (se puede atacar caminando). Es let para poder medir las variantes.
-let MOVE_ATTACK_RULE = 'free'; // a pedido: se ataca caminando; el equilibrio se hace con stats (ver DISEÑO.md)
+// 'reset-ranged' (solo los de distancia reinician), 'free' (se puede atacar caminando) o 'cancel' (caminar corta la
+// preparación del golpe, como en Dota). Es let para poder medir las variantes.
+// User decision 2026-11-02: walking cancels the attack, melee and ranged alike. Like Dota, only the wind-up: the last
+// part of the attack timer (from ATTACK_WINDUP_FRAC on, when the robot pulls back) needs standing still. Between hits
+// you can walk freely; walking during the wind-up sends the timer back to its start and cuts the hit animation.
+// (A first version cancelled the whole timer: ranged competitors could not step away from creeps and fell by round 5.)
+let MOVE_ATTACK_RULE = 'cancel';
+const ATTACK_WINDUP_FRAC = 0.6;
+const CANCELABLE_ATTACK_ANIMS = ['melee', 'ranged', 'swing', 'finisher'];
+function walkCancelsAttack() { return MOVE_ATTACK_RULE === 'cancel'; }
+// ¿Está en la preparación del golpe? (lo que caminar cortaría)
+function inAttackWindup(hero) { return hero.attackTimer * effAtkSpeed(hero) >= ATTACK_WINDUP_FRAC; }
 // Velocidad de movimiento de todos (héroes y creeps): 0,65 = 35% más lentos que al principio, a pedido (se veía muy frenético).
 // Solo el movimiento: ataques y proyectiles quedan igual.
 const MOVE_SPEED_MULT = 0.65; // bajado otra vez a pedido (antes 0,8)
@@ -529,8 +539,13 @@ function updateHero(hero, arena, dt) {
     // Ataque automático: al enemigo en rango de mayor prioridad (ej: Sanadores) o, si no, al más cercano
     // (desarmado: como el Manto Fantasma del Nigromante, no ataca pero sigue moviéndose, a diferencia de un aturdimiento)
     const target = (stunned || busy || hasFlag(hero, 'disarm')) ? null : pickAttackTarget(hero, effRange(hero));
-    const walking = MOVE_ATTACK_RULE === 'pause' && gameClock < (hero.movingUntil || 0);
-    if (target && walking) {
+    const cancels = walkCancelsAttack();
+    const walking = (MOVE_ATTACK_RULE === 'pause' || cancels) && gameClock < (hero.movingUntil || 0);
+    if (walking && cancels) {
+        // cancel: the timer keeps loading up to the wind-up, but the wind-up itself needs standing still
+        if (hero.fxAttack && CANCELABLE_ATTACK_ANIMS.includes(hero.fxAttack.kind)) hero.fxAttack = null;
+        hero.attackTimer = target ? Math.min(hero.attackTimer + dt, ATTACK_WINDUP_FRAC / effAtkSpeed(hero)) : 0;
+    } else if (target && walking) {
         // pausa: mientras camina el ataque no avanza, pero conserva lo que tenía cargado
     } else if (target) {
         hero.attackTimer += dt;

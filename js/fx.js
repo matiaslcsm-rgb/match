@@ -100,7 +100,7 @@ function attackPose(u) {
     const a = u.fxAttack;
     const atkSpeed = u.isHero ? effAtkSpeed(u) : (u.atkSpeed ? effAtkSpeed(u) : 0);
     const frac = atkSpeed ? (u.attackTimer || 0) * atkSpeed : 0;
-    const wind = frac > 0.6 && frac < 1 && inCombat() ? (frac - 0.6) / 0.4 : 0;
+    const wind = frac > ATTACK_WINDUP_FRAC && frac < 1 && inCombat() ? (frac - ATTACK_WINDUP_FRAC) / (1 - ATTACK_WINDUP_FRAC) : 0;
     const dir = a || { dx: u.facing || 1, dy: 0 };
     if (u.windup && u.windup.until > u.windup.at) { // golpe anunciado: se echa atrás, se comprime y al final tiembla
         const w = u.windup, k = Math.max(0, Math.min(1, (gameClock - w.at) / (w.until - w.at)));

@@ -1379,13 +1379,16 @@ test('Prioridad: el ataque automático va primero por el Sanador si está a tiro
 });
 
 // ============================================================ IA
-test('IA a distancia: avanza si no hay nadie a tiro y retrocede si se le acercan', () => {
+test('IA a distancia: avanza si no hay nadie a tiro; si se le acercan retrocede entre disparos y se planta para disparar', () => {
     newGame('REC');
     const c = dummy({ x: 15, y: 5 });
     checkEq(aiMoveDirection(player).dx, 1, 'avanza hacia el enemigo lejano');
     c.x = 6;
-    const dir = aiMoveDirection(player);
-    checkEq(dir.dx, -1, 'retrocede alejándose del enemigo pegado');
+    player.attackTimer = 0;
+    checkEq(aiMoveDirection(player).dx, -1, 'entre disparos, retrocede alejándose del enemigo pegado');
+    player.attackTimer = 0.95 / effAtkSpeed(player);
+    checkEq(JSON.stringify(aiMoveDirection(player)), JSON.stringify({ dx: 0, dy: 0 }), 'preparando el disparo, se queda quieto');
+    player.attackTimer = 0;
     c.x = 9; // a 4 casillas, dentro del rango (5) y fuera de la zona de peligro (3)
     checkEq(JSON.stringify(aiMoveDirection(player)), JSON.stringify({ dx: 0, dy: 0 }), 'se queda disparando');
 });
@@ -2715,21 +2718,37 @@ test('Objetivo marcado con clic: el ataque lo prioriza aunque haya otro más cer
     checkEq(validFocus(player), null, 'si muere se desmarca');
 });
 
-test('Ataque al moverse: libre por defecto; con la regla "reset", moverse reinicia el ataque', () => {
+test('Ataque al moverse: por defecto caminar corta la preparación del golpe (a distancia y cuerpo a cuerpo)', () => {
     const saved = MOVE_ATTACK_RULE;
     try {
-        for (const rule of ['free', 'reset']) {
+        for (const [rule, key] of [['free', 'REC'], ['reset', 'REC'], ['cancel', 'REC'], ['cancel', 'CRANE']]) {
             MOVE_ATTACK_RULE = rule;
-            newGame('REC');
-            dummy({ x: player.x + 3 });
-            player.attackTimer = 0.5; player.moveTimer = 99;
+            newGame(key);
+            dummy({ x: key === 'CRANE' ? player.x - 2 : player.x + 3 }); // melee: walks into reach
+            const interval = 1 / effAtkSpeed(player);
+            player.attackTimer = interval * 0.9; player.moveTimer = 99; // in the middle of the wind-up
+            player.fxAttack = { kind: 'melee', dx: 1, dy: 0, at: fxClock };
             keys = { arrowleft: true };
             updateWave(0.001);
             keys = {};
-            check(rule === 'reset' ? player.attackTimer < 0.01 : player.attackTimer >= 0.5, rule + ': ' + player.attackTimer);
+            if (rule === 'free') check(player.attackTimer >= interval * 0.9, 'free: sigue cargando');
+            else if (rule === 'reset') check(player.attackTimer < 0.01, 'reset: arranca de cero');
+            else {
+                checkNear(player.attackTimer, interval * ATTACK_WINDUP_FRAC, `${key}: vuelve al comienzo de la preparación`, 0.01);
+                check(!player.fxAttack, `${key}: se corta la animación del golpe`);
+            }
         }
+        // between hits, walking does not cost anything
+        MOVE_ATTACK_RULE = 'cancel';
+        newGame('REC');
+        dummy({ x: player.x + 3 });
+        player.attackTimer = 0.1; player.moveTimer = 99;
+        keys = { arrowleft: true };
+        updateWave(0.05);
+        keys = {};
+        check(player.attackTimer > 0.1, 'entre golpes, caminando sigue cargando');
     } finally { MOVE_ATTACK_RULE = saved; }
-    checkEq(saved, 'free', 'por defecto se ataca caminando');
+    checkEq(saved, 'cancel', 'por defecto caminar corta la preparación');
 });
 
 test('En duelo, la curación y el control entre héroes bajan (el robo de vida no)', () => {

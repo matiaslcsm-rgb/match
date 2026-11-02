@@ -7,6 +7,15 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 - **Carpeta local:** `D:\MattBox\Proyectos\match` (desde 2026-10-31, con Windows recién instalado)
 
 ## Rumbo actual (decidido por el usuario)
+- **Caminar corta el golpe (2026-11-02, decisión del usuario: "que la animación de caminar corte la de golpear, para los de
+  rango como los de melee"; elegido: que corte el ataque, no solo el dibujo):** `MOVE_ATTACK_RULE = 'cancel'` (game.js).
+  Como en Dota, solo la **preparación** del golpe (el último 40% de la carga, cuando el robot se echa atrás) pide estar
+  quieto: si caminás en ese momento, la carga vuelve al comienzo de la preparación y se corta la animación. Entre golpes
+  se camina gratis. La IA se planta cuando el golpe está por salir y, si no, se mueve como siempre. Primera versión
+  descartada: cortar toda la carga dejaba a los de distancia sin poder alejarse de los creeps (Alquimista afuera en la
+  ronda 5). Banco de 132, antes → después: ronda final 25 → 23; duelo mediano 14,2 → 20,7 s (17% por tiempo); M.O.R.T.I.S.
+  16 → 34%, Vampiro 11 → 27%, Arcanista 30 → 20%, **Danzante 20 → 1%** (su innato premia moverse y su IA da vueltas
+  alrededor del rival). Pendiente: el Danzante y si los duelos más largos molestan.
 - **Núcleo antes que gráficos (2026-11-02, decisión del usuario):** se deja la estética de robots por ahora. Sistema
   aprobado: **habilidades por piezas** (`js/data/skillParts.js`: una habilidad nueva es una línea de datos con forma,
   golpes y giro; el armador escribe valores por nivel, texto, etiquetas y lanzamiento, y saca enfriamiento y maná de un

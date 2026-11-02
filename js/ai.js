@@ -65,6 +65,9 @@ function aiMoveDirection(hero) {
     if (!enemies.length) return { dx: 0, dy: 0 };
     const threat = aiThreat(hero);
     if (threat) return dodgeStep(hero, threat); // primero, salir de la marca
+    // Walking cancels the wind-up (MOVE_ATTACK_RULE 'cancel', game.js): when the hit is ready to come out, stand still for
+    // it; between hits it moves as usual (kiting, circling)
+    if (walkCancelsAttack() && pickAttackTarget(hero, effRange(hero)) && inAttackWindup(hero)) return { dx: 0, dy: 0 };
     const nearest = nearestEnemy(hero);
     const range = effRange(hero);
     // Objetivo a perseguir: uno prioritario cercano (ej: Sanador) o, si no hay, el más cercano
