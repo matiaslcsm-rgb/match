@@ -948,3 +948,7 @@ body.log-open #combat-log { height: calc(100% - 26px); }
 .bd-chip.ult { box-shadow: inset 0 0 0 1px var(--in-yellow); }
 .bd-chip.item { border-left-color: var(--in-line); }
 .bd-chips > small { color: var(--in-dim); font-size: 0.72rem; }
+
+/* Duel damage ramp notice (showDuelRampCard, ui.js) */
+.dc-ramp { box-shadow: inset 0 0 0 3px #d9402c; }
+.dc-ramp-title { font-size: 1.8rem; text-transform: uppercase; letter-spacing: 2px; color: var(--in-orange); text-shadow: 3px 3px 0 var(--in-line); margin: 6px 0 4px; animation: dc-left 0.3s ease-out; }

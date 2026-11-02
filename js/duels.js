@@ -129,7 +129,9 @@ function penalizeDuelLoser(loser) {
 
 // Llamado desde updateArena para las arenas de duelo: vence el tiempo o alguien murió.
 function updateDuelArena(arena, dt) {
+    const before = arena.elapsed;
     arena.elapsed += dt;
+    if (before < DUEL_RAMP_START && arena.elapsed >= DUEL_RAMP_START && !arena.done) showDuelRampCard(arena); // ui.js
     const [a, b] = arena.heroes;
     if (!a.isAlive() || !b.isAlive()) return; // lo resuelve onHeroDeath
     const s = arena.stats, diff = a.hp / a.maxHp - b.hp / b.maxHp;

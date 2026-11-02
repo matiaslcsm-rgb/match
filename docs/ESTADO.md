@@ -24,6 +24,9 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
   Bruja, Vampiro, Grúa y Alquimista. Banco de 132, antes → después: por tiempo 16 → **2%**; duelo mediano 19 → 19,5 s;
   cambios de ventaja 1,1 → 1,2; la IA esquiva 39 → 43% de los golpes anunciados; ronda final 23 → 23. Victorias: Zeus
   25 → 35% (gana igual solo 22% de sus duelos), Arcanista 18 → 25%, M.O.R.T.I.S. 29 → 21%, Danzante 13 → 9%. 222/222 pruebas.
+  Probado a mano (Grúa contra Vampiro, el cruce que más se estiraba): cae la Grúa a los 46,6 s. Como el cambio de ritmo no
+  se leía, a los 30 s pasa un cartel EN VIVO "¡El daño sube!" con el locutor diciendo "Sudden death" (`showDuelRampCard`,
+  ui.js; pedido del usuario). Sale solo en el duelo que estás mirando o peleando, una vez.
 - **Apuestas que se leen (2026-11-02, idea 1 de `docs/REFERENCIA-CHC.md`, elegida por el usuario):** en la ventana de
   apuestas, cada duelista muestra sus habilidades con su nivel (con el color del atributo de origen; las definitivas,
   marcadas) y sus ítems con ícono; al pasar el mouse, qué hace cada uno (`betKitHtml`, ui.js). Solo interfaz: no cambia

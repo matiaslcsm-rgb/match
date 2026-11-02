@@ -848,6 +848,15 @@ function playDuelCard(html) {
 }
 function showDuelCard(a, b) { playDuelCard(duelCardHtml(a, b)); }
 
+// Halfway through a duel the damage starts to rise (duelDamageReduction, duels.js): the show says so, so the faster
+// hits read as a rule and not as a surprise. Only for the duel on screen.
+function showDuelRampCard(arena) {
+    if (!arena.heroes.includes(player) && !(typeof viewArena === 'function' && arena === viewArena())) return;
+    playDuelCard(`<div class="dc-box dc-ramp"><div class="dc-head"><span class="lb-live"><i></i>EN VIVO</span><span>Duelo · ${DUEL_RAMP_START} s</span></div>` +
+        `<div class="dc-ramp-title">¡El daño sube!</div><p class="dc-line">Desde ahora cada golpe pega más fuerte, hasta el final del duelo.</p></div>`);
+    sfx('suddenDeath');
+}
+
 // Cartel del resultado: lo mismo, cuando termina el duelo. La frase sale de cómo terminó, la primera regla que se cumpla.
 function duelVerdict(winner, loser, changes, byTime) {
     const pct = h => Math.max(1, Math.round(100 * h.hp / h.maxHp));

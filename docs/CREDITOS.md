@@ -28,7 +28,7 @@ renombraron.
 | `sounds/duel-bell.wav` | Arranca una ronda con duelo | Match bell, de [Boxing Ring](https://opengameart.org/content/boxing-ring-0) | Umplix | CC0 |
 | `sounds/duel-win-fanfare.mp3` | Ganaste tu duelo | [Hyper Ultra Fanfare](https://opengameart.org/content/hyper-ultra-fanfare) | Zane Little Music | CC0 |
 | `sounds/bet-win-fanfare.mp3` | Alguien ganó una apuesta | [Victory 6](https://opengameart.org/content/victory-6) | Musheran | CC0 |
-| `sounds/announcer-fight.ogg`, `sounds/announcer-you-lose.ogg` | Locutor: arranca la oleada, perdiste tu duelo | [Voiceover Pack: Fighter](https://opengameart.org/content/voiceover-pack-fighter-40-taunts) | Kenney | CC0 |
+| `sounds/announcer-fight.ogg`, `sounds/announcer-you-lose.ogg`, `sounds/announcer-sudden-death.ogg` | Locutor: arranca la oleada, perdiste tu duelo, el daño del duelo sube | [Voiceover Pack: Fighter](https://opengameart.org/content/voiceover-pack-fighter-40-taunts) | Kenney | CC0 |
 
 ## Música (Infinite Tower)
 

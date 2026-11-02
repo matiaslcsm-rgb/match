@@ -95,6 +95,7 @@ const SFX = {
     crowd: () => { noise(1.3, 800, 0.16, 0, 'bandpass'); noise(1.0, 1900, 0.07, 0.08, 'bandpass'); noise(0.7, 500, 0.08, 0.2, 'bandpass'); }, // la tribuna grita (match3d.js)
     click: () => tone(900, 700, 0.04, 'square', 0.06),
     wave: () => [392, 523, 659].forEach((f, i) => tone(f, f, 0.18, 'sawtooth', 0.09, i * 0.1)),
+    suddenDeath: () => [330, 262, 196].forEach((f, i) => tone(f, f, 0.18, 'sawtooth', 0.12, i * 0.14)), // if the announcer file fails
     duel: () => { tone(260, 260, 0.2, 'sawtooth', 0.12); tone(390, 390, 0.3, 'sawtooth', 0.12, 0.15); },
     boss: () => { tone(90, 60, 0.9, 'sawtooth', 0.2); noise(0.8, 300, 0.2); },
     win: () => [659, 784, 1047].forEach((f, i) => tone(f, f, 0.2, 'triangle', 0.14, i * 0.1)),

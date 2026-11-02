@@ -19,11 +19,12 @@ const SOUND_FILES = {
     duel: 'sounds/duel-bell.wav',           // ring bell when a round with a duel starts
     win: 'sounds/duel-win-fanfare.mp3',     // you won your duel
     lose: 'sounds/announcer-you-lose.ogg',  // you lost your duel
-    betWin: 'sounds/bet-win-fanfare.mp3'    // someone won a bet
+    betWin: 'sounds/bet-win-fanfare.mp3',   // someone won a bet
+    suddenDeath: 'sounds/announcer-sudden-death.ogg' // "Sudden death!" when the duel damage starts to rise
 };
 
 // Volumen de cada archivo (1 = normal), por si alguno suena muy fuerte o muy bajo. Ej: { betWin: 0.6 }
 // The show files came out 70% too loud next to the synthesized sounds (user, 2026-11-02)
 const SOUND_VOLUME = {
-    wave: 0.3, duel: 0.3, win: 0.3, lose: 0.3, betWin: 0.3
+    wave: 0.3, duel: 0.3, win: 0.3, lose: 0.3, betWin: 0.3, suddenDeath: 0.3
 };

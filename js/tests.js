@@ -2825,6 +2825,16 @@ test('Duelo largo: pasada la mitad, el daño entre competidores sube hasta no te
     checkEq(hit(mid), Math.round(100 * (1 - DUEL_DAMAGE_REDUCTION / 2)), 'a tres cuartos, la mitad de la reducción');
     checkEq(hit(DUEL_TIME - 0.01), 100, 'al final, casi sin reducción');
     b.hp = 1; checkEq(healUnit(b, 100), Math.round(100 * (1 - DUEL_HEAL_REDUCTION)), 'la curación sigue reducida');
+    // the show announces it once, when the duel crosses the halfway mark
+    const card = document.getElementById('duel-card');
+    a.hp = a.maxHp; b.hp = b.maxHp; arena.elapsed = DUEL_RAMP_START - 0.1; card.innerHTML = '';
+    updateDuelArena(arena, 0.05);
+    checkEq(card.innerHTML, '', 'antes de la mitad, sin cartel');
+    updateDuelArena(arena, 0.1);
+    check(card.textContent.includes('¡El daño sube!'), 'al cruzar la mitad, el cartel');
+    card.innerHTML = '';
+    updateDuelArena(arena, 0.1);
+    checkEq(card.innerHTML, '', 'una sola vez');
 });
 
 // ============================================================ PARTIDAS COMPLETAS
