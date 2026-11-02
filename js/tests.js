@@ -2795,7 +2795,7 @@ function benchGame(seed, rounds = 60) {
     try {
         withRandom(seededRandom(seed), () => quietly(() => simulateGame(seed % keys.length, false, rounds)));
     } finally { eliminateHero = realEliminate; soundOn = realSound; matchSummaryOff = false; }
-    rankedHeroes().forEach((h, i) => { out[h.name] = { place: i + 1, out: h.benchOut || null }; });
+    rankedHeroes().forEach((h, i) => { out[h.name] = { place: i + 1, out: h.benchOut || null, skills: h.skills.map(s => s.id), duelWins: h.duelWins, duelLosses: h.duelLosses }; });
     return { seed, winner: rankedHeroes()[0].name, round: waveNumber, heroes: out, duels: duelLog.slice() };
 }
 // Junta las partidas en una tabla por héroe: partidas jugadas, ganadas, puesto promedio y ronda promedio de eliminación.
@@ -2810,6 +2810,24 @@ function benchTable(games) {
         place: +(s.place / s.games).toFixed(1), outRound: s.outs ? Math.round(s.outRound / s.outs) : null }))
         .sort((a, b) => b.winPct - a.winPct || a.place - b.place);
 }
+// Per skill, from the final kits: games, wins, and how much better or worse the holder placed than its competitor usually
+// does in this bench (placeDelta < 0 = better). Comparing against the competitor's own average keeps a strong competitor
+// from making its skills look strong.
+function benchSkillTable(games) {
+    const heroPlace = {};
+    games.forEach(g => Object.entries(g.heroes).forEach(([name, r]) => { const h = heroPlace[name] || (heroPlace[name] = { sum: 0, n: 0 }); h.sum += r.place; h.n++; }));
+    const t = {};
+    games.forEach(g => Object.entries(g.heroes).forEach(([name, r]) => (r.skills || []).forEach(id => {
+        const s = t[id] || (t[id] = { id, games: 0, wins: 0, delta: 0, dw: 0, dl: 0 });
+        s.games++; if (g.winner === name) s.wins++;
+        s.delta += r.place - heroPlace[name].sum / heroPlace[name].n;
+        s.dw += r.duelWins || 0; s.dl += r.duelLosses || 0;
+    })));
+    return Object.values(t).map(s => ({ id: s.id, name: SKILL_INDEX[s.id] ? SKILL_INDEX[s.id].name : s.id, show: !!SHOW_SKILLS[s.id],
+        ult: !!(SKILL_INDEX[s.id] && SKILL_INDEX[s.id].isUltimate), games: s.games, winPct: Math.round(100 * s.wins / s.games),
+        placeDelta: +(s.delta / s.games).toFixed(2), duelPct: Math.round(100 * s.dw / ((s.dw + s.dl) || 1)) }))
+        .sort((a, b) => a.placeDelta - b.placeDelta);
+}
 // Corre el banco de a una partida por vez (sin trabar la página) y muestra la tabla. Semillas 1..n.
 // Resumen de los duelos del banco (docs/MATCH.md §5: qué medir en los duelos)
 function benchDuels(list) {
@@ -2820,6 +2838,7 @@ function benchDuels(list) {
 }
 function runBench(n) {
     testSandbox();
+    aiPreferShow = /[?&]show\b/.test(location.search);
     windupStats.fired = windupStats.hit = 0;
     const games = [], panel = document.createElement('div');
     panel.id = 'test-report'; document.body.appendChild(panel);
@@ -2833,12 +2852,15 @@ function runBench(n) {
         const rows = benchTable(games), avgRound = Math.round(games.reduce((a, g) => a + g.round, 0) / n);
         const duels = benchDuels(games.flatMap(g => g.duels));
         duels.windupFired = windupStats.fired; duels.windupDodgedPct = Math.round(100 * (1 - windupStats.hit / (windupStats.fired || 1)));
-        window.benchResult = { n, avgRound, rows, games, duels };
+        const skillRows = benchSkillTable(games);
+        window.benchResult = { n, avgRound, rows, games, duels, skillRows, preferShow: aiPreferShow };
         panel.innerHTML = `<h3>📊 Banco de Custom Hero: ${n} partidas, ronda final promedio ${avgRound}</h3>` +
             `<p>⚔️ ${duels.n} duelos: duran ${duels.medianSecs} s (la mitad entre ${duels.p25} y ${duels.p75} s), ${duels.byTimePct}% por tiempo, ` +
             `${duels.avgChanges} cambios de quién va ganando en promedio, ${duels.avoidablePct}% del daño entre héroes se podía evitar caminando; ` +
             `${duels.windupFired} golpes anunciados, ${duels.windupDodgedPct}% esquivados</p>` +
-            rows.map(r => `<div>${r.name}: ${r.wins}/${r.games} ganadas (${r.winPct}%), puesto ${r.place}, afuera en la ronda ${r.outRound ?? '—'}</div>`).join('');
+            rows.map(r => `<div>${r.name}: ${r.wins}/${r.games} ganadas (${r.winPct}%), puesto ${r.place}, afuera en la ronda ${r.outRound ?? '—'}</div>`).join('') +
+            `<h3>Habilidades del Show${aiPreferShow ? ' (la IA las prefiere)' : ''}: puesto frente al de su competidor (negativo = mejor)</h3>` +
+            skillRows.filter(r => r.show).map(r => `<div>${r.name}${r.ult ? ' (definitiva)' : ''}: ${r.games} partidas, ${r.placeDelta > 0 ? '+' : ''}${r.placeDelta} puestos, ${r.winPct}% ganadas, ${r.duelPct}% de duelos</div>`).join('');
         document.title = `📊 banco ${n}/${n} listo`;
         console.log('Banco de Custom Hero', window.benchResult);
     };
@@ -3075,12 +3097,25 @@ test('Piezas: definitivas de 3 niveles, pasivas al recibir golpes y mejoras prop
     check(ult.cast(a) && getEffect(b, 'MARKED'), 'le llega al rival esté donde esté');
     const plate = SHOW_SKILLS.SHOW_ARMOR_PLATE;
     a.skills = [plate]; a.skillLevels[plate.id] = 1;
-    for (let i = 0; i < 3; i++) emit(a, 'onDamaged', { source: b, dealt: 10 });
-    checkEq(statusStacks(b, 'dent'), 1, 'al tercer golpe recibido, abolla al que le pegó');
+    for (let i = 0; i < 5; i++) emit(a, 'onDamaged', { source: b, dealt: 10 });
+    checkEq(statusStacks(b, 'dent'), 1, 'al quinto golpe recibido, abolla al que le pegó');
     check(getEffect(a, 'SHIELD'), 'y te da escudo');
     const speed = effAtkSpeed(a);
     SHOW_SKILLS.SHOW_OVATION.cast(a);
     check(effAtkSpeed(a) > speed, 'Ovación sube la velocidad de ataque');
+});
+
+test('Banco: con ?show la IA prefiere las del Show y la tabla mide cada habilidad', () => {
+    const [a] = partsDuel();
+    a.skills = [];
+    const natural = Object.values(HERO_SKILLS[a.key]).find(s => !s.isUltimate), show = SHOW_SKILLS.SHOW_SPARK;
+    checkEq(aiPickDraft(a, [natural, show]), natural, 'normalmente, la natural');
+    aiPreferShow = true;
+    try { checkEq(aiPickDraft(a, [natural, show]), show, 'midiendo, la del Show'); } finally { aiPreferShow = false; }
+    const rows = benchSkillTable([{ winner: 'A', heroes: { A: { place: 1, skills: ['SHOW_SPARK'] }, B: { place: 2, skills: ['SHOW_HAMMER'] } } },
+        { winner: 'B', heroes: { A: { place: 2, skills: ['SHOW_HAMMER'] }, B: { place: 1, skills: ['SHOW_SPARK'] } } }]);
+    checkEq(rows[0].id, 'SHOW_SPARK', 'la que salió mejor que su competidor queda primera');
+    checkEq(rows[0].winPct, 100, 'con sus victorias');
 });
 
 function testSandbox() {

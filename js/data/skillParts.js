@@ -4,7 +4,8 @@
 // They have no natural competitor (heroKey SHOW_KEY, progression.js). The skills themselves live in data/showSkills.js.
 //
 // def: { id, name, shape: { type, ... }, hits: [{ type, ... }], twist: { type, ... } or a list of them (optional),
-//        ultimate: true (optional: 3 levels, bigger numbers, much longer cooldown) }
+//        ultimate: true (optional: 3 levels, bigger numbers, much longer cooldown),
+//        cost: 0.85 (optional: multiplies the power budget; set from the bench when a skill is over- or underpriced) }
 //   shapes  strike { range }                 the nearest enemy in range (1.5 = melee)
 //           bolt { range, radius, pierce }   projectile toward the aim point; stops on the first one unless pierce
 //           blast { range, radius }          area at the aim point (or on the nearest enemy)
@@ -48,7 +49,7 @@ function partPoints(def) {
     let pts = def.hits.reduce((s, h) => s + PART_POINTS[h.type](h) * (def.shape.type === 'zone' && h.type === 'damage' ? def.shape.duration * 0.8 : 1), 0);
     pts *= SHAPE_POINTS[def.shape.type] * (def.shape.pierce ? 1.2 : 1);
     twistsOf(def).forEach(t => { pts *= TWIST_POINTS[t.type]; });
-    return pts;
+    return pts * (def.cost || 1);
 }
 function twistsOf(def) { return [].concat(def.twist || []); }
 const round5 = x => Math.round(x / 5) * 5;

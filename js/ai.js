@@ -180,8 +180,12 @@ function aiSpendPoints(hero) {
 }
 
 // Draft: prefiere sus habilidades naturales; si no tiene definitiva, una definitiva; si no, la primera activa.
+// aiPreferShow (only the bench, ?banco=N&show): show skills first, so each one shows up often enough to be measured.
+let aiPreferShow = false;
 function aiPickDraft(hero, options) {
-    return options.find(s => s.heroKey === hero.key)
+    const needsUlt = !hero.skills.some(s => s.isUltimate);
+    const show = aiPreferShow && (options.find(s => s.heroKey === SHOW_KEY && (needsUlt || !s.isUltimate)));
+    return show || options.find(s => s.heroKey === hero.key)
         || (!hero.skills.some(s => s.isUltimate) && options.find(s => s.isUltimate))
         || options.find(s => s.kind === 'active')
         || options[0];
@@ -191,7 +195,7 @@ function aiPickDraft(hero, options) {
 // tiene; si no, lo guarda) por la mejor de 6. El Fragmento lo usa si al menos la mitad de su kit no es natural (la que
 // pierde es al azar); si no, lo vende.
 function aiUseDestiny(hero) {
-    const foreign = () => hero.skills.filter(s => s.heroKey !== hero.key);
+    const foreign = () => hero.skills.filter(s => s.heroKey !== hero.key && !(aiPreferShow && s.heroKey === SHOW_KEY));
     while (hero.destiny.books > 0 && foreign().length) {
         hero.destiny.books--;
         aiReplaceSkill(hero, foreign().find(s => !s.isUltimate) || foreign()[0], 'book');

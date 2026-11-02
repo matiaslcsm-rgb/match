@@ -27,7 +27,14 @@ medida con el banco).
   por piezas (enfriamiento de 70-110 s, como las de los competidores), pasivas que contraatacan al recibir golpes
   (`whenHit`), mejoras propias (`self`, `haste`) y golpes a toda la arena (`everywhere`). Banco de 132 con las 40: ronda
   final 25, duelos 15,1 s, el mejor 27% (Arcanista). Ninguno se dispara.
-- [ ] **Medir las 40 juntas** (lo siguiente).
+- [x] **Medir las 40 juntas** (2026-11-02): `index.html?banco=132&show` hace que la IA prefiera las del Show y suma
+  una tabla por habilidad: en cuántas partidas salió, cuánto ganó y **cuántos puestos sacó mejor o peor que su
+  competidor de costumbre** (así un competidor fuerte no hace parecer fuertes a sus habilidades). Primera vuelta: de
+  -1,24 a +0,74 puestos; las pasivas con escudo (Batería Externa y Placa Blindada) ganaban el 70% de sus duelos. Se
+  bajaron esas dos y se subieron las 7 más flojas (campo `cost` del armador para abaratarlas). Segunda vuelta: de -0,44 a
+  +0,68; con 132 partidas, ±0,5 puestos es ruido (~90 apariciones por habilidad). Para afinar más hace falta el banco de 528.
+  Dato lateral: con las del Show, Rec pasa de 0% a 25% de victorias y Vector de 1% a 13%; Alquimista y Bruja del Hielo
+  caen porque dependen de sus naturales.
 - [ ] **Tanda 3**, después de medir.
 
 ---
