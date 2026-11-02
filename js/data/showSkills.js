@@ -105,3 +105,63 @@ registerShowSkills([
     { id: 'SHOW_AERIAL_SHOT', name: 'Toma Aérea', ultimate: true, shape: { type: 'dash', cells: 6, radius: 1.8 }, cost: 0.8,
         hits: [{ type: 'damage', dmgType: 'physical', base: 150, ratio: 0.7 }, { type: 'stun', duration: 1 }, { type: 'mark' }] }
 ]);
+
+// Show skills, batch 3 (2026-11-02, measured later together with the first 40): bounces, spreading statuses and life
+// leech, plus 4 more ultimates.
+registerShowSkills([
+    // --- Overcharge ---
+    { id: 'SHOW_CHAIN_RELAY', name: 'Relé en Cadena', shape: { type: 'bolt', range: 6, radius: 0.7 },
+        hits: [{ type: 'damage', dmgType: 'magical', base: 60, ratio: 0.35 }, { type: 'overcharge', charges: 1, power: 25 }],
+        twist: { type: 'bounce', times: 2, mult: 0.7 } },
+    { id: 'SHOW_BLOWN_FUSE', name: 'Fusible Quemado', shape: { type: 'nova', radius: 2.5 },
+        hits: [{ type: 'discharge', mult: 1.5 }, { type: 'slow', pct: 0.3, duration: 1.5 }] },
+    { id: 'SHOW_DISCHARGER', name: 'Descargador', shape: { type: 'whenHit', every: 5 },
+        hits: [{ type: 'discharge', mult: 1 }, { type: 'heal', amount: 30 }] },
+    // --- Dent ---
+    { id: 'SHOW_MONKEY_WRENCH', name: 'Llave Inglesa', shape: { type: 'strike', range: 1.5 },
+        hits: [{ type: 'damage', dmgType: 'physical', base: 70, ratio: 0.6 }, { type: 'leech', pct: 0.4 }],
+        twist: { type: 'crusher', perDent: 0.12 } },
+    { id: 'SHOW_BODY_SHOP', name: 'Chapa y Pintura', shape: { type: 'nova', radius: 2 },
+        hits: [{ type: 'dent', stacks: 2 }, { type: 'shield', amount: 50, duration: 3 }] },
+    { id: 'SHOW_COMPACTOR', name: 'Compactadora', shape: { type: 'blast', range: 4, radius: 1.5 },
+        hits: [{ type: 'damage', dmgType: 'physical', base: 100, ratio: 0.6 }, { type: 'root', duration: 0.8 }, { type: 'dent', stacks: 2 }],
+        twist: { type: 'windup', time: 0.6 } },
+    // --- Overheat ---
+    { id: 'SHOW_WELDING', name: 'Soldadura', shape: { type: 'strike', range: 1.5 },
+        hits: [{ type: 'damage', dmgType: 'magical', base: 50, ratio: 0.4 }, { type: 'overheat', dps: 30, duration: 3 }, { type: 'root', duration: 0.6 }] },
+    { id: 'SHOW_TURBINE', name: 'Turbina', shape: { type: 'everyHit', every: 4 },
+        hits: [{ type: 'overheat', dps: 20, duration: 3 }, { type: 'haste', atkSpeed: 0.15, move: 0, duration: 2 }] },
+    // --- Spreading ---
+    { id: 'SHOW_VIRAL', name: 'Viral', shape: { type: 'strike', range: 5 },
+        hits: [{ type: 'damage', dmgType: 'magical', base: 40, ratio: 0.3 }, { type: 'spread', radius: 3 }] },
+    // --- Marked ---
+    { id: 'SHOW_PAPARAZZI', name: 'Paparazzi', shape: { type: 'bolt', range: 6, radius: 0.6 },
+        hits: [{ type: 'damage', dmgType: 'physical', base: 40, ratio: 0.4 }, { type: 'mark' }],
+        twist: { type: 'bounce', times: 3, mult: 0.8 } },
+    { id: 'SHOW_OVERHEAD_SHOT', name: 'Toma Cenital', shape: { type: 'blast', range: 7, radius: 1.2 },
+        hits: [{ type: 'damage', dmgType: 'physical', base: 90, ratio: 0.6 }, { type: 'mark' }],
+        twist: [{ type: 'windup', time: 0.5 }, { type: 'far', bonus: 0.25 }] },
+    { id: 'SHOW_BLIND_SPOT', name: 'Ángulo Ciego', shape: { type: 'dash', cells: 3, radius: 1.5 },
+        hits: [{ type: 'damage', dmgType: 'physical', base: 70, ratio: 0.5 }, { type: 'mark' }],
+        twist: { type: 'execute', below: 0.3, bonus: 0.4 } },
+    // --- Sustain and buffs ---
+    { id: 'SHOW_STOLEN_PLUG', name: 'Enchufe Robado', shape: { type: 'strike', range: 2 },
+        hits: [{ type: 'damage', dmgType: 'magical', base: 60, ratio: 0.4 }, { type: 'leech', pct: 0.5 }, { type: 'discharge', mult: 1 }] },
+    { id: 'SHOW_QUICK_RECHARGE', name: 'Recarga Rápida', shape: { type: 'self' },
+        hits: [{ type: 'heal', amount: 80 }, { type: 'shield', amount: 50, duration: 3 }] },
+    { id: 'SHOW_FIRED_UP_CROWD', name: 'Público Enardecido', shape: { type: 'nova', radius: 3.5 },
+        hits: [{ type: 'slow', pct: 0.3, duration: 2 }, { type: 'haste', atkSpeed: 0.3, move: 0.15, duration: 3 }] },
+    { id: 'SHOW_COUNTERPUNCH', name: 'Contragolpe', shape: { type: 'whenHit', every: 4 },
+        hits: [{ type: 'damage', dmgType: 'physical', base: 50, ratio: 0.5 }, { type: 'stun', duration: 0.3 }] },
+    // --- Ultimates ---
+    { id: 'SHOW_GRAND_FINALE', name: 'Gran Final', ultimate: true, shape: { type: 'everywhere' },
+        hits: [{ type: 'overheat', dps: 40, duration: 4 }, { type: 'overcharge', charges: 1, power: 60 }] },
+    { id: 'SHOW_HEAT_WAVE', name: 'Ola de Calor', ultimate: true, shape: { type: 'nova', radius: 4 },
+        hits: [{ type: 'damage', dmgType: 'magical', base: 120, ratio: 0.5 }, { type: 'overheat', dps: 40, duration: 4 }] },
+    { id: 'SHOW_FINAL_CUT', name: 'Corte Final', ultimate: true, shape: { type: 'bolt', range: 9, radius: 1, pierce: true },
+        hits: [{ type: 'damage', dmgType: 'physical', base: 220, ratio: 1 }],
+        twist: [{ type: 'windup', time: 0.7 }, { type: 'execute', below: 0.3, bonus: 0.5 }] },
+    { id: 'SHOW_NATIONAL_BROADCAST', name: 'Cadena Nacional', ultimate: true, shape: { type: 'bolt', range: 7, radius: 0.8 },
+        hits: [{ type: 'damage', dmgType: 'magical', base: 120, ratio: 0.5 }, { type: 'overcharge', charges: 1, power: 40 }],
+        twist: { type: 'bounce', times: 5, mult: 0.85 } }
+]);

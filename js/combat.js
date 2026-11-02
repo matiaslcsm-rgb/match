@@ -260,7 +260,8 @@ function fireSkillProjectile(attacker, opts) {
         attacker, kind: 'skill', x: ox, y: oy, tx: opts.tx, ty: opts.ty,
         dx: dx / dist, dy: dy / dist, dist, traveled: 0, speed: opts.speed, radius: opts.radius,
         dmg: opts.dmg, dmgType: opts.dmgType || 'magical', vfx: opts.vfx, skillName: opts.skillName,
-        onHit: opts.onHit, onArrive: opts.onArrive, hitSet: new Set(), fxEl: fxCastingSkill ? skillVfx(fxCastingSkill).el : null,
+        onHit: opts.onHit, onArrive: opts.onArrive, hitSet: new Set(opts.skip || []), // skip: already hit (a bounce leaving its last target)
+        fxEl: fxCastingSkill ? skillVfx(fxCastingSkill).el : null,
         stopOnHit: opts.stopOnHit, solid: opts.solid, noDamage: opts.noDamage, arrow: opts.arrow, isCrit: opts.isCrit, quietMiss: opts.quietMiss, basic: opts.basic,
         announced: !!(fxCastingSkill && fxCastingSkill.windup) && attacker.arena.kind === 'duel' // golpe anunciado en un duelo (banco)
     });

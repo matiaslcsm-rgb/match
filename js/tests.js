@@ -3067,10 +3067,10 @@ test('Piezas: la zona pega cada medio segundo y la pasiva cada N golpes', () => 
     checkEq(skillOriginLabel({ heroKey: SHOW_KEY }), 'Del Show', 'en el draft dice que es del Show');
 });
 
-test('Tandas del Show: las 40 habilidades se lanzan sin romperse', () => {
+test('Tandas del Show: las 60 habilidades se lanzan sin romperse', () => {
     const show = Object.values(SHOW_SKILLS);
-    checkEq(show.length, 40, '40 habilidades');
-    checkEq(show.filter(s => s.isUltimate).length, 6, '6 definitivas');
+    checkEq(show.length, 60, '60 habilidades');
+    checkEq(show.filter(s => s.isUltimate).length, 10, '10 definitivas');
     show.forEach(s => {
         const [a, b] = partsDuel();
         a.skills = [s]; a.skillLevels[s.id] = 1;
@@ -3116,6 +3116,37 @@ test('Banco: con ?show la IA prefiere las del Show y la tabla mide cada habilida
         { winner: 'B', heroes: { A: { place: 2, skills: ['SHOW_HAMMER'] }, B: { place: 1, skills: ['SHOW_SPARK'] } } }]);
     checkEq(rows[0].id, 'SHOW_SPARK', 'la que salió mejor que su competidor queda primera');
     checkEq(rows[0].winPct, 100, 'con sus victorias');
+});
+
+// Wave arena with three creeps in a row next to the player (for bounces and spreading)
+function partsWave() {
+    newGame('CRANE');
+    const arena = player.arena, cs = arena.creeps.slice(0, 3);
+    arena.creeps.slice(3).forEach(c => { c.hp = 0; });
+    player.x = 3; player.y = 6; player.mana = player.maxMana;
+    cs.forEach((c, i) => { c.x = 5 + i * 2; c.y = 6; c.hp = c.maxHp = 5000; c.effects = []; });
+    return cs;
+}
+
+test('Piezas: el rebote salta de enemigo en enemigo', () => {
+    const cs = partsWave();
+    const pap = SHOW_SKILLS.SHOW_PAPARAZZI;
+    player.aimPoint = { x: cs[0].x, y: cs[0].y };
+    try { check(pap.cast(player), 'sale'); } finally { player.aimPoint = null; }
+    for (let i = 0; i < 60; i++) updateProjectiles(player.arena, 0.05);
+    check(cs.every(c => getEffect(c, 'MARKED')), 'marca a los tres');
+});
+
+test('Piezas: el contagio pasa los estados a los de al lado y el robo de vida cura', () => {
+    const cs = partsWave();
+    applyDent(cs[0], 2); applyOverheat(player, cs[0], 20, 3);
+    SHOW_SKILLS.SHOW_VIRAL.cast(player);
+    checkEq(statusStacks(cs[1], 'dent'), 2, 'el de al lado se lleva las abolladuras');
+    check(getEffect(cs[1], 'OVERHEAT'), 'y el recalentado');
+    cs[0].x = 4;
+    player.hp = 50;
+    SHOW_SKILLS.SHOW_STOLEN_PLUG.cast(player);
+    check(player.hp > 50, 'Enchufe Robado cura con el daño');
 });
 
 function testSandbox() {

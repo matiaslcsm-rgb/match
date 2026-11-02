@@ -86,6 +86,23 @@ function shortCircuit(source, target) {
     return true;
 }
 
+// --- SPREAD ---
+// Copies the show statuses of `from` to every other enemy within `radius` (the "spread" part, data/skillParts.js)
+function spreadStatuses(source, from, radius) {
+    const charges = getEffect(from, STATUS.overcharge.id), heat = getEffect(from, STATUS.overheat.id);
+    const dents = statusStacks(from, 'dent'), marked = !!getEffect(from, STATUS.mark.id);
+    if (!charges && !heat && !dents && !marked) return 0;
+    const others = enemiesOf(source).filter(e => e !== from && e.isAlive() && Math.hypot(e.x - from.x, e.y - from.y) <= radius);
+    others.forEach(e => {
+        if (heat) applyOverheat(source, e, heat.data.dps, heat.until - gameClock);
+        if (charges) applyOvercharge(source, e, charges.data.stacks, charges.data.power / charges.data.stacks);
+        if (dents) applyDent(e, dents);
+        if (marked) applyMark(e);
+    });
+    if (others.length) fxText(from, '¡Contagio!', '#c77dff', 12);
+    return others.length;
+}
+
 // --- MARKED ---
 function applyMark(target) {
     if (!target.isAlive() || !target.effects) return;

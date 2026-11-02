@@ -19,11 +19,14 @@
 //   hits    damage { dmgType, base, ratio }  physical scales with attack damage, magical with Intelligence, pure with nothing
 //           stun / root / silence { duration }, slow { pct, duration }, push / pull { cells } (pushed into a column: +1 Dent)
 //           overcharge { charges, power }, dent { stacks }, overheat { dps, duration }, mark {}, discharge { mult }
+//           leech { pct } heals the caster a share of the damage this hit just dealt; spread { radius } copies the target's
+//           show statuses to the enemies around it
 //           shield { amount, duration }, heal { amount } and haste { atkSpeed, move, duration } go on the caster, once per cast
 //   twists  windup { time }          announced (game.js): it can be dodged, so it hits 25% harder and costs less
 //           crusher { perDent }      consumes the target's dents: +perDent damage for each one
 //           execute { below, bonus } more damage to targets under `below` of their life
 //           close { bonus } / far { bonus }  more damage at 2 cells or less / 4 or more
+//           bounce { times, mult }   bolts only: it jumps to the next enemy nearby, each time with `mult` of the effect
 
 const SHOW_KEY = 'SHOW';
 const SHOW_SKILLS = {};
@@ -43,15 +46,17 @@ const PART_POINTS = {
     slow: h => h.pct * h.duration * 4, push: h => h.cells * 0.5, pull: h => h.cells * 0.5,
     overcharge: h => h.charges + h.power / 40, dent: h => h.stacks, overheat: h => h.dps * h.duration / 30,
     mark: () => 1.5, discharge: () => 2, shield: h => h.amount / 30, heal: h => h.amount / 30,
-    haste: h => (h.atkSpeed * 3 + h.move * 2) * h.duration
+    haste: h => (h.atkSpeed * 3 + h.move * 2) * h.duration,
+    leech: h => h.pct * 4, spread: () => 2.5
 };
 const SHAPE_POINTS = { strike: 1, bolt: 0.9, blast: 1.25, nova: 1.25, dash: 1.15, zone: 1, everywhere: 2, self: 1, everyHit: 1, whenHit: 1 };
-const TWIST_POINTS = { windup: 0.8, crusher: 1.15, execute: 1.15, close: 1.1, far: 1.1 };
+const TWIST_POINTS = { windup: 0.8, crusher: 1.15, execute: 1.15, close: 1.1, far: 1.1, bounce: 1 };
+const BOUNCE_RANGE = 4;
 
 function partPoints(def) {
     let pts = def.hits.reduce((s, h) => s + PART_POINTS[h.type](h) * (def.shape.type === 'zone' && h.type === 'damage' ? def.shape.duration * 0.8 : 1), 0);
     pts *= SHAPE_POINTS[def.shape.type] * (def.shape.pierce ? 1.2 : 1);
-    twistsOf(def).forEach(t => { pts *= TWIST_POINTS[t.type]; });
+    twistsOf(def).forEach(t => { pts *= t.type === 'bounce' ? 1 + 0.45 * t.times * t.mult : TWIST_POINTS[t.type]; });
     return pts * (def.cost || 1) * SHOW_PRICE;
 }
 function twistsOf(def) { return [].concat(def.twist || []); }
@@ -89,6 +94,8 @@ function partValues(def) {
         if (h.type === 'dent') v.dents = h.stacks;
         if (h.type === 'overheat') { v.heatDps = perLevel(h.dps).map(Math.round); v.heatDur = h.duration; }
         if (h.type === 'discharge') v.dischargeMult = h.mult;
+        if (h.type === 'leech') v.leechPct = h.pct;
+        if (h.type === 'spread') v.spreadRadius = h.radius;
         if (h.type === 'shield') { v.shield = perLevel(h.amount).map(Math.round); v.shieldDur = h.duration; }
         if (h.type === 'heal') v.heal = perLevel(h.amount).map(Math.round);
         if (h.type === 'haste') { v.hasteAtk = perLevel(h.atkSpeed, 0.1); v.hasteMove = h.move; v.hasteDur = h.duration; }
@@ -99,6 +106,7 @@ function partValues(def) {
         if (t.type === 'execute') { v.execBelow = t.below; v.execBonus = t.bonus; }
         if (t.type === 'close') v.closeBonus = t.bonus;
         if (t.type === 'far') v.farBonus = t.bonus;
+        if (t.type === 'bounce') { v.bounces = t.times; v.bounceMult = t.mult; }
     });
     if (!PASSIVE_SHAPES.includes(s.type)) Object.assign(v, partCosts(def));
     return v;
@@ -118,6 +126,7 @@ const HIT_TEXT = {
     dent: 'pone {dents} Abolladura(s) (+5% de daño recibido cada una)',
     overheat: 'lo Recalienta ({heatDps} de daño mágico por segundo durante {heatDur}s; con Sobrecarga: cortocircuito)',
     discharge: 'hace estallar su Sobrecarga (x{dischargeMult})',
+    leech: 'te cura el {leechPct%} de ese daño', spread: 'le contagia sus estados del show a los enemigos a {spreadRadius} casillas',
     shield: 'te da un escudo de {shield} por {shieldDur}s', heal: 'te cura {heal}',
     haste: 'ganás {hasteAtk%} de velocidad de ataque y {hasteMove%} de velocidad de movimiento por {hasteDur}s'
 };
@@ -137,7 +146,8 @@ const TWIST_TEXT = {
     crusher: 'Consume las Abolladuras del objetivo: +{perDent%} de daño por cada una.',
     execute: '+{execBonus%} de daño a los que tengan menos del {execBelow%} de su vida.',
     close: '+{closeBonus%} de daño a los que estén a 2 casillas o menos.',
-    far: '+{farBonus%} de daño a los que estén a 4 casillas o más.'
+    far: '+{farBonus%} de daño a los que estén a 4 casillas o más.',
+    bounce: 'Rebota hasta {bounces} veces al enemigo más cercano, cada vez con el {bounceMult%} del efecto.'
 };
 function joinList(xs) { return xs.length <= 1 ? xs.join('') : xs.slice(0, -1).join(', ') + ' y ' + xs[xs.length - 1]; }
 function partDescription(def) {
@@ -166,6 +176,8 @@ function partTags(def) {
     if (s.type === 'whenHit') tags.add('AL_RECIBIR_DAÑO');
     if (types.includes('shield') || types.includes('haste')) tags.add('MEJORA');
     if (types.includes('heal')) tags.add('CURACIÓN');
+    if (types.includes('leech')) tags.add('ROBO_VIDA');
+    if (types.includes('spread') || twistsOf(def).some(t => t.type === 'bounce')) tags.add('ÁREA');
     return [...tags];
 }
 
@@ -191,10 +203,13 @@ function applyPartHits(skill, caster, target, tickScale = 1) {
     const v = key => val(skill, caster, key);
     const mult = partMult(skill, caster, target);
     const dx = target.x - caster.x, dy = target.y - caster.y, dist = Math.hypot(dx, dy) || 1;
+    let dealt = 0;
     skill.parts.hits.forEach(h => {
         if (!target.isAlive() || SELF_HITS.includes(h.type)) return;
         switch (h.type) {
-            case 'damage': dealDamage(caster, target, (v('dmg') + partStat(caster, h.dmgType) * (v('ratio') || 0)) * mult * tickScale, h.dmgType); break;
+            case 'damage': dealt = dealDamage(caster, target, (v('dmg') + partStat(caster, h.dmgType) * (v('ratio') || 0)) * mult * tickScale, h.dmgType).dealt; break;
+            case 'leech': healUnit(caster, dealt * v('leechPct')); break;
+            case 'spread': spreadStatuses(caster, target, v('spreadRadius')); break;
             case 'stun': addEffect(target, { id: 'STUN', name: 'Aturdido', duration: v('stun'), flags: ['stun'] }); break;
             case 'root': addEffect(target, { id: 'ROOT', name: 'Enraizado', duration: v('root'), flags: ['root'] }); break;
             case 'silence': addEffect(target, { id: 'SILENCE', name: 'Callado', duration: v('silence'), flags: ['silence'] }); break;
@@ -231,6 +246,25 @@ function partImpact(skill, caster, x, y) {
     if (a) fxImpact(a, x, y, skillVfx(skill).el, true);
 }
 
+// A bolt from the caster (or, bouncing, from the last one it hit) toward `aim`. scale shrinks with each bounce.
+function fireBolt(skill, caster, from, aim, scale, bouncesLeft, hit) {
+    const bounce = twistsOf(skill.parts).find(t => t.type === 'bounce');
+    fireSkillProjectile(caster, {
+        x: from ? from.x : undefined, y: from ? from.y : undefined, quietMiss: !!from, skip: [...hit],
+        tx: aim.x, ty: aim.y, speed: 13, radius: val(skill, caster, 'radius'), noDamage: true, stopOnHit: !skill.parts.shape.pierce || !!bounce,
+        vfx: { color: SKILL_FX_COLORS[skill.tags[0]] || '#ffffff' }, skillName: skill.name,
+        onHit: target => {
+            if (hit.has(target)) return;
+            hit.add(target);
+            applyPartHits(skill, caster, target, scale);
+            if (bouncesLeft <= 0) return;
+            const next = enemiesNear(caster, target.x, target.y, BOUNCE_RANGE).filter(e => !hit.has(e))
+                .sort((a, b) => Math.hypot(a.x - target.x, a.y - target.y) - Math.hypot(b.x - target.x, b.y - target.y))[0];
+            if (next) fireBolt(skill, caster, target, { x: next.x, y: next.y }, scale * bounce.mult, bouncesLeft - 1, hit);
+        }
+    });
+}
+
 // --- CAST BY SHAPE ---
 const PART_CAST = {
     strike(skill, caster) {
@@ -242,11 +276,8 @@ const PART_CAST = {
     bolt(skill, caster) {
         const aim = partAim(skill, caster);
         if (!aim) return false;
-        fireSkillProjectile(caster, {
-            tx: aim.x, ty: aim.y, speed: 13, radius: val(skill, caster, 'radius'), noDamage: true, stopOnHit: !skill.parts.shape.pierce,
-            vfx: { color: SKILL_FX_COLORS[skill.tags[0]] || '#ffffff' }, skillName: skill.name,
-            onHit: target => applyPartHits(skill, caster, target)
-        });
+        const bounce = twistsOf(skill.parts).find(t => t.type === 'bounce');
+        fireBolt(skill, caster, null, aim, 1, bounce ? bounce.times : 0, new Set());
         return true;
     },
     blast(skill, caster) {

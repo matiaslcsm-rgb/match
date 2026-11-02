@@ -40,7 +40,9 @@ medida con el banco).
   vuelta de 132 después del ajuste no alcanza para confirmarlo (ruido del mismo tamaño): **falta otro banco de 528**.
   Dato lateral: con las del Show, Rec pasa de 0% a 25% de victorias y Vector de 1% a 13%; Alquimista y Bruja del Hielo
   caen porque dependen de sus naturales.
-- [ ] **Tanda 3**, después de medir.
+- [x] **Tanda 3** (2026-11-02): 20 más, 60 en total (10 definitivas). Piezas nuevas: rebote (`bounce`: el proyectil
+  salta al enemigo más cercano), contagio (`spread`: pasa los estados del objetivo a los de al lado) y robo de vida
+  (`leech`). Se mide junto con las 40 anteriores en el banco de 528.
 
 ---
 
