@@ -3097,8 +3097,8 @@ test('Piezas: definitivas de 3 niveles, pasivas al recibir golpes y mejoras prop
     check(ult.cast(a) && getEffect(b, 'MARKED'), 'le llega al rival esté donde esté');
     const plate = SHOW_SKILLS.SHOW_ARMOR_PLATE;
     a.skills = [plate]; a.skillLevels[plate.id] = 1;
-    for (let i = 0; i < 5; i++) emit(a, 'onDamaged', { source: b, dealt: 10 });
-    checkEq(statusStacks(b, 'dent'), 1, 'al quinto golpe recibido, abolla al que le pegó');
+    for (let i = 0; i < plate.values.every; i++) emit(a, 'onDamaged', { source: b, dealt: 10 });
+    checkEq(statusStacks(b, 'dent'), 1, 'al N-ésimo golpe recibido, abolla al que le pegó');
     check(getEffect(a, 'SHIELD'), 'y te da escudo');
     const speed = effAtkSpeed(a);
     SHOW_SKILLS.SHOW_OVATION.cast(a);

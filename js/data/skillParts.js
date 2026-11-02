@@ -31,6 +31,9 @@ const PART_LEVELS = [1, 1.45, 1.9, 2.35]; // what damage, shields and stored pow
 const ULT_PART_LEVELS = [1, 1.5, 2];
 const PASSIVE_SHAPES = ['everyHit', 'whenHit'];
 const ZONE_TICK = 0.5;
+// Every show skill is a bit cheaper than the raw budget: in the 528 bench (2026-11-02) they placed 0.3 worse on average
+// than the competitors' own skills
+const SHOW_PRICE = 0.92;
 const WINDUP_BONUS = 0.25;
 const SELF_HITS = ['shield', 'heal', 'haste'];
 
@@ -49,7 +52,7 @@ function partPoints(def) {
     let pts = def.hits.reduce((s, h) => s + PART_POINTS[h.type](h) * (def.shape.type === 'zone' && h.type === 'damage' ? def.shape.duration * 0.8 : 1), 0);
     pts *= SHAPE_POINTS[def.shape.type] * (def.shape.pierce ? 1.2 : 1);
     twistsOf(def).forEach(t => { pts *= TWIST_POINTS[t.type]; });
-    return pts * (def.cost || 1);
+    return pts * (def.cost || 1) * SHOW_PRICE;
 }
 function twistsOf(def) { return [].concat(def.twist || []); }
 const round5 = x => Math.round(x / 5) * 5;

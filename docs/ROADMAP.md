@@ -32,7 +32,12 @@ medida con el banco).
   competidor de costumbre** (así un competidor fuerte no hace parecer fuertes a sus habilidades). Primera vuelta: de
   -1,24 a +0,74 puestos; las pasivas con escudo (Batería Externa y Placa Blindada) ganaban el 70% de sus duelos. Se
   bajaron esas dos y se subieron las 7 más flojas (campo `cost` del armador para abaratarlas). Segunda vuelta: de -0,44 a
-  +0,68; con 132 partidas, ±0,5 puestos es ruido (~90 apariciones por habilidad). Para afinar más hace falta el banco de 528.
+  +0,68; con 132 partidas, ±0,5 puestos es ruido (~90 apariciones por habilidad).
+  **Banco de 528** (`?banco=528&show`, ~370 apariciones por habilidad, ruido ±0,12): de -0,50 a +0,53. Fuertes de más:
+  Placa Blindada (-0,50, 61% de duelos) y Escape de Nafta (-0,49). Flojas (+0,32 a +0,53): Apagón, Toma a Tierra, Tornillo
+  Flojo, Rating Récord, Grito del Público, Toma Aérea, Cámara Lenta y Soplete. En promedio las del Show sacaron 0,3
+  puestos menos que las naturales. Ajuste: esas 10 retocadas y todas las del Show un 8% más baratas (`SHOW_PRICE`). Una
+  vuelta de 132 después del ajuste no alcanza para confirmarlo (ruido del mismo tamaño): **falta otro banco de 528**.
   Dato lateral: con las del Show, Rec pasa de 0% a 25% de victorias y Vector de 1% a 13%; Alquimista y Bruja del Hielo
   caen porque dependen de sus naturales.
 - [ ] **Tanda 3**, después de medir.
