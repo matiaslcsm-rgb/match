@@ -2816,6 +2816,17 @@ test('En duelo los héroes se hacen menos daño entre sí; contra creeps no camb
     checkNear(creepStatMult(3, false), CREEP_GROWTH * CREEP_GROWTH, 'los creeps crecen x' + CREEP_GROWTH + ' por ronda');
 });
 
+test('Duelo largo: pasada la mitad, el daño entre competidores sube hasta no tener reducción al final', () => {
+    toDuels();
+    const arena = arenas[0], [a, b] = arena.heroes;
+    const hit = t => { arena.elapsed = t; b.hp = b.maxHp; dealDamage(a, b, 100, 'pure'); return b.maxHp - b.hp; };
+    checkEq(hit(DUEL_RAMP_START), Math.round(100 * (1 - DUEL_DAMAGE_REDUCTION)), 'hasta la mitad, la reducción de siempre');
+    const mid = (DUEL_RAMP_START + DUEL_TIME) / 2;
+    checkEq(hit(mid), Math.round(100 * (1 - DUEL_DAMAGE_REDUCTION / 2)), 'a tres cuartos, la mitad de la reducción');
+    checkEq(hit(DUEL_TIME - 0.01), 100, 'al final, casi sin reducción');
+    b.hp = 1; checkEq(healUnit(b, 100), Math.round(100 * (1 - DUEL_HEAL_REDUCTION)), 'la curación sigue reducida');
+});
+
 // ============================================================ PARTIDAS COMPLETAS
 // Juega varias rondas con la IA (draft, puntos, tienda y combate de los 8 héroes). Con godMode el jugador es
 // invulnerable, para probar que el flujo completo funciona; sin godMode sirve para medir la dificultad.

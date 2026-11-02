@@ -16,6 +16,14 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
   ronda 5). Banco de 132, antes → después: ronda final 25 → 23; duelo mediano 14,2 → 20,7 s (17% por tiempo); M.O.R.T.I.S.
   16 → 34%, Vampiro 11 → 27%, Arcanista 30 → 20%, **Danzante 20 → 1%** (su innato premia moverse y su IA da vueltas
   alrededor del rival). Pendiente: si los duelos más largos molestan.
+- **Duelos que no terminan por tiempo (2026-11-02, decisión del usuario, opción A de tres):** pasados los 30 s, la
+  reducción de daño entre competidores en duelo (80%) se achica de a poco hasta desaparecer a los 60 s
+  (`duelDamageReduction`, duels.js); la curación sigue reducida. Es la idea de la muerte súbita de la ronda 15, que ya
+  funcionaba, pero adentro de cada duelo. Antes, el 23-28% de los duelos de las rondas 6 a 14 terminaba por tiempo, sin
+  que nadie se lastimara mucho (el ganador quedaba con 80% de vida y el perdedor con 51%); los que más se estiraban eran
+  Bruja, Vampiro, Grúa y Alquimista. Banco de 132, antes → después: por tiempo 16 → **2%**; duelo mediano 19 → 19,5 s;
+  cambios de ventaja 1,1 → 1,2; la IA esquiva 39 → 43% de los golpes anunciados; ronda final 23 → 23. Victorias: Zeus
+  25 → 35% (gana igual solo 22% de sus duelos), Arcanista 18 → 25%, M.O.R.T.I.S. 29 → 21%, Danzante 13 → 9%. 222/222 pruebas.
 - **Apuestas que se leen (2026-11-02, idea 1 de `docs/REFERENCIA-CHC.md`, elegida por el usuario):** en la ventana de
   apuestas, cada duelista muestra sus habilidades con su nivel (con el color del atributo de origen; las definitivas,
   marcadas) y sus ítems con ícono; al pasar el mouse, qué hace cada uno (`betKitHtml`, ui.js). Solo interfaz: no cambia

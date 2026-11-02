@@ -16,6 +16,14 @@
 const DUEL_TIME = 60;
 const DUEL_START_ROUND = 5; // rondas 1-4: solo draft y creeps (armás el kit); los duelos y las apuestas arrancan acá
 const DUEL_DAMAGE_REDUCTION = 0.8; // en duelo, los héroes se hacen 80% menos daño entre sí (sin esto duraban ~3 s; con 60% ~8 s; con 80% ~16 s)
+// User decision 2026-11-02 (option A): from DUEL_RAMP_START on, the damage reduction shrinks evenly until it is gone when
+// the time runs out, so long duels end with a fall instead of the clock. Healing keeps its reduction.
+const DUEL_RAMP_START = 30;
+function duelDamageReduction(arena) {
+    const t = arena ? arena.elapsed || 0 : 0;
+    const ramp = Math.max(0, Math.min(1, (t - DUEL_RAMP_START) / (DUEL_TIME - DUEL_RAMP_START)));
+    return DUEL_DAMAGE_REDUCTION * (1 - ramp);
+}
 const DUEL_CURSE_ALIVE = 3; // con 3 héroes en juego o menos, perder un duelo suma una instancia de maldición
 const DUEL_DEATH_ALIVE = 2; // con 2, perder el duelo además cuesta una vida
 const DUEL_STARTS = [{ x: 3, y: 6 }, { x: 16, y: 6 }];

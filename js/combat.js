@@ -133,7 +133,7 @@ function dealDamage(source, target, amount, type = 'physical', opts = {}) {
     // Pasiva del Guerrero (Templanza): el daño físico de sus habilidades también tira crítico (los golpes ya lo tiran)
     if (source && source.heroClass === 'warrior' && type === 'physical' && opts.isCrit === undefined && !opts.relic && Math.random() < effCritChance(source) / 100) { final *= 2; opts = { ...opts, isCrit: true }; }
     if (type === 'magical' && source) final *= 1 + effSpellAmp(source) / 100;
-    if (source && source.isHero && target.isHero && target.arena && target.arena.kind === 'duel' && !opts.fullDuelDamage) final *= 1 - DUEL_DAMAGE_REDUCTION; // fullDuelDamage: lo que no escala como un golpe (Autómatas, Aura de Corrupción)
+    if (source && source.isHero && target.isHero && target.arena && target.arena.kind === 'duel' && !opts.fullDuelDamage) final *= 1 - duelDamageReduction(target.arena); // fullDuelDamage: lo que no escala como un golpe (Autómatas, Aura de Corrupción)
     const marked = !!source && amount > 0 && isDirectHit(opts) && consumeMark(target); // Marked (statuses.js): harder and through shields
     if (marked) final *= 1 + STATUS.mark.bonus;
     final = mitigate(target, final * (1 - effDmgReduction(target)), type);
