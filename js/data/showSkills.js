@@ -10,10 +10,10 @@ registerShowSkills([
         hits: [{ type: 'damage', dmgType: 'magical', base: 50, ratio: 0.3 }, { type: 'overcharge', charges: 2, power: 25 }, { type: 'silence', duration: 1 }] },
     { id: 'SHOW_LIGHTNING_ROD', name: 'Pararrayos', shape: { type: 'zone', range: 6, radius: 1.5, duration: 3 },
         hits: [{ type: 'damage', dmgType: 'magical', base: 30, ratio: 0.15 }, { type: 'overcharge', charges: 1, power: 20 }] },
-    { id: 'SHOW_GROUNDING', name: 'Toma a Tierra', shape: { type: 'strike', range: 1.5 }, cost: 0.85,
+    { id: 'SHOW_GROUNDING', name: 'Toma a Tierra', shape: { type: 'strike', range: 1.5 }, cost: 0.75,
         hits: [{ type: 'damage', dmgType: 'physical', base: 80, ratio: 0.6 }, { type: 'discharge', mult: 2.5 }, { type: 'slow', pct: 0.3, duration: 2 }] },
     // --- Dent ---
-    { id: 'SHOW_HAMMER', name: 'Martillazo', shape: { type: 'strike', range: 1.5 },
+    { id: 'SHOW_HAMMER', name: 'Martillazo', shape: { type: 'strike', range: 1.5 }, cost: 0.8,
         hits: [{ type: 'damage', dmgType: 'physical', base: 70, ratio: 0.6 }, { type: 'dent', stacks: 2 }] },
     { id: 'SHOW_RAM', name: 'Embestida', shape: { type: 'dash', cells: 4, radius: 1.5 },
         hits: [{ type: 'damage', dmgType: 'physical', base: 60, ratio: 0.4 }, { type: 'push', cells: 2 }] },
@@ -21,7 +21,7 @@ registerShowSkills([
         hits: [{ type: 'damage', dmgType: 'physical', base: 30, ratio: 0.3 }, { type: 'dent', stacks: 1 }] },
     { id: 'SHOW_SCRAPPER', name: 'Chatarrero', shape: { type: 'bolt', range: 6, radius: 0.6 },
         hits: [{ type: 'damage', dmgType: 'physical', base: 50, ratio: 0.3 }, { type: 'pull', cells: 3 }, { type: 'dent', stacks: 1 }] },
-    { id: 'SHOW_HYDRAULIC_PRESS', name: 'Prensa Hidráulica', shape: { type: 'blast', range: 4, radius: 1.8 }, cost: 0.8,
+    { id: 'SHOW_HYDRAULIC_PRESS', name: 'Prensa Hidráulica', shape: { type: 'blast', range: 4, radius: 1.8 }, cost: 0.7,
         hits: [{ type: 'damage', dmgType: 'physical', base: 140, ratio: 0.7 }],
         twist: [{ type: 'windup', time: 0.6 }, { type: 'crusher', perDent: 0.15 }] },
     // --- Overheat ---
@@ -48,7 +48,7 @@ registerShowSkills([
     // --- Control ---
     { id: 'SHOW_COMMERCIAL_BREAK', name: 'Corte Comercial', shape: { type: 'nova', radius: 2.5 },
         hits: [{ type: 'damage', dmgType: 'physical', base: 40, ratio: 0.3 }, { type: 'stun', duration: 0.5 }, { type: 'shield', amount: 60, duration: 4 }] },
-    { id: 'SHOW_CROWD_ROAR', name: 'Grito del Público', shape: { type: 'nova', radius: 3 }, cost: 0.85,
+    { id: 'SHOW_CROWD_ROAR', name: 'Grito del Público', shape: { type: 'nova', radius: 3 }, cost: 0.75,
         hits: [{ type: 'silence', duration: 1.5 }, { type: 'heal', amount: 100 }] }
 ]);
 
@@ -79,12 +79,12 @@ registerShowSkills([
     { id: 'SHOW_BLOWN_ENGINE', name: 'Motor Fundido', shape: { type: 'nova', radius: 2.5 },
         hits: [{ type: 'overheat', dps: 30, duration: 3 }, { type: 'haste', atkSpeed: 0.3, move: 0.2, duration: 3 }] },
     // --- Marked ---
-    { id: 'SHOW_CUT_TO_BLACK', name: 'Corte a Negro', shape: { type: 'strike', range: 1.5 }, cost: 0.85,
+    { id: 'SHOW_CUT_TO_BLACK', name: 'Corte a Negro', shape: { type: 'strike', range: 1.5 }, cost: 0.75,
         hits: [{ type: 'damage', dmgType: 'physical', base: 60, ratio: 0.4 }, { type: 'silence', duration: 1.5 }, { type: 'mark' }] },
     { id: 'SHOW_SLOW_MOTION', name: 'Cámara Lenta', shape: { type: 'blast', range: 6, radius: 1.8 }, cost: 0.85,
         hits: [{ type: 'damage', dmgType: 'magical', base: 40, ratio: 0.3 }, { type: 'slow', pct: 0.5, duration: 2 }, { type: 'mark' }] },
     // --- Combos and buffs ---
-    { id: 'SHOW_SCREWDRIVER', name: 'Desarmador', shape: { type: 'strike', range: 1.5 }, cost: 0.85,
+    { id: 'SHOW_SCREWDRIVER', name: 'Desarmador', shape: { type: 'strike', range: 1.5 }, cost: 0.75,
         hits: [{ type: 'damage', dmgType: 'physical', base: 80, ratio: 0.6 }, { type: 'discharge', mult: 1.5 }],
         twist: { type: 'crusher', perDent: 0.15 } },
     { id: 'SHOW_OVATION', name: 'Ovación', shape: { type: 'self' },
@@ -113,9 +113,9 @@ registerShowSkills([
     { id: 'SHOW_CHAIN_RELAY', name: 'Relé en Cadena', shape: { type: 'bolt', range: 6, radius: 0.7 },
         hits: [{ type: 'damage', dmgType: 'magical', base: 60, ratio: 0.35 }, { type: 'overcharge', charges: 1, power: 25 }],
         twist: { type: 'bounce', times: 2, mult: 0.7 } },
-    { id: 'SHOW_BLOWN_FUSE', name: 'Fusible Quemado', shape: { type: 'nova', radius: 2.5 },
+    { id: 'SHOW_BLOWN_FUSE', name: 'Fusible Quemado', shape: { type: 'nova', radius: 2.5 }, cost: 0.8,
         hits: [{ type: 'discharge', mult: 1.5 }, { type: 'slow', pct: 0.3, duration: 1.5 }] },
-    { id: 'SHOW_DISCHARGER', name: 'Descargador', shape: { type: 'whenHit', every: 5 },
+    { id: 'SHOW_DISCHARGER', name: 'Descargador', shape: { type: 'whenHit', every: 7 },
         hits: [{ type: 'discharge', mult: 1 }, { type: 'heal', amount: 30 }] },
     // --- Dent ---
     { id: 'SHOW_MONKEY_WRENCH', name: 'Llave Inglesa', shape: { type: 'strike', range: 1.5 },
@@ -129,8 +129,8 @@ registerShowSkills([
     // --- Overheat ---
     { id: 'SHOW_WELDING', name: 'Soldadura', shape: { type: 'strike', range: 1.5 },
         hits: [{ type: 'damage', dmgType: 'magical', base: 50, ratio: 0.4 }, { type: 'overheat', dps: 30, duration: 3 }, { type: 'root', duration: 0.6 }] },
-    { id: 'SHOW_TURBINE', name: 'Turbina', shape: { type: 'everyHit', every: 4 },
-        hits: [{ type: 'overheat', dps: 20, duration: 3 }, { type: 'haste', atkSpeed: 0.15, move: 0, duration: 2 }] },
+    { id: 'SHOW_TURBINE', name: 'Turbina', shape: { type: 'everyHit', every: 6 },
+        hits: [{ type: 'overheat', dps: 15, duration: 3 }, { type: 'haste', atkSpeed: 0.1, move: 0, duration: 2 }] },
     // --- Spreading ---
     { id: 'SHOW_VIRAL', name: 'Viral', shape: { type: 'strike', range: 5 },
         hits: [{ type: 'damage', dmgType: 'magical', base: 40, ratio: 0.3 }, { type: 'spread', radius: 3 }] },
@@ -138,7 +138,7 @@ registerShowSkills([
     { id: 'SHOW_PAPARAZZI', name: 'Paparazzi', shape: { type: 'bolt', range: 6, radius: 0.6 },
         hits: [{ type: 'damage', dmgType: 'physical', base: 40, ratio: 0.4 }, { type: 'mark' }],
         twist: { type: 'bounce', times: 3, mult: 0.8 } },
-    { id: 'SHOW_OVERHEAD_SHOT', name: 'Toma Cenital', shape: { type: 'blast', range: 7, radius: 1.2 },
+    { id: 'SHOW_OVERHEAD_SHOT', name: 'Toma Cenital', shape: { type: 'blast', range: 7, radius: 1.2 }, cost: 0.8,
         hits: [{ type: 'damage', dmgType: 'physical', base: 90, ratio: 0.6 }, { type: 'mark' }],
         twist: [{ type: 'windup', time: 0.5 }, { type: 'far', bonus: 0.25 }] },
     { id: 'SHOW_BLIND_SPOT', name: 'Ángulo Ciego', shape: { type: 'dash', cells: 3, radius: 1.5 },
@@ -151,17 +151,17 @@ registerShowSkills([
         hits: [{ type: 'heal', amount: 80 }, { type: 'shield', amount: 50, duration: 3 }] },
     { id: 'SHOW_FIRED_UP_CROWD', name: 'Público Enardecido', shape: { type: 'nova', radius: 3.5 },
         hits: [{ type: 'slow', pct: 0.3, duration: 2 }, { type: 'haste', atkSpeed: 0.3, move: 0.15, duration: 3 }] },
-    { id: 'SHOW_COUNTERPUNCH', name: 'Contragolpe', shape: { type: 'whenHit', every: 4 },
+    { id: 'SHOW_COUNTERPUNCH', name: 'Contragolpe', shape: { type: 'whenHit', every: 6 },
         hits: [{ type: 'damage', dmgType: 'physical', base: 50, ratio: 0.5 }, { type: 'stun', duration: 0.3 }] },
     // --- Ultimates ---
-    { id: 'SHOW_GRAND_FINALE', name: 'Gran Final', ultimate: true, shape: { type: 'everywhere' },
+    { id: 'SHOW_GRAND_FINALE', name: 'Gran Final', ultimate: true, shape: { type: 'everywhere' }, cost: 0.8,
         hits: [{ type: 'overheat', dps: 40, duration: 4 }, { type: 'overcharge', charges: 1, power: 60 }] },
     { id: 'SHOW_HEAT_WAVE', name: 'Ola de Calor', ultimate: true, shape: { type: 'nova', radius: 4 },
         hits: [{ type: 'damage', dmgType: 'magical', base: 120, ratio: 0.5 }, { type: 'overheat', dps: 40, duration: 4 }] },
-    { id: 'SHOW_FINAL_CUT', name: 'Corte Final', ultimate: true, shape: { type: 'bolt', range: 9, radius: 1, pierce: true },
+    { id: 'SHOW_FINAL_CUT', name: 'Corte Final', ultimate: true, shape: { type: 'bolt', range: 9, radius: 1, pierce: true }, cost: 0.8,
         hits: [{ type: 'damage', dmgType: 'physical', base: 220, ratio: 1 }],
         twist: [{ type: 'windup', time: 0.7 }, { type: 'execute', below: 0.3, bonus: 0.5 }] },
-    { id: 'SHOW_NATIONAL_BROADCAST', name: 'Cadena Nacional', ultimate: true, shape: { type: 'bolt', range: 7, radius: 0.8 },
+    { id: 'SHOW_NATIONAL_BROADCAST', name: 'Cadena Nacional', ultimate: true, shape: { type: 'bolt', range: 7, radius: 0.8 }, cost: 0.8,
         hits: [{ type: 'damage', dmgType: 'magical', base: 120, ratio: 0.5 }, { type: 'overcharge', charges: 1, power: 40 }],
         twist: { type: 'bounce', times: 5, mult: 0.85 } }
 ]);

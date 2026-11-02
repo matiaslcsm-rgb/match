@@ -36,8 +36,8 @@ const PASSIVE_SHAPES = ['everyHit', 'whenHit'];
 const ZONE_TICK = 0.5;
 // Every show skill is a bit cheaper than the raw budget: in the 528 bench (2026-11-02) they placed 0.3 worse on average
 // than the competitors' own skills
-const SHOW_PRICE = 0.92;
-const WINDUP_BONUS = 0.25;
+const SHOW_PRICE = 0.88;
+const WINDUP_BONUS = 0.4; // 0.25 lost too often to dodges (bench 528, 2026-11-02)
 const SELF_HITS = ['shield', 'heal', 'haste'];
 
 // Power points of each part at level 1. Cooldown and mana come from the total (partCosts).
@@ -50,7 +50,7 @@ const PART_POINTS = {
     leech: h => h.pct * 4, spread: () => 2.5
 };
 const SHAPE_POINTS = { strike: 1, bolt: 0.9, blast: 1.25, nova: 1.25, dash: 1.15, zone: 1, everywhere: 2, self: 1, everyHit: 1, whenHit: 1 };
-const TWIST_POINTS = { windup: 0.8, crusher: 1.15, execute: 1.15, close: 1.1, far: 1.1, bounce: 1 };
+const TWIST_POINTS = { windup: 0.7, crusher: 1.15, execute: 1.15, close: 1.1, far: 1.1, bounce: 1 };
 const BOUNCE_RANGE = 4;
 
 function partPoints(def) {
@@ -142,7 +142,7 @@ const SHAPE_TEXT = {
     whenHit: 'Pasiva: cada {every} golpes que recibís, contraatacás al que te pegó:'
 };
 const TWIST_TEXT = {
-    windup: 'Golpe anunciado: se prepara {windupTime}s y se puede esquivar, pero pega un 25% más.',
+    windup: 'Golpe anunciado: se prepara {windupTime}s y se puede esquivar, pero pega un 40% más.',
     crusher: 'Consume las Abolladuras del objetivo: +{perDent%} de daño por cada una.',
     execute: '+{execBonus%} de daño a los que tengan menos del {execBelow%} de su vida.',
     close: '+{closeBonus%} de daño a los que estén a 2 casillas o menos.',

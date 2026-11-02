@@ -42,7 +42,13 @@ medida con el banco).
   caen porque dependen de sus naturales.
 - [x] **Tanda 3** (2026-11-02): 20 más, 60 en total (10 definitivas). Piezas nuevas: rebote (`bounce`: el proyectil
   salta al enemigo más cercano), contagio (`spread`: pasa los estados del objetivo a los de al lado) y robo de vida
-  (`leech`). Se mide junto con las 40 anteriores en el banco de 528.
+  (`leech`). **Banco de 528 con las 60** (~280 apariciones cada una, ruido ±0,14): de -0,93 a +0,66 puestos. Dos
+  patrones: las **pasivas** salen fuertes de más (Contragolpe y Turbina -0,93; Descargador -0,46), porque no tienen
+  enfriamiento ni maná y el presupuesto no las cobra; y los **golpes anunciados** flojos (Toma Cenital, Prensa Hidráulica,
+  Corte Final, Desguace), porque la IA los esquiva. Ajuste: las tres pasivas saltan más espaciado, el anunciado pega
+  +40% (antes +25%) y es más barato, las 11 más flojas más baratas, y todas las del Show un 4% más (`SHOW_PRICE` 0,88:
+  seguían 0,4 puestos detrás de las naturales). Los ajustes de la tanda 1 y 2 se confirmaron: Placa Blindada pasó de
+  -0,50 a -0,18 y Escape de Nafta de -0,49 a -0,36. **Pendiente:** confirmar este ajuste con el próximo banco de 528.
 
 ---
 
