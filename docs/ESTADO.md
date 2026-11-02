@@ -16,6 +16,13 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
   ronda 5). Banco de 132, antes → después: ronda final 25 → 23; duelo mediano 14,2 → 20,7 s (17% por tiempo); M.O.R.T.I.S.
   16 → 34%, Vampiro 11 → 27%, Arcanista 30 → 20%, **Danzante 20 → 1%** (su innato premia moverse y su IA da vueltas
   alrededor del rival). Pendiente: si los duelos más largos molestan.
+- **Música y sonidos del show (2026-11-02, pedido del usuario: "ruido de duelo, fanfarrias de victoria, música de
+  batalla, no la medieval que quedó de la Torre"):** cuatro pistas electrónicas CC0 (menú, oleadas, duelo y jefes; la de
+  duelo es nueva y suena solo en tu duelo, `musicTargets` en music.js), campana de ring al arrancar una ronda con
+  duelo, fanfarrias al ganar tu duelo o una apuesta y un locutor ("Fight!", "You lose") en `js/data/sounds.js`. Fuentes
+  en `docs/CREDITOS.md`. Las pistas medievales viejas (`music/town.mp3`, `combat.ogg`, `boss.ogg`) quedaron en la
+  carpeta sin usar. Ojo: la de duelo pesa 15 MB y se baja recién cuando arranca tu primer duelo. La tribuna sigue con el
+  grito sintetizado: la grabación candidata dura 27 s y es para ambiente, no para cada festejo. 220/220 pruebas.
 - **El Danzante, arreglado (2026-11-02, pedido del usuario):** cada paso cuenta como "caminando" hasta que le toca el
   siguiente, así que si la preparación empezaba en el medio, el golpe esperaba a que terminara el paso. Contra un muñeco
   pegaba 19 veces en 20 s en vez de 25. Ahora la IA deja de girar un paso antes (`stepReachesWindup`, ai.js) y queda quieta

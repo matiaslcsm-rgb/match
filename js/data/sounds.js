@@ -13,7 +13,13 @@
 // Ejemplo:
 //   const SOUND_FILES = { betWin: 'sounds/apuesta-ganada.mp3', duel: 'sounds/duelo.ogg' };
 
+// Show sounds (user request 2026-11-02; sources in docs/CREDITOS.md)
 const SOUND_FILES = {
+    wave: 'sounds/announcer-fight.ogg',     // "Fight!" when a creep round starts
+    duel: 'sounds/duel-bell.wav',           // ring bell when a round with a duel starts
+    win: 'sounds/duel-win-fanfare.mp3',     // you won your duel
+    lose: 'sounds/announcer-you-lose.ogg',  // you lost your duel
+    betWin: 'sounds/bet-win-fanfare.mp3'    // someone won a bet
 };
 
 // Volumen de cada archivo (1 = normal), por si alguno suena muy fuerte o muy bajo. Ej: { betWin: 0.6 }

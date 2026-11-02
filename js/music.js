@@ -1,8 +1,9 @@
 // Música de MATCH (2026-10-28, sacada de la música por capas de Infinite Tower, towerMusic.js). Pistas libres de
 // opengameart.org (docs/CREDITOS.md). El menú y las fases tranquilas con la del taller; oleadas y duelos con la de
 // combate; los jefes de ronda con la de jefe. Cambia con fundido; lo que queda en silencio un rato se pausa.
-const MUSIC_TRACKS = { town: 'music/town.mp3', combat: 'music/combat.ogg', boss: 'music/boss.ogg' };
-const MUSIC_GAIN = { town: 0.5, combat: 0.5, boss: 0.55 }; // las grabaciones vienen a niveles distintos
+// User request 2026-11-02: show music instead of the medieval tracks left over from the Tower, with its own duel track.
+const MUSIC_TRACKS = { town: 'music/show-menu.ogg', combat: 'music/show-waves.mp3', duel: 'music/show-duel.ogg', boss: 'music/show-boss.mp3' };
+const MUSIC_GAIN = { town: 0.5, combat: 0.5, duel: 0.5, boss: 0.55 }; // las grabaciones vienen a niveles distintos
 const MUSIC = { volume: 0.6, fade: 1.6, idlePause: 6 };
 let musicOn = true;
 try { musicOn = localStorage.getItem('chc-music') !== 'off'; } catch (e) { /* sin almacenamiento: prendida */ }
@@ -23,7 +24,7 @@ function stopMusic() { Object.values(musicLayers).forEach(l => { l.target = 0; l
 // Qué tiene que sonar ahora: { key: volumen objetivo }
 function musicTargets() {
     if (gameState === 'BOSS') return { boss: 1 };
-    if (inCombat() && player && !player.inRest) return { combat: 0.85 };
+    if (inCombat() && player && !player.inRest) return player.arena && player.arena.kind === 'duel' ? { duel: 0.85 } : { combat: 0.85 };
     return { town: gameState === 'MENU' || gameState === 'HERO_SELECT' ? 0.7 : 0.6 };
 }
 // Cada cuadro (render): fundidos hacia el volumen objetivo

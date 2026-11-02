@@ -1576,6 +1576,15 @@ function toDuels(heroKey = 'CRANE', playerFights = true) {
     return arenas;
 }
 
+test('Música del show: la de duelo suena en tu duelo; la de oleadas, en las oleadas', () => {
+    toDuels();
+    checkEq(player.arena && player.arena.kind, 'duel', 'el jugador está en su duelo');
+    checkEq(Object.keys(musicTargets()).join(), 'duel', 'en el duelo, la música de duelo');
+    newGame('CRANE');
+    checkEq(Object.keys(musicTargets()).join(), 'combat', 'en la oleada, la de oleadas');
+    check(Object.values(MUSIC_TRACKS).every(p => p.startsWith('music/show-')), 'ninguna pista medieval de la Torre');
+});
+
 test('Un duelo por ronda: pelean los que menos pelearon, sin repetir la pareja anterior; los demás miran', () => {
     toDuels();
     checkEq(gameState, 'WAVE', 'el duelo se pelea en la misma fase que las oleadas');

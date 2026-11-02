@@ -13,6 +13,23 @@ bajo licencia **[CC BY 3.0](https://creativecommons.org/licenses/by/3.0/)**. El 
 - **skoll**: blood, fangs, winchester-rifle
 - **willdabeast**: gold-bar, orb-wand
 
+## Música y sonidos del show (MATCH, desde 2026-11-02)
+
+Elegidos por el usuario para reemplazar la música medieval que había quedado de la Torre. Todos de
+**[OpenGameArt.org](https://opengameart.org)** y **CC0** (dominio público; igual damos el crédito). No se modificaron, solo se
+renombraron.
+
+| Archivo | Para qué | Original | Autor | Licencia |
+|---|---|---|---|---|
+| `music/show-menu.ogg` | Menú y boxes | Electric Stream, de [T&T Free Cyberpunk Pack 2](https://opengameart.org/content/t-t-free-cyberpunk-pack-2) | tricksntraps | CC0 |
+| `music/show-waves.mp3` | Oleadas | [Hunter-class Lifeform](https://opengameart.org/content/hunter-class-lifeform) | vitalezzz | CC0 |
+| `music/show-duel.ogg` | Tu duelo | AI Fight, de [T&T Free Cyberpunk Pack 2](https://opengameart.org/content/t-t-free-cyberpunk-pack-2) | tricksntraps | CC0 |
+| `music/show-boss.mp3` | Jefes | [Dark Forces (Loop)](https://opengameart.org/content/dark-forcesloop) | Pro Sensory | CC0 |
+| `sounds/duel-bell.wav` | Arranca una ronda con duelo | Match bell, de [Boxing Ring](https://opengameart.org/content/boxing-ring-0) | Umplix | CC0 |
+| `sounds/duel-win-fanfare.mp3` | Ganaste tu duelo | [Hyper Ultra Fanfare](https://opengameart.org/content/hyper-ultra-fanfare) | Zane Little Music | CC0 |
+| `sounds/bet-win-fanfare.mp3` | Alguien ganó una apuesta | [Victory 6](https://opengameart.org/content/victory-6) | Musheran | CC0 |
+| `sounds/announcer-fight.ogg`, `sounds/announcer-you-lose.ogg` | Locutor: arranca la oleada, perdiste tu duelo | [Voiceover Pack: Fighter](https://opengameart.org/content/voiceover-pack-fighter-40-taunts) | Kenney | CC0 |
+
 ## Música (Infinite Tower)
 
 Pistas de **[OpenGameArt.org](https://opengameart.org)**. Todas son **CC0** (dominio público, sin obligación de crédito, igual
