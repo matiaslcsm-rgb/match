@@ -12,6 +12,15 @@ en una arena 3D. **El centro del diseño son los duelos:** que pelear entre comp
 **Descartado por ahora (decisión del usuario 2026-10-28):** el garaje / creador de competidor para el jugador ("no es
 algo que sume por ahora"). Se juega con los competidores del show.
 
+**Prioridad del momento (decisión del usuario 2026-11-02): el núcleo del juego, no lo gráfico.** "Dejemos la estética
+de robots por ahora y centrémonos en el core". Plan aprobado: habilidades armadas por piezas + 4 estados que se combinan,
+para que el draft sea armar un combo y el pool crezca rápido (de ~64 a ~120 habilidades en 3 tandas de 20, cada una
+medida con el banco).
+- [x] **Piezas en el motor** (2026-11-02): `js/statuses.js` (Sobrecarga, Abolladura, Recalentado, Marcado y el
+  cortocircuito) y `js/data/skillParts.js` (el armador: formas, golpes, giros y presupuesto de poder). 7 pruebas.
+- [ ] **Tanda 1:** 20 habilidades del Show, aprobadas por el usuario en una tabla antes de programarlas.
+- [ ] **Tanda 2 y 3**, después de medir la primera.
+
 ---
 
 ## Fase 1 — Terminar el 3D

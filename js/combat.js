@@ -134,13 +134,16 @@ function dealDamage(source, target, amount, type = 'physical', opts = {}) {
     if (source && source.heroClass === 'warrior' && type === 'physical' && opts.isCrit === undefined && !opts.relic && Math.random() < effCritChance(source) / 100) { final *= 2; opts = { ...opts, isCrit: true }; }
     if (type === 'magical' && source) final *= 1 + effSpellAmp(source) / 100;
     if (source && source.isHero && target.isHero && target.arena && target.arena.kind === 'duel' && !opts.fullDuelDamage) final *= 1 - DUEL_DAMAGE_REDUCTION; // fullDuelDamage: lo que no escala como un golpe (Autómatas, Aura de Corrupción)
+    const marked = !!source && amount > 0 && isDirectHit(opts) && consumeMark(target); // Marked (statuses.js): harder and through shields
+    if (marked) final *= 1 + STATUS.mark.bonus;
     final = mitigate(target, final * (1 - effDmgReduction(target)), type);
     let takenPct = sumMod(target, 'dmgTakenPct'); // ej: Condenado
     if (target.isHero && typeof suddenDeathBonus === 'function') takenPct += suddenDeathBonus(); // muerte súbita (roundEconomy.js)
     if (source && source.isRoundBoss) takenPct += sumMod(target, 'bossDmgTakenPct'); // ej: Placa de Producción
     // La maldición (Condenado) solo amplifica el daño de creeps y de héroes sin maldición
     if (source && source.isHero && isCondemned(source)) takenPct -= (getEffect(target, 'CONDEMNED') || { mods: {} }).mods.dmgTakenPct || 0;
-    final = absorbShield(target, Math.round(final * (1 + takenPct)));
+    final = Math.round(final * (1 + takenPct));
+    if (!marked) final = absorbShield(target, final);
     if (target.oneHit) final = target.hp;
     const floor = hasFlag(target, 'preventDeath') ? 1 : 0;
     const hpLost = Math.max(0, Math.min(final, target.hp - floor));
@@ -258,7 +261,7 @@ function fireSkillProjectile(attacker, opts) {
         dx: dx / dist, dy: dy / dist, dist, traveled: 0, speed: opts.speed, radius: opts.radius,
         dmg: opts.dmg, dmgType: opts.dmgType || 'magical', vfx: opts.vfx, skillName: opts.skillName,
         onHit: opts.onHit, onArrive: opts.onArrive, hitSet: new Set(), fxEl: fxCastingSkill ? skillVfx(fxCastingSkill).el : null,
-        stopOnHit: opts.stopOnHit, solid: opts.solid, arrow: opts.arrow, isCrit: opts.isCrit, quietMiss: opts.quietMiss, basic: opts.basic,
+        stopOnHit: opts.stopOnHit, solid: opts.solid, noDamage: opts.noDamage, arrow: opts.arrow, isCrit: opts.isCrit, quietMiss: opts.quietMiss, basic: opts.basic,
         announced: !!(fxCastingSkill && fxCastingSkill.windup) && attacker.arena.kind === 'duel' // golpe anunciado en un duelo (banco)
     });
 }
@@ -278,8 +281,11 @@ function updateProjectiles(arena, dt) {
                 p.hitSet.add(c);
                 let dealt;
                 dodgeableHit = p;
-                try { dealt = p.basic ? resolveBasicHit(p.attacker, c, p.dmg, p.isCrit) : dealDamage(p.attacker, c, p.dmg, p.dmgType, { isCrit: p.isCrit }).dealt; } finally { dodgeableHit = null; }
-                if (p.onHit) p.onHit(c, dealt);
+                try {
+                    if (p.noDamage) { dealt = 0; if (p.onHit) p.onHit(c, 0); } // show skills (data/skillParts.js) deal their own damage on hit
+                    else dealt = p.basic ? resolveBasicHit(p.attacker, c, p.dmg, p.isCrit) : dealDamage(p.attacker, c, p.dmg, p.dmgType, { isCrit: p.isCrit }).dealt;
+                } finally { dodgeableHit = null; }
+                if (!p.noDamage && p.onHit) p.onHit(c, dealt);
                 if (p.stopOnHit) stopped = true; // no atraviesa: se queda en el primero
             });
             if (stopped) { fxProjectileHit(p, p.x, p.y); projectiles.splice(i, 1); continue; }

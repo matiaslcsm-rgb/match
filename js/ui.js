@@ -224,7 +224,7 @@ function skillCardHtml(s, level = 0) {
     const type = s.isUltimate ? 'Definitiva' : s.kind === 'passive' ? 'Pasiva' : 'Activa';
     return `<div class="draft-card-head">${origin ? heroIconHtml(origin, 'md') : ''}<div>` +
         `<h4>${abilityLabel(s.name, s.isUltimate ? 'ult' : '')}${level ? ` <span class="item-meta">nivel ${level}</span>` : ''}</h4>` +
-        `<p class="meta"><span class="${natural ? 'natural' : ''}" style="${natural ? '' : `color:${color}`}">${natural ? '★ Natural' : 'De ' + naturalHeroName(s)}</span></p></div></div>` +
+        `<p class="meta"><span class="${natural ? 'natural' : ''}" style="${natural ? '' : `color:${color}`}">${natural ? '★ Natural' : skillOriginLabel(s)}</span></p></div></div>` +
         `<p class="draft-type ${s.isUltimate ? 'ult' : s.kind}">${type}${s.kind === 'passive' ? '' : ` &middot; ${skillCostLine(s, level)}`}</p>` +
         `<p>${describeSkill(s, level)}</p><div class="tags">${tagChips(s.tags)}</div>`;
 }

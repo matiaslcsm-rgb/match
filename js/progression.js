@@ -15,6 +15,7 @@ const SKILL_INDEX = {};
 Object.entries(HERO_SKILLS).forEach(([heroKey, skills]) => {
     Object.values(skills).forEach(s => { s.heroKey = heroKey; SKILL_INDEX[s.id] = s; });
 });
+Object.values(SHOW_SKILLS).forEach(s => { s.heroKey = SHOW_KEY; SKILL_INDEX[s.id] = s; }); // built from parts, no owner (data/skillParts.js)
 const ALL_SKILLS = Object.values(SKILL_INDEX);
 
 // --- VALORES POR NIVEL ---
@@ -141,7 +142,8 @@ function renderBanSelect() {
     if (!sel) return;
     const last = lastBan();
     sel.innerHTML = '<option value="">Ninguna</option>' + Object.values(HERO_TEMPLATES).map(t =>
-        `<optgroup label="${t.name}">${Object.values(HERO_SKILLS[t.key] || {}).map(s => `<option value="${s.id}">${s.name}${s.isUltimate ? ' (definitiva)' : ''}</option>`).join('')}</optgroup>`).join('');
+        `<optgroup label="${t.name}">${Object.values(HERO_SKILLS[t.key] || {}).map(s => `<option value="${s.id}">${s.name}${s.isUltimate ? ' (definitiva)' : ''}</option>`).join('')}</optgroup>`).join('') +
+        (Object.keys(SHOW_SKILLS).length ? `<optgroup label="Del Show">${Object.values(SHOW_SKILLS).map(s => `<option value="${s.id}">${s.name}</option>`).join('')}</optgroup>` : '');
     sel.value = SKILL_INDEX[last] ? last : '';
 }
 // Al elegir el héroe: lo que quedó en el selector pasa a estar baneado
@@ -153,4 +155,6 @@ function applyBanChoice() {
     if (id) log(`🚫 Baneaste ${SKILL_INDEX[id].name}: no le va a salir a nadie en el draft.`);
 }
 
-function naturalHeroName(skill) { return HERO_TEMPLATES[skill.heroKey].name; }
+function naturalHeroName(skill) { return skill.heroKey === SHOW_KEY ? 'el Show' : HERO_TEMPLATES[skill.heroKey].name; }
+// "De Grúa" / "Del Show" (draft card)
+function skillOriginLabel(skill) { return skill.heroKey === SHOW_KEY ? 'Del Show' : 'De ' + naturalHeroName(skill); }

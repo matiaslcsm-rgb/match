@@ -2938,6 +2938,113 @@ test('MATCH 3D: los efectos del piso se dibujan en otro canvas (la calcomanía d
     check(typeof drawTargetingHint === 'function' && drawMouseOverlay.length === 2, 'el cartel de apuntar se puede dibujar aparte del piso');
 });
 
+// --- SHOW STATUSES AND SKILLS BUILT FROM PARTS (statuses.js, data/skillParts.js) ---
+function partsDuel() {
+    toDuels('CRANE');
+    const [a, b] = arenas[0].heroes;
+    a.x = 3; a.y = 6; b.x = 4; b.y = 6;
+    a.mana = a.maxMana; b.effects = []; b.stunImmuneUntil = 0;
+    return [a, b];
+}
+
+test('Sobrecarga: las cargas se juntan y a las 3 explotan', () => {
+    const [a, b] = partsDuel();
+    const hp = b.hp;
+    applyOvercharge(a, b, 1, 40); applyOvercharge(a, b, 1, 40);
+    checkEq(statusStacks(b, 'overcharge'), 2, 'dos cargas');
+    checkEq(b.hp, hp, 'todavía no explota');
+    applyOvercharge(a, b, 1, 40);
+    checkEq(statusStacks(b, 'overcharge'), 0, 'a las 3 se van');
+    check(b.hp < hp, 'y le pegan');
+    applyOvercharge(a, b, 1, 40);
+    checkEq(dischargeOvercharge(a, b, 2), 1, 'una descarga temprana usa las que haya');
+});
+
+test('Abolladura: apila hasta 5, sube el daño recibido y se consume', () => {
+    const [, b] = partsDuel();
+    applyDent(b, 3); applyDent(b, 4);
+    checkEq(statusStacks(b, 'dent'), 5, 'tope 5');
+    checkNear(sumMod(b, 'dmgTakenPct'), 0.25, '+5% cada una');
+    checkEq(consumeDents(b), 5, 'las consume');
+    checkEq(statusStacks(b, 'dent'), 0, 'y se van');
+});
+
+test('Recalentado quema y con Sobrecarga hace cortocircuito', () => {
+    const [a, b] = partsDuel();
+    applyOverheat(a, b, 40, 3);
+    const hp = b.hp;
+    tickEffects(b, 0.5);
+    check(b.hp < hp, 'quema cada medio segundo');
+    applyOvercharge(a, b, 1, 30);
+    check(hasFlag(b, 'stun'), 'cortocircuito: aturde');
+    check(!getEffect(b, 'OVERHEAT') && !getEffect(b, 'OVERCHARGE'), 'y se lleva los dos estados');
+});
+
+test('Marcado: el próximo golpe directo pega 50% más y atraviesa el escudo', () => {
+    const [a, b] = partsDuel();
+    b.hp = b.maxHp;
+    let hp = b.hp;
+    dealDamage(a, b, 100, 'pure', { isAttack: true });
+    const plain = hp - b.hp;
+    addShield(b, 500, 5);
+    applyMark(b);
+    hp = b.hp;
+    dealDamage(a, b, 100, 'pure', { isAttack: true });
+    checkEq(hp - b.hp, Math.round(plain * 1.5), 'pega 50% más');
+    check(getEffect(b, 'SHIELD').data.left > 0 && !getEffect(b, 'MARKED'), 'el escudo queda entero y la marca se gasta');
+});
+
+const PART_TEST_BOLT = { id: 'TEST_PART_BOLT', name: 'Prueba', shape: { type: 'bolt', range: 6, radius: 0.7 },
+    hits: [{ type: 'damage', dmgType: 'magical', base: 90, ratio: 0.4 }, { type: 'overcharge', charges: 1, power: 30 }], twist: { type: 'windup', time: 0.6 } };
+
+test('Piezas: el armador hace valores por nivel, texto, etiquetas y costos', () => {
+    const s = buildShowSkill(PART_TEST_BOLT);
+    checkEq(s.kind, 'active', 'activa');
+    check(s.pointTarget && s.windup === 0.6, 'se apunta y es anunciada');
+    check(s.tags.includes('MÁGICO') && s.tags.includes('PERJUICIO'), 'etiquetas automáticas');
+    checkEq(s.values.dmg.length, 4, '4 niveles de daño');
+    check(!/\{\w+%?\}/.test(describeSkill(s, 1)), 'la descripción no deja marcadores sin completar');
+    const cd = s.values.cooldown[0];
+    check(cd >= 5 && cd <= 22 && s.values.manaCost[0] > 0, 'enfriamiento y maná salen del presupuesto');
+    const big = buildShowSkill({ ...PART_TEST_BOLT, hits: [{ type: 'damage', dmgType: 'magical', base: 200, ratio: 0.4 }, { type: 'stun', duration: 1 }] });
+    check(big.values.cooldown[0] > cd, 'más poder, más enfriamiento');
+});
+
+test('Piezas: el proyectil aplica sus golpes y el remate consume Abolladuras', () => {
+    const [a, b] = partsDuel();
+    const bolt = buildShowSkill({ ...PART_TEST_BOLT, twist: undefined });
+    const hp = b.hp;
+    check(bolt.cast(a), 'sale');
+    for (let i = 0; i < 20; i++) updateProjectiles(a.arena, 0.05);
+    check(b.hp < hp, 'pega');
+    checkEq(statusStacks(b, 'overcharge'), 1, 'y deja una carga');
+    const crush = buildShowSkill({ id: 'TEST_PART_CRUSH', name: 'Prueba', shape: { type: 'strike', range: 1.5 },
+        hits: [{ type: 'damage', dmgType: 'pure', base: 100 }], twist: { type: 'crusher', perDent: 0.2 } });
+    b.hp = b.maxHp;
+    let before = b.hp; crush.cast(a); const plain = before - b.hp;
+    applyDent(b, 3);
+    before = b.hp; crush.cast(a);
+    checkEq(statusStacks(b, 'dent'), 0, 'consume las abolladuras');
+    check(before - b.hp > plain * 1.5, 'y pega bastante más');
+});
+
+test('Piezas: la zona pega cada medio segundo y la pasiva cada N golpes', () => {
+    const [a, b] = partsDuel();
+    const zone = buildShowSkill({ id: 'TEST_PART_ZONE', name: 'Prueba', shape: { type: 'zone', range: 6, radius: 1.5, duration: 3 },
+        hits: [{ type: 'damage', dmgType: 'magical', base: 40, ratio: 0 }] });
+    check(zone.cast(a), 'sale');
+    const hp = b.hp;
+    tickEffects(a, 0.5);
+    check(b.hp < hp, 'la zona pega');
+    const passive = buildShowSkill({ id: 'TEST_PART_EVERY', name: 'Prueba', shape: { type: 'everyHit', every: 3 }, hits: [{ type: 'dent', stacks: 1 }] });
+    a.skills = [passive]; a.skillLevels.TEST_PART_EVERY = 1;
+    emit(a, 'onHit', { target: b }); emit(a, 'onHit', { target: b });
+    checkEq(statusStacks(b, 'dent'), 0, 'dos golpes, nada');
+    emit(a, 'onHit', { target: b });
+    checkEq(statusStacks(b, 'dent'), 1, 'al tercero, abolladura');
+    checkEq(skillOriginLabel({ heroKey: SHOW_KEY }), 'Del Show', 'en el draft dice que es del Show');
+});
+
 function testSandbox() {
     autoCast = false; // las pruebas controlan a mano cuándo se lanza cada habilidad (la de habilidades automáticas lo prende)
     keyboardMove = true; quickCast = false; // las pruebas de movimiento usan las flechas; las de controles estilo Dota lo apagan

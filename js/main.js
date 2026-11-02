@@ -1,7 +1,7 @@
 // Punto de entrada: conecta los botones y arranca el bucle principal.
 
 // Versión visible en el menú: si no coincide con la última subida, el navegador muestra una copia vieja (Ctrl+F5).
-const GAME_VERSION = '2026-10-31 · MATCH: zoom con la rueda y arena completa';
+const GAME_VERSION = '2026-11-02 · MATCH: habilidades por piezas y estados del show';
 document.getElementById('game-version').textContent = `Versión ${GAME_VERSION}`;
 // Se actualiza solo (2026-10-17, "no se actualizó"): GitHub Pages deja el juego en la caché del navegador hasta 10 min.
 // Si el main.js del servidor trae otra versión, se vuelven a bajar la página y sus archivos y se recarga (una vez por versión).
@@ -97,24 +97,25 @@ function validateContent() {
         const ults = skills.filter(s => s.isUltimate);
         if (![3, 4].includes(skills.length - ults.length)) problems.push(`${t.key}: tiene ${skills.length - ults.length} habilidades normales (deben ser 3, o 4 como Grúa)`);
         if (ults.length !== 1) problems.push(`${t.key}: tiene ${ults.length} definitivas (debe ser 1)`);
-        skills.forEach(s => {
-            const where = `${t.key}/${s.id}`;
-            checkAbility(s, where);
-            if (s.kind === 'active' && typeof s.cast !== 'function') problems.push(`${where}: es activa pero no tiene cast()`);
-            if (s.kind === 'passive' && !s.hooks) problems.push(`${where}: es pasiva pero no tiene hooks`);
-            if (s.kind !== 'active' && s.kind !== 'passive') problems.push(`${where}: kind debe ser 'active' o 'passive'`);
-            if (!s.values) { problems.push(`${where}: no tiene values`); return; }
-            if (s.kind === 'active' && (s.values.cooldown === undefined || s.values.manaCost === undefined)) problems.push(`${where}: falta cooldown o manaCost en values`);
-            // Los valores por nivel tienen que tener exactamente tantos niveles como la habilidad
-            Object.entries(s.values).forEach(([key, v]) => {
-                if (Array.isArray(v) && v.length !== maxSkillLevel(s)) problems.push(`${where}: values.${key} tiene ${v.length} niveles (deben ser ${maxSkillLevel(s)})`);
-            });
-            // Cada marcador {clave} de la descripción tiene que existir en values
-            [...s.description.matchAll(/\{(\w+)%?\}/g)].forEach(([, key]) => {
-                if (s.values[key] === undefined) problems.push(`${where}: la descripción usa {${key}} pero no existe en values`);
-            });
-        });
+        skills.forEach(s => checkSkill(s, `${t.key}/${s.id}`));
     });
+    Object.values(SHOW_SKILLS).forEach(s => checkSkill(s, `SHOW/${s.id}`)); // built from parts (data/skillParts.js)
+    function checkSkill(s, where) {
+        checkAbility(s, where);
+        if (s.kind === 'active' && typeof s.cast !== 'function') problems.push(`${where}: es activa pero no tiene cast()`);
+        if (s.kind === 'passive' && !s.hooks) problems.push(`${where}: es pasiva pero no tiene hooks`);
+        if (s.kind !== 'active' && s.kind !== 'passive') problems.push(`${where}: kind debe ser 'active' o 'passive'`);
+        if (!s.values) { problems.push(`${where}: no tiene values`); return; }
+        if (s.kind === 'active' && (s.values.cooldown === undefined || s.values.manaCost === undefined)) problems.push(`${where}: falta cooldown o manaCost en values`);
+        // Los valores por nivel tienen que tener exactamente tantos niveles como la habilidad
+        Object.entries(s.values).forEach(([key, v]) => {
+            if (Array.isArray(v) && v.length !== maxSkillLevel(s)) problems.push(`${where}: values.${key} tiene ${v.length} niveles (deben ser ${maxSkillLevel(s)})`);
+        });
+        // Cada marcador {clave} de la descripción tiene que existir en values
+        [...s.description.matchAll(/\{(\w+)%?\}/g)].forEach(([, key]) => {
+            if (s.values[key] === undefined) problems.push(`${where}: la descripción usa {${key}} pero no existe en values`);
+        });
+    }
     Object.entries(ITEMS).forEach(([key, item]) => {
         if (item.key !== key) problems.push(`Ítem ${key}: su key no coincide`);
         if (item.tier === 'basic') {

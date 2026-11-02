@@ -94,7 +94,7 @@ function startSkillDraft(mode = 'normal', exclude = []) {
 // Suma la habilidad elegida al kit. Llega en nivel 0: hay que invertirle un punto para usarla.
 function learnSkill(skill) {
     player.addSkill(skill);
-    log(`✨ Drafteaste: ${skill.name}${skill.heroKey !== player.key ? ` (de ${naturalHeroName(skill)})` : ''}. Invertile un punto para usarla.`);
+    log(`✨ Drafteaste: ${skill.name}${skill.heroKey !== player.key ? ` (${skillOriginLabel(skill).toLowerCase()})` : ''}. Invertile un punto para usarla.`);
     showPanel('draft-container', false);
     startPreparation();
 }
