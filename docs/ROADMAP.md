@@ -49,6 +49,17 @@ medida con el banco).
   +40% (antes +25%) y es más barato, las 11 más flojas más baratas, y todas las del Show un 4% más (`SHOW_PRICE` 0,88:
   seguían 0,4 puestos detrás de las naturales). Los ajustes de la tanda 1 y 2 se confirmaron: Placa Blindada pasó de
   -0,50 a -0,18 y Escape de Nafta de -0,49 a -0,36. **Pendiente:** confirmar este ajuste con el próximo banco de 528.
+- [x] **Banco de 528 de confirmación** (2026-11-02, pedido del usuario; ya con caminar que corta el golpe y el daño que
+  sube en el duelo): de -0,82 a +0,44 puestos (antes -0,93 a +0,66); las del Show, en promedio, 0,27 puestos detrás de
+  las naturales (antes 0,4). Fuertes de más: casi todas las de **Recalentado** (Escape de Nafta -0,82, Radiador Roto,
+  Lanzallamas, Termo-Bomba) y las **pasivas** (Contragolpe -0,69, Batería Externa), más Pararrayos. Flojas: las
+  **anunciadas** y de **remate** (Toma Cenital +0,44, Corte Final, Golpe de Gracia), Fusible Quemado, Viral y Corte a
+  Negro. Ajuste: las activas fuertes más caras (`cost` 1,1 a 1,25), las pasivas más espaciadas, las flojas más baratas.
+  **Segundo banco de 528:** de -0,65 a +0,59. Mejoraron Escape de Nafta (-0,38), Pararrayos (-0,33), Toma Cenital
+  (+0,22), Golpe de Gracia (+0,19) y Corte a Negro (+0,11). No alcanzó para las pasivas (Radiador Roto -0,65, Contragolpe
+  -0,53, Batería Externa -0,44) ni para Fusible Quemado (+0,59) y Corte Final (+0,47). Siguen fuertes 5 de Recalentado
+  (se sumó Turbina, -0,46): **apunta a que el problema es el estado, no cada habilidad.** Pendiente (decisión): bajar la
+  quemadura de Recalentado para todas, o seguir retocando de a una.
 - [x] **Estados visibles** (2026-11-02, recomendado y aprobado: "la profundidad no le llegaba al que juega"):
   `js/statusFx.js`. Debajo de cada barra de vida, un ícono por estado (rayo con sus cargas, que titila cuando falta
   una para explotar; abolladura con su número; llama del recalentado) y una mira rosa que gira sobre la cabeza del
