@@ -10,10 +10,11 @@ registerHero({
     description: 'Agilidad: guerrero que convierte el movimiento en daño. Gira alrededor de su objetivo encadenando ataques sin quedarse quieto.',
     scaling: { stat: 'atk', perKills: 8, perKillsAmount: 1.5, perHeroKill: 4 },
     innate: {
-        id: 'DANCER_DANCE', name: 'Danza Cinética', moveNeeded: 2, moveWindow: 2, maxCharges: 5, chargeDuration: 5,
+        // moveNeeded 1 (was 2): walking cancels the wind-up, so there is only room for one step between hits
+        id: 'DANCER_DANCE', name: 'Danza Cinética', moveNeeded: 1, moveWindow: 2, maxCharges: 5, chargeDuration: 5,
         atkSpeedPerCharge: 0.02, evasionPerCharge: 1, burstMult: 0.4,
         tags: ['AL_MOVERSE', 'AL_GOLPEAR', 'MEJORA'],
-        description: 'Innato: si te moviste al menos 2 casillas en los últimos 2s, cada ataque básico te da 1 carga de Danza por 5s (máx. 5). Cada carga: +2% vel. de ataque y +1% evasión. Con 5 cargas, tu próximo ataque las consume y da un golpe extra de 40% de tu daño físico.',
+        description: 'Innato: si te moviste al menos 1 casilla en los últimos 2s, cada ataque básico te da 1 carga de Danza por 5s (máx. 5). Cada carga: +2% vel. de ataque y +1% evasión. Con 5 cargas, tu próximo ataque las consume y da un golpe extra de 40% de tu daño físico.',
         hooks: {
             onMove(owner, { steps }, innate) {
                 const moves = owner.danceMoves || (owner.danceMoves = []);

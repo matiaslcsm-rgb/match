@@ -1231,13 +1231,13 @@ test('Ancla: cada golpe ralentiza y quita evasión', () => {
     checkNear(effEvasion(player), ev - CREEP_TYPES.ANCHOR.evasionLoss, 'sin evasión');
 });
 
-test('Danza Cinética: moverse 2 casillas y pegar da cargas; con 5, el próximo golpe hace un golpe extra', () => {
+test('Danza Cinética: moverse 1 casilla y pegar da cargas; con 5, el próximo golpe hace un golpe extra', () => {
     newGame('DANCER');
     const c = dummy({ hp: 5000, maxHp: 5000 });
     const inn = player.innate;
     resolveBasicHit(player, c, 10, false);
     check(!getEffect(player, 'DANCER_DANCE'), 'quieto no carga');
-    emit(player, 'onMove', { steps: 1 }); emit(player, 'onMove', { steps: 1 });
+    emit(player, 'onMove', { steps: 1 });
     resolveBasicHit(player, c, 10, false);
     checkEq(getEffect(player, 'DANCER_DANCE').data.charges, 1, 'una carga');
     checkNear(effEvasion(player), player.evasion + inn.evasionPerCharge, '+1% evasión por carga');
@@ -1250,6 +1250,29 @@ test('Danza Cinética: moverse 2 casillas y pegar da cargas; con 5, el próximo 
     gameClock += inn.moveWindow + 0.1;
     resolveBasicHit(player, c, 10, false);
     check(!getEffect(player, 'DANCER_DANCE'), 'el movimiento viejo ya no cuenta');
+});
+
+test('Danzante con IA: gira entre golpes sin demorarlos y junta Danza', () => {
+    newGame('DANCER'); autopilot = true;
+    try {
+        const c = dummy({ hp: 1e9, maxHp: 1e9, moveInterval: 1e9, atk: 0 });
+        creeps.forEach(o => { if (o !== c) o.hp = 0; });
+        let hits = 0, steps = 0, charged = false;
+        const real = resolveBasicHit;
+        resolveBasicHit = (...a) => { if (a[0] === player) hits++; return real(...a); };
+        try {
+            for (let i = 0; i < 200; i++) {
+                const x = player.x, y = player.y;
+                gameClock += 0.05; updateWave(0.05);
+                if (x !== player.x || y !== player.y) steps++;
+                if (getEffect(player, 'DANCER_DANCE')) charged = true;
+            }
+        } finally { resolveBasicHit = real; }
+        // 10 s at ~1.24 attacks per second; a step that runs into the wind-up would cost ~0.3 s per hit (about 9 hits)
+        check(hits >= 11, `pega sin demoras (${hits} golpes en 10 s)`);
+        check(steps >= 3, `se mueve entre golpes (${steps} pasos)`);
+        check(charged, 'junta cargas de Danza');
+    } finally { autopilot = false; }
 });
 
 test('Ritmo Letal: suma daño contra el mismo objetivo y se borra al cambiar', () => {

@@ -55,6 +55,9 @@ medida con el banco).
   Marcado. Cuando un estado se cobra hay golpe: rayo del cielo y sacudida en la descarga, rayo con fuego y una pausa
   más larga en el cortocircuito, chispas de metal que crecen con las abolladuras aplastadas, impacto en la marca. En el
   draft, cada habilidad del Show dice qué estado pone y cuál usa, en sus colores.
+- [x] **El Danzante después de "caminar corta el golpe"** (2026-11-02): había caído a 1% porque sus pasos alrededor del
+  rival demoraban cada golpe. La IA deja de girar un paso antes de la preparación y la Danza pide 1 casilla en vez de 2.
+  Banco de 132: 13% de victorias y 52% de duelos (detalle en `docs/ESTADO.md`).
 
 ---
 

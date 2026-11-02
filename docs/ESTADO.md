@@ -15,7 +15,14 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
   descartada: cortar toda la carga dejaba a los de distancia sin poder alejarse de los creeps (Alquimista afuera en la
   ronda 5). Banco de 132, antes → después: ronda final 25 → 23; duelo mediano 14,2 → 20,7 s (17% por tiempo); M.O.R.T.I.S.
   16 → 34%, Vampiro 11 → 27%, Arcanista 30 → 20%, **Danzante 20 → 1%** (su innato premia moverse y su IA da vueltas
-  alrededor del rival). Pendiente: el Danzante y si los duelos más largos molestan.
+  alrededor del rival). Pendiente: si los duelos más largos molestan.
+- **El Danzante, arreglado (2026-11-02, pedido del usuario):** cada paso cuenta como "caminando" hasta que le toca el
+  siguiente, así que si la preparación empezaba en el medio, el golpe esperaba a que terminara el paso. Contra un muñeco
+  pegaba 19 veces en 20 s en vez de 25. Ahora la IA deja de girar un paso antes (`stepReachesWindup`, ai.js) y queda quieta
+  justo cuando empieza la preparación. Como entre golpes solo entra un paso, la Danza pide moverse 1 casilla en los
+  últimos 2 s (antes 2). Resultado contra el muñeco: 25 golpes y las mismas cargas que antes del cambio. Banco de 132:
+  Danzante 1 → 13% de victorias (52% de duelos); ronda final 23; duelo mediano 20,7 → 19 s; Vampiro 30%, M.O.R.T.I.S.
+  29%, Zeus 25%, Arcanista 18%. 219/219 pruebas.
 - **Núcleo antes que gráficos (2026-11-02, decisión del usuario):** se deja la estética de robots por ahora. Sistema
   aprobado: **habilidades por piezas** (`js/data/skillParts.js`: una habilidad nueva es una línea de datos con forma,
   golpes y giro; el armador escribe valores por nivel, texto, etiquetas y lanzamiento, y saca enfriamiento y maná de un

@@ -3,7 +3,7 @@
   "configurations": [
     {
       "name": "juego",
-      "runtimeExecutable": "python",
+      "runtimeExecutable": "py",
       "runtimeArgs": ["docs/captura.py", "8766"],
       "port": 8766
     }

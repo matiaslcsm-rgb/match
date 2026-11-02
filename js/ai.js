@@ -79,7 +79,12 @@ function aiMoveDirection(hero) {
         return distance(hero, focus) > range ? stepToward(hero, focus) : { dx: 0, dy: 0 };
     }
     if (distance(hero, focus) > Math.max(1, hero.attackRange)) return stepToward(hero, focus);
-    return movesToFight(hero) ? circleStep(hero, focus) : { dx: 0, dy: 0 };
+    return movesToFight(hero) && !stepReachesWindup(hero) ? circleStep(hero, focus) : { dx: 0, dy: 0 };
+}
+// A step counts as walking until the next one would be due: if the wind-up starts before then, the step delays the hit.
+// Circlers stop one step early so they are standing still right when the wind-up begins.
+function stepReachesWindup(hero) {
+    return walkCancelsAttack() && (hero.attackTimer + heroStepTime(hero)) * effAtkSpeed(hero) >= ATTACK_WINDUP_FRAC;
 }
 
 // Héroes que ganan algo al moverse (innato con AL_MOVERSE, ej: Danza Cinética): en vez de quedarse quietos, giran
