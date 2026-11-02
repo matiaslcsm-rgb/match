@@ -1755,6 +1755,19 @@ test('Previa: al empezar la ronda se eligen los duelistas y los demás apuestan;
     checkEq(arenas[0].heroes.join(), pair.join(), 'los mismos de la previa');
 });
 
+test('Apuestas: cada duelista muestra sus habilidades con nivel y sus ítems', () => {
+    toBetting(400);
+    const [a] = bettablePairs()[0];
+    giveItem(a, 'BLADE');
+    renderBetting();
+    const side = document.querySelector('#bet-pairs .bet-duelist');
+    const txt = side.textContent;
+    a.skills.forEach(s => check(txt.includes(s.name) && txt.includes(`nv ${skillLevel(a, s)}`), `la habilidad ${s.name} con su nivel`));
+    check(txt.includes(ITEMS.BLADE.name), 'el ítem');
+    const chip = [...side.querySelectorAll('.bd-chip')].find(c => c.textContent.includes(a.skills[0].name));
+    check(chip && chip.title.length > 10, 'al pasar el mouse dice qué hace');
+});
+
 test('Apuesta: tope del 50% del oro y una por ronda', () => {
     toBetting(400);
     const [a, b] = bettablePairs()[0];

@@ -89,6 +89,8 @@ Ordenadas de más a menos valor según lo que dicen los jugadores del original. 
 
 1. **Ver las habilidades y los ítems de los duelistas en la ventana de apuestas.** Es lo que hace que apostar sea leer
    el duelo y no tirar una moneda. Chico, no cambia el balance. *Va al roadmap como ítem normal (C1).*
+   **Hecho el 2026-11-02:** cada duelista muestra sus habilidades con su nivel y sus ítems; al pasar el mouse, qué hace
+   cada uno (`betKitHtml`, ui.js).
 2. **Medir cuánto oro da pelear un duelo contra cuánto da apostar.** Es el error que *Clash* le corrigió a *Chaos*.
    Con el banco de partidas: oro del ganador del duelo contra la ganancia promedio de las apuestas. Si apostar rinde más,
    subir lo del duelista. *Va al roadmap con el balance del final (C2).*

@@ -16,6 +16,10 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
   ronda 5). Banco de 132, antes → después: ronda final 25 → 23; duelo mediano 14,2 → 20,7 s (17% por tiempo); M.O.R.T.I.S.
   16 → 34%, Vampiro 11 → 27%, Arcanista 30 → 20%, **Danzante 20 → 1%** (su innato premia moverse y su IA da vueltas
   alrededor del rival). Pendiente: si los duelos más largos molestan.
+- **Apuestas que se leen (2026-11-02, idea 1 de `docs/REFERENCIA-CHC.md`, elegida por el usuario):** en la ventana de
+  apuestas, cada duelista muestra sus habilidades con su nivel (con el color del atributo de origen; las definitivas,
+  marcadas) y sus ítems con ícono; al pasar el mouse, qué hace cada uno (`betKitHtml`, ui.js). Solo interfaz: no cambia
+  el balance. 221/221 pruebas.
 - **Música y sonidos del show (2026-11-02, pedido del usuario: "ruido de duelo, fanfarrias de victoria, música de
   batalla, no la medieval que quedó de la Torre"):** cuatro pistas electrónicas CC0 (menú, oleadas, duelo y jefes; la de
   duelo es nueva y suena solo en tu duelo, `musicTargets` en music.js), campana de ring al arrancar una ronda con

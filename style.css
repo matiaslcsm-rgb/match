@@ -938,3 +938,13 @@ body.log-open #combat-log { height: calc(100% - 26px); }
     #hb-name { visibility: hidden; }
     #hb-passives { left: 132px; }
 }
+
+/* Betting window: each duelist's skills and items (idea 1 of docs/REFERENCIA-CHC.md) */
+.bd-kit { width: 100%; text-align: left; }
+.bd-kit-title { font-size: 0.68rem; color: var(--in-dim); text-transform: uppercase; letter-spacing: 1px; margin: 4px 0 2px; }
+.bd-chips { display: flex; flex-wrap: wrap; gap: 3px; }
+.bd-chip { background: var(--in-cell2); border: 1px solid var(--in-line); border-left: 3px solid var(--in-edge); padding: 1px 5px; font-size: 0.72rem; color: var(--in-bone); cursor: help; display: inline-flex; align-items: center; }
+.bd-chip small { color: var(--in-dim); margin-left: 3px; }
+.bd-chip.ult { box-shadow: inset 0 0 0 1px var(--in-yellow); }
+.bd-chip.item { border-left-color: var(--in-line); }
+.bd-chips > small { color: var(--in-dim); font-size: 0.72rem; }

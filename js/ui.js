@@ -471,7 +471,23 @@ function betDuelistHtml(h) {
         `<div class="bd-name">${h.displayName}</div>` +
         `<div class="bd-stats"><span>${heroRank(h)}º · ${h.points} pts</span><span>Nivel ${h.level} · <span class="hearts">${lives}</span></span>` +
         `<span>Duelos ${h.duelWins} ganados · ${h.duelLosses} perdidos</span></div>` +
+        betKitHtml(h) +
         `<div class="bd-pot">💰 ${betsOn(h)}g apostados${n ? ` (${n} apuesta${n > 1 ? 's' : ''})` : ''}</div>`;
+}
+// The duelist's skills (with level) and items, so betting means reading the duel (idea 1 of docs/REFERENCIA-CHC.md).
+// Hovering a chip shows what it does.
+function betKitHtml(h) {
+    const attr = s => HERO_TEMPLATES[s.heroKey] ? ATTR_INFO[HERO_TEMPLATES[s.heroKey].primaryAttr].color : '';
+    const skills = h.skills.map(s => {
+        const lvl = skillLevel(h, s), tip = stripHtml(s.values ? describeSkill(s, lvl) : s.description || '');
+        return `<span class="bd-chip${s.isUltimate ? ' ult' : ''}" style="border-left-color:${attr(s) || 'var(--in-edge)'}" title="${tip.replace(/"/g, '&quot;')}">` +
+            `${s.name} <small>nv ${lvl}</small></span>`;
+    }).join('');
+    const items = h.inventory.filter(i => ITEMS[i.key]).map(i => `<span class="bd-chip item" title="${stripHtml(describeItem(ITEMS[i.key]) || '').replace(/"/g, '&quot;')}">` +
+        `${itemIconHtml(i.key)}${ITEMS[i.key].name}</span>`)
+        .concat(h.neutral && NEUTRAL_ITEMS[h.neutral] ? [`<span class="bd-chip item">✨ ${NEUTRAL_ITEMS[h.neutral].name}</span>`] : []).join('');
+    return `<div class="bd-kit"><div class="bd-kit-title">Habilidades</div><div class="bd-chips">${skills || '<small>ninguna</small>'}</div>` +
+        `<div class="bd-kit-title">Ítems</div><div class="bd-chips">${items || '<small>ninguno</small>'}</div></div>`;
 }
 
 let betAmount = 0; // monto elegido en la ventana de apuestas (arranca en 0: el riesgo lo decidís vos)
