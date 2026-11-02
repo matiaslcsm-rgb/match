@@ -30,7 +30,9 @@ draft, tienda, un duelo por ronda, apuestas, jefes) con competidores y creeps co
 - La arena en 2D (para comparar): `index.html?view3d=0`.
 
 ## Reglas de la casa
-- Español rioplatense con voseo en código, comentarios, commits e interfaz. El usuario no es programador.
+- **Idioma (pedido del usuario 2026-11-02):** el código nuevo, sus comentarios y los commits van en inglés; lo que lee
+  el usuario va en español rioplatense con voseo: el chat, la interfaz del juego y los documentos (`docs/`). No se
+  traduce el código que ya está en español. El usuario no es programador.
 - Escribí como el código de alrededor; toda mecánica nueva lleva su prueba en `js/tests.js`.
 - Medí antes y después, y anotá en `docs/ESTADO.md` y `docs/ROADMAP.md`. Subí `GAME_VERSION` (`js/main.js`) en cada
   entrega.
