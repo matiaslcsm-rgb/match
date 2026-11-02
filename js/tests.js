@@ -3045,13 +3045,14 @@ test('Piezas: la zona pega cada medio segundo y la pasiva cada N golpes', () => 
     checkEq(skillOriginLabel({ heroKey: SHOW_KEY }), 'Del Show', 'en el draft dice que es del Show');
 });
 
-test('Tanda 1 del Show: las 20 habilidades se lanzan sin romperse y dejan sus estados', () => {
+test('Tandas del Show: las 40 habilidades se lanzan sin romperse', () => {
     const show = Object.values(SHOW_SKILLS);
-    checkEq(show.length, 20, '20 habilidades');
+    checkEq(show.length, 40, '40 habilidades');
+    checkEq(show.filter(s => s.isUltimate).length, 6, '6 definitivas');
     show.forEach(s => {
         const [a, b] = partsDuel();
         a.skills = [s]; a.skillLevels[s.id] = 1;
-        if (s.kind === 'passive') { for (let i = 0; i < 4; i++) emit(a, 'onHit', { target: b }); return; }
+        if (s.kind === 'passive') { for (let i = 0; i < 4; i++) { emit(a, 'onHit', { target: b }); emit(a, 'onDamaged', { source: b, dealt: 10 }); } return; }
         check(s.cast(a), `${s.name} sale`);
         for (let i = 0; i < 20; i++) { updateProjectiles(a.arena, 0.05); tickEffects(a, 0.05); tickEffects(b, 0.05); }
     });
@@ -3064,6 +3065,22 @@ test('Tanda 1 del Show: Chispazo + Soplete hacen cortocircuito', () => {
     for (let i = 0; i < 20; i++) updateProjectiles(a.arena, 0.05);
     SHOW_SKILLS.SHOW_BLOWTORCH.cast(a);
     check(hasFlag(b, 'stun'), 'aturde');
+});
+
+test('Piezas: definitivas de 3 niveles, pasivas al recibir golpes y mejoras propias', () => {
+    const [a, b] = partsDuel();
+    const ult = SHOW_SKILLS.SHOW_RECORD_RATING;
+    checkEq(ult.values.dmg.length, 3, 'la definitiva tiene 3 niveles');
+    check(ult.values.cooldown[0] >= 40, 'y un enfriamiento largo');
+    check(ult.cast(a) && getEffect(b, 'MARKED'), 'le llega al rival esté donde esté');
+    const plate = SHOW_SKILLS.SHOW_ARMOR_PLATE;
+    a.skills = [plate]; a.skillLevels[plate.id] = 1;
+    for (let i = 0; i < 3; i++) emit(a, 'onDamaged', { source: b, dealt: 10 });
+    checkEq(statusStacks(b, 'dent'), 1, 'al tercer golpe recibido, abolla al que le pegó');
+    check(getEffect(a, 'SHIELD'), 'y te da escudo');
+    const speed = effAtkSpeed(a);
+    SHOW_SKILLS.SHOW_OVATION.cast(a);
+    check(effAtkSpeed(a) > speed, 'Ovación sube la velocidad de ataque');
 });
 
 function testSandbox() {

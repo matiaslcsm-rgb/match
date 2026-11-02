@@ -3,18 +3,22 @@
 // read them) and cast()/hooks, and prices cooldown and mana from a power budget, so a new skill is born roughly balanced.
 // They have no natural competitor (heroKey SHOW_KEY, progression.js). The skills themselves live in data/showSkills.js.
 //
-// def: { id, name, shape: { type, ... }, hits: [{ type, ... }], twist: { type, ... } or a list of them (optional) }
+// def: { id, name, shape: { type, ... }, hits: [{ type, ... }], twist: { type, ... } or a list of them (optional),
+//        ultimate: true (optional: 3 levels, bigger numbers, much longer cooldown) }
 //   shapes  strike { range }                 the nearest enemy in range (1.5 = melee)
 //           bolt { range, radius, pierce }   projectile toward the aim point; stops on the first one unless pierce
 //           blast { range, radius }          area at the aim point (or on the nearest enemy)
 //           nova { radius }                  area around the caster
 //           dash { cells, radius }           charges toward the nearest enemy and hits whoever is next to it at the end
 //           zone { range, radius, duration } area at a point that hits every ZONE_TICK seconds (damage is per second)
+//           everywhere {}                    every enemy alive in the arena (for ultimates)
+//           self {}                          only the caster: for skills made of shield / heal / haste
 //           everyHit { every }               passive: every `every` basic attacks
+//           whenHit { every }                passive: every `every` hits taken, on whoever hit you
 //   hits    damage { dmgType, base, ratio }  physical scales with attack damage, magical with Intelligence, pure with nothing
 //           stun / root / silence { duration }, slow { pct, duration }, push / pull { cells } (pushed into a column: +1 Dent)
 //           overcharge { charges, power }, dent { stacks }, overheat { dps, duration }, mark {}, discharge { mult }
-//           shield { amount, duration } and heal { amount } go on the caster, once per cast
+//           shield { amount, duration }, heal { amount } and haste { atkSpeed, move, duration } go on the caster, once per cast
 //   twists  windup { time }          announced (game.js): it can be dodged, so it hits 25% harder and costs less
 //           crusher { perDent }      consumes the target's dents: +perDent damage for each one
 //           execute { below, bonus } more damage to targets under `below` of their life
@@ -23,18 +27,21 @@
 const SHOW_KEY = 'SHOW';
 const SHOW_SKILLS = {};
 const PART_LEVELS = [1, 1.45, 1.9, 2.35]; // what damage, shields and stored power grow per skill level
+const ULT_PART_LEVELS = [1, 1.5, 2];
+const PASSIVE_SHAPES = ['everyHit', 'whenHit'];
 const ZONE_TICK = 0.5;
 const WINDUP_BONUS = 0.25;
-const SELF_HITS = ['shield', 'heal'];
+const SELF_HITS = ['shield', 'heal', 'haste'];
 
 // Power points of each part at level 1. Cooldown and mana come from the total (partCosts).
 const PART_POINTS = {
     damage: h => h.base / 25, stun: h => h.duration * 6, root: h => h.duration * 3.5, silence: h => h.duration * 2,
     slow: h => h.pct * h.duration * 4, push: h => h.cells * 0.5, pull: h => h.cells * 0.5,
     overcharge: h => h.charges + h.power / 40, dent: h => h.stacks, overheat: h => h.dps * h.duration / 30,
-    mark: () => 1.5, discharge: () => 2, shield: h => h.amount / 30, heal: h => h.amount / 30
+    mark: () => 1.5, discharge: () => 2, shield: h => h.amount / 30, heal: h => h.amount / 30,
+    haste: h => (h.atkSpeed * 3 + h.move * 2) * h.duration
 };
-const SHAPE_POINTS = { strike: 1, bolt: 0.9, blast: 1.25, nova: 1.25, dash: 1.15, zone: 1, everyHit: 1 };
+const SHAPE_POINTS = { strike: 1, bolt: 0.9, blast: 1.25, nova: 1.25, dash: 1.15, zone: 1, everywhere: 2, self: 1, everyHit: 1, whenHit: 1 };
 const TWIST_POINTS = { windup: 0.8, crusher: 1.15, execute: 1.15, close: 1.1, far: 1.1 };
 
 function partPoints(def) {
@@ -47,15 +54,20 @@ function twistsOf(def) { return [].concat(def.twist || []); }
 const round5 = x => Math.round(x / 5) * 5;
 function partCosts(def) {
     const pts = partPoints(def);
+    if (def.ultimate) {
+        const ucd = Math.max(70, Math.min(110, Math.round((3 + pts * 1.1) * 5 / 5) * 5)); // like the competitors' ultimates (Zeus: 90)
+        const umana = round5((30 + pts * 8) * 1.4);
+        return { cooldown: [0, 10, 20].map(d => ucd - d), manaCost: [0, 25, 50].map(d => umana + d) };
+    }
     const cd = Math.max(5, Math.min(22, Math.round((3 + pts * 1.1) * 2) / 2));
     const mana = round5(30 + pts * 8);
     return { cooldown: [0, 0.5, 1, 1.5].map(d => cd - d), manaCost: [0, 10, 20, 30].map(d => mana + d) };
 }
-const perLevel = (x, step = 0) => PART_LEVELS.map((m, i) => +(step ? x + step * i : x * m).toFixed(2));
 
 // --- VALUES ---
 function partValues(def) {
-    const v = {}, s = def.shape;
+    const v = {}, s = def.shape, levels = def.ultimate ? ULT_PART_LEVELS : PART_LEVELS;
+    const perLevel = (x, step = 0) => levels.map((m, i) => +(step ? x + step * i : x * m).toFixed(2));
     if (s.range) v.range = s.range;
     if (s.radius) v.radius = s.radius;
     if (s.cells) v.cells = s.cells;
@@ -75,6 +87,7 @@ function partValues(def) {
         if (h.type === 'discharge') v.dischargeMult = h.mult;
         if (h.type === 'shield') { v.shield = perLevel(h.amount).map(Math.round); v.shieldDur = h.duration; }
         if (h.type === 'heal') v.heal = perLevel(h.amount).map(Math.round);
+        if (h.type === 'haste') { v.hasteAtk = perLevel(h.atkSpeed, 0.1); v.hasteMove = h.move; v.hasteDur = h.duration; }
     });
     twistsOf(def).forEach(t => {
         if (t.type === 'windup') v.windupTime = t.time;
@@ -83,7 +96,7 @@ function partValues(def) {
         if (t.type === 'close') v.closeBonus = t.bonus;
         if (t.type === 'far') v.farBonus = t.bonus;
     });
-    if (s.type !== 'everyHit') Object.assign(v, partCosts(def));
+    if (!PASSIVE_SHAPES.includes(s.type)) Object.assign(v, partCosts(def));
     return v;
 }
 
@@ -101,7 +114,8 @@ const HIT_TEXT = {
     dent: 'pone {dents} Abolladura(s) (+5% de daño recibido cada una)',
     overheat: 'lo Recalienta ({heatDps} de daño mágico por segundo durante {heatDur}s; con Sobrecarga: cortocircuito)',
     discharge: 'hace estallar su Sobrecarga (x{dischargeMult})',
-    shield: 'te da un escudo de {shield} por {shieldDur}s', heal: 'te cura {heal}'
+    shield: 'te da un escudo de {shield} por {shieldDur}s', heal: 'te cura {heal}',
+    haste: 'ganás {hasteAtk%} de velocidad de ataque y {hasteMove%} de velocidad de movimiento por {hasteDur}s'
 };
 const SHAPE_TEXT = {
     strike: 'Golpea al enemigo más cercano (rango {range}):',
@@ -110,7 +124,9 @@ const SHAPE_TEXT = {
     nova: 'Estalla a tu alrededor (radio {radius}):',
     dash: 'Cargás hasta {cells} casillas contra el enemigo más cercano y, a los que quedan pegados,',
     zone: 'Deja una zona en el punto que apuntes (rango {range}, radio {radius}) durante {zoneDur}s:',
-    everyHit: 'Pasiva: cada {every} ataques básicos, el golpe además'
+    everywhere: 'A TODOS los enemigos de la arena, estén donde estén:',
+    everyHit: 'Pasiva: cada {every} ataques básicos, el golpe además',
+    whenHit: 'Pasiva: cada {every} golpes que recibís, contraatacás al que te pegó:'
 };
 const TWIST_TEXT = {
     windup: 'Golpe anunciado: se prepara {windupTime}s y se puede esquivar, pero pega un 25% más.',
@@ -127,8 +143,9 @@ function partDescription(def) {
     const onTarget = def.hits.filter(h => !SELF_HITS.includes(h.type)).map(h =>
         h.type === 'damage' ? DMG_TEXT[h.dmgType] + (s.type === 'zone' ? ' por segundo' : '') : HIT_TEXT[h.type]);
     const self = def.hits.filter(h => SELF_HITS.includes(h.type)).map(h => HIT_TEXT[h.type]);
-    let text = `${lead} ${joinList(onTarget)}.`;
-    if (self.length) text += ` Además, ${joinList(self)}.`;
+    let text = s.type === 'self' ? `Te potenciás: ${joinList(self)}.` : `${lead} ${joinList(onTarget)}.`;
+    if (self.length && s.type !== 'self') text += ` Además, ${joinList(self)}.`;
+    if (def.ultimate) text = 'DEFINITIVA. ' + text;
     twistsOf(def).forEach(t => { text += ' ' + TWIST_TEXT[t.type]; });
     return text;
 }
@@ -137,12 +154,13 @@ function partTags(def) {
     const tags = new Set(), types = def.hits.map(h => h.type), s = def.shape;
     def.hits.forEach(h => { if (h.type === 'damage') tags.add({ physical: 'FÍSICO', magical: 'MÁGICO', pure: 'PURO' }[h.dmgType]); });
     if (types.some(t => ['stun', 'root', 'silence', 'slow', 'push', 'pull'].includes(t))) tags.add('CONTROL');
-    if (['blast', 'nova', 'zone'].includes(s.type) || s.pierce || (s.type === 'dash' && s.radius > 1.5)) tags.add('ÁREA');
+    if (['blast', 'nova', 'zone', 'everywhere'].includes(s.type) || s.pierce || (s.type === 'dash' && s.radius > 1.5)) tags.add('ÁREA');
     if (s.type === 'zone' || types.includes('overheat')) tags.add('DAÑO_EN_EL_TIEMPO');
     if (types.some(t => ['overcharge', 'dent', 'overheat', 'mark'].includes(t))) tags.add('PERJUICIO');
     if (s.type === 'dash') tags.add('MOVILIDAD');
     if (s.type === 'everyHit') tags.add('AL_GOLPEAR');
-    if (types.includes('shield')) tags.add('MEJORA');
+    if (s.type === 'whenHit') tags.add('AL_RECIBIR_DAÑO');
+    if (types.includes('shield') || types.includes('haste')) tags.add('MEJORA');
     if (types.includes('heal')) tags.add('CURACIÓN');
     return [...tags];
 }
@@ -191,6 +209,8 @@ function applySelfHits(skill, caster) {
     skill.parts.hits.forEach(h => {
         if (h.type === 'shield') addShield(caster, val(skill, caster, 'shield'), val(skill, caster, 'shieldDur'), skill.name);
         if (h.type === 'heal') healUnit(caster, val(skill, caster, 'heal'));
+        if (h.type === 'haste') addEffect(caster, { id: skill.id + '_HASTE', name: skill.name, duration: val(skill, caster, 'hasteDur'), tags: ['MEJORA'],
+            mods: { atkSpeedPct: val(skill, caster, 'hasteAtk'), moveSpeedPct: val(skill, caster, 'hasteMove') } });
     });
 }
 
@@ -251,6 +271,14 @@ const PART_CAST = {
         enemiesNear(caster, caster.x, caster.y, skill.parts.shape.radius || 1.5).forEach(e => applyPartHits(skill, caster, e));
         return true;
     },
+    everywhere(skill, caster) {
+        const targets = enemiesOf(caster).filter(c => c.isAlive());
+        if (!targets.length) { log(`${skill.name}: no hay enemigos vivos.`); return false; }
+        targets.forEach(t => applyPartHits(skill, caster, t));
+        fxShake(5);
+        return true;
+    },
+    self() { return true; },
     zone(skill, caster) {
         const aim = partAim(skill, caster);
         if (!aim) return false;
@@ -271,25 +299,26 @@ const PART_CAST = {
 };
 
 function buildShowSkill(def) {
-    const passive = def.shape.type === 'everyHit';
+    const passive = PASSIVE_SHAPES.includes(def.shape.type);
     const skill = {
-        id: def.id, name: def.name, kind: passive ? 'passive' : 'active', parts: def,
+        id: def.id, name: def.name, kind: passive ? 'passive' : 'active', parts: def, isUltimate: !!def.ultimate,
         tags: partTags(def), values: partValues(def), description: partDescription(def)
     };
     const windup = twistsOf(def).find(t => t.type === 'windup');
     if (windup) skill.windup = windup.time;
     if (['bolt', 'blast', 'zone'].includes(def.shape.type)) skill.pointTarget = true;
-    if (passive) {
-        skill.hooks = {
-            onHit(owner, { target }) {
-                const key = 'parts_' + this.id;
-                owner[key] = (owner[key] || 0) + 1;
-                if (owner[key] < val(this, owner, 'every')) return;
-                owner[key] = 0;
-                applyPartHits(this, owner, target);
-                applySelfHits(this, owner);
-            }
-        };
+    // Passives count events and fire on the `every`-th one
+    const proc = (skill, owner, target) => {
+        const key = 'parts_' + skill.id;
+        owner[key] = (owner[key] || 0) + 1;
+        if (owner[key] < val(skill, owner, 'every')) return;
+        owner[key] = 0;
+        applyPartHits(skill, owner, target);
+        applySelfHits(skill, owner);
+    };
+    if (def.shape.type === 'everyHit') skill.hooks = { onHit(owner, { target }) { proc(this, owner, target); } };
+    else if (def.shape.type === 'whenHit') {
+        skill.hooks = { onDamaged(owner, { source }) { if (source && source.isAlive() && enemiesOf(owner).includes(source)) proc(this, owner, source); } };
     } else {
         skill.cast = function (caster) {
             const ok = PART_CAST[def.shape.type](this, caster);

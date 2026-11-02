@@ -21,9 +21,14 @@ medida con el banco).
 - [x] **Tanda 1** (2026-11-02, aprobada por el usuario): 20 habilidades del Show en `js/data/showSkills.js`, 5 por
   estado más 2 de control. Banco de 132, sin ellas → con ellas: ronda final 25 → 25, duelos 14,5 → 15,7 s; ningún
   competidor se dispara (el mejor pasa de 29% a 28% de victorias). Grúa, Rec y Vector ya estaban abajo (0-2%) y siguen igual.
-- [ ] **Medir cada habilidad del Show:** la IA prefiere las naturales en el draft, así que las del Show casi solo
-  aparecen como relleno; falta un conteo de victorias por habilidad para ajustar números.
-- [ ] **Tanda 2 y 3**, después de medir la primera.
+  Ojo al medir: la IA prefiere las naturales en el draft, así que las del Show casi solo aparecen como relleno; hace
+  falta un conteo de victorias por habilidad (y quizás forzar que la IA las elija) para ajustar números.
+- [x] **Tanda 2** (2026-11-02, el usuario pidió hacerla antes de medir y medir todo junto): 20 más, con 6 definitivas
+  por piezas (enfriamiento de 70-110 s, como las de los competidores), pasivas que contraatacan al recibir golpes
+  (`whenHit`), mejoras propias (`self`, `haste`) y golpes a toda la arena (`everywhere`). Banco de 132 con las 40: ronda
+  final 25, duelos 15,1 s, el mejor 27% (Arcanista). Ninguno se dispara.
+- [ ] **Medir las 40 juntas** (lo siguiente).
+- [ ] **Tanda 3**, después de medir.
 
 ---
 
