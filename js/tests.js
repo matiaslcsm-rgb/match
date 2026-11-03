@@ -1203,11 +1203,18 @@ test('Banco de duelos: cada duelo anota cuánto duró, si fue por tiempo, los ca
     check(arena.stats.lead === a, 'va ganando el de más vida');
     a.hp = a.maxHp * 0.2; updateDuelArena(arena, 0.1);
     checkEq(arena.stats.changes, 1, 'el otro pasó adelante: un cambio');
+    addEffect(b, { id: 'STUN', duration: 5, flags: ['stun'] }); addEffect(b, { id: 'SILENCE', duration: 5, flags: ['silence'] });
+    updateDuelArena(arena, 0.5);
+    const ctl = arena.stats.ctl[1];
+    check(ctl.stun === 0.5 && ctl.silence === 0.5 && ctl.any === 0.5 && arena.stats.ctl[0].any === 0, 'cuenta el tiempo con control (dos a la vez cuentan una vez en "alguno")');
     arena.elapsed = DUEL_TIME; updateDuelArena(arena, 0.1);
     const d = duelLog[duelLog.length - 1];
     check(d && d.byTime && d.changes === 1 && d.secs >= DUEL_TIME, 'al terminar por tiempo queda anotado');
-    const sum = benchDuels([{ secs: 10, byTime: false, changes: 0, dmg: 100, avoidable: 25 }, { secs: 30, byTime: true, changes: 2, dmg: 100, avoidable: 0 }]);
+    check(d.ctlWinner && d.ctlLoser && d.ctlWinner.stun + d.ctlLoser.stun >= 0.5, 'el control queda anotado para el que ganó y el que perdió');
+    const none = { stun: 0, root: 0, silence: 0, disarm: 0, any: 0 }, half = { ...none, stun: 5, any: 5 };
+    const sum = benchDuels([{ secs: 10, byTime: false, changes: 0, dmg: 100, avoidable: 25, ctlWinner: none, ctlLoser: half }, { secs: 30, byTime: true, changes: 2, dmg: 100, avoidable: 0, ctlWinner: none, ctlLoser: none }]);
     check(sum.n === 2 && sum.byTimePct === 50 && sum.avgChanges === 1 && sum.avoidablePct === 13, 'el resumen del banco cuenta bien');
+    check(sum.control.loserStunPct === 12.5 && sum.control.winnerAnyPct === 0 && sum.control.heavyPct === 50, 'el resumen del control cuenta bien');
     resetGame();
 });
 
@@ -2919,7 +2926,17 @@ function benchDuels(list) {
     const secs = list.map(d => d.secs).sort((a, b) => a - b), q = f => secs.length ? secs[Math.min(secs.length - 1, Math.floor(f * secs.length))] : 0;
     const dmg = list.reduce((a, d) => a + d.dmg, 0), avoid = list.reduce((a, d) => a + d.avoidable, 0);
     return { n: list.length, medianSecs: q(0.5), p25: q(0.25), p75: q(0.75), byTimePct: Math.round(100 * list.filter(d => d.byTime).length / (list.length || 1)),
-        avgChanges: Math.round(10 * list.reduce((a, d) => a + d.changes, 0) / (list.length || 1)) / 10, avoidablePct: Math.round(100 * avoid / (dmg || 1)) };
+        avgChanges: Math.round(10 * list.reduce((a, d) => a + d.changes, 0) / (list.length || 1)) / 10, avoidablePct: Math.round(100 * avoid / (dmg || 1)),
+        control: benchControl(list) };
+}
+// Share of duel time spent under control, for winners and losers: stun alone and any control (stun, root, silence, disarm)
+function benchControl(list) {
+    const withCtl = list.filter(d => d.ctlWinner && d.ctlLoser), secs = withCtl.reduce((a, d) => a + d.secs, 0) || 1;
+    const pct = (side, key) => Math.round(1000 * withCtl.reduce((a, d) => a + d[side][key], 0) / secs) / 10;
+    const heavy = withCtl.filter(d => d.ctlLoser.any >= 0.25 * d.secs).length;
+    return { n: withCtl.length, winnerStunPct: pct('ctlWinner', 'stun'), loserStunPct: pct('ctlLoser', 'stun'),
+        winnerAnyPct: pct('ctlWinner', 'any'), loserAnyPct: pct('ctlLoser', 'any'), loserSilencePct: pct('ctlLoser', 'silence'),
+        loserDisarmPct: pct('ctlLoser', 'disarm'), loserRootPct: pct('ctlLoser', 'root'), heavyPct: Math.round(100 * heavy / (withCtl.length || 1)) };
 }
 function runBench(n) {
     testSandbox();
@@ -2943,6 +2960,9 @@ function runBench(n) {
             `<p>⚔️ ${duels.n} duelos: duran ${duels.medianSecs} s (la mitad entre ${duels.p25} y ${duels.p75} s), ${duels.byTimePct}% por tiempo, ` +
             `${duels.avgChanges} cambios de quién va ganando en promedio, ${duels.avoidablePct}% del daño entre héroes se podía evitar caminando; ` +
             `${duels.windupFired} golpes anunciados, ${duels.windupDodgedPct}% esquivados</p>` +
+            `<p>🔒 Control en los duelos (parte del tiempo del duelo): el que pierde pasa ${duels.control.loserStunPct}% aturdido y ${duels.control.loserAnyPct}% con algún control ` +
+            `(callado ${duels.control.loserSilencePct}%, desarmado ${duels.control.loserDisarmPct}%, atrapado ${duels.control.loserRootPct}%); el que gana, ${duels.control.winnerStunPct}% y ${duels.control.winnerAnyPct}%. ` +
+            `En ${duels.control.heavyPct}% de los duelos el que perdió pasó un cuarto o más del duelo con control.</p>` +
             rows.map(r => `<div>${r.name}: ${r.wins}/${r.games} ganadas (${r.winPct}%), puesto ${r.place}, afuera en la ronda ${r.outRound ?? '—'}</div>`).join('') +
             `<h3>Habilidades del Show${aiPreferShow ? ' (la IA las prefiere)' : ''}: puesto frente al de su competidor (negativo = mejor)</h3>` +
             skillRows.filter(r => r.show).map(r => `<div>${r.name}${r.ult ? ' (definitiva)' : ''}: ${r.games} partidas, ${r.placeDelta > 0 ? '+' : ''}${r.placeDelta} puestos, ${r.winPct}% ganadas, ${r.duelPct}% de duelos</div>`).join('');

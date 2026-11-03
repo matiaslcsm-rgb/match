@@ -7,6 +7,11 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 - **Carpeta local:** `D:\MattBox\Proyectos\match` (desde 2026-10-31, con Windows recién instalado)
 
 ## Rumbo actual (decidido por el usuario)
+- **Control en los duelos, medido (2026-11-03, idea 5 de REFERENCIA-CHC.md, el usuario eligió "medir primero"):** el banco
+  cuenta cuánto de cada duelo pasa cada uno aturdido, callado, desarmado o atrapado (`noteControlTime`, duels.js; renglón 🔒
+  del banco). 132 partidas: el que pierde, 3% del duelo con control (1,2% aturdido); el que gana, 2,3%. No hace falta otro
+  ítem: ya están las Botas Firmes (40% menos de control, desde 2026-09-26), el control a la mitad en duelo y 1,5 s sin
+  poder ser aturdido de nuevo. Mismo banco: ronda final 23, duelo mediano 20,1 s.
 - **El 3D, 3 veces más rápido (2026-11-02, del documento: "lo siguiente es unir las piezas de cada robot en una sola
   geometría"):** cada robot tenía ~90 piezas y cada una se dibujaba dos veces (color y contorno): ~170 dibujos por robot.
   Ahora, al aparecer, sus piezas se unen en una por material más una para todo el contorno (`bakeParts` en toon.js,

@@ -65,6 +65,16 @@ function tapeDuelFrame(arena) {
     arena.stats.tape.push(arena.heroes.flatMap(h => [h.rx ?? h.x, h.ry ?? h.y, Math.max(0, h.hp / h.maxHp)]));
 }
 
+// Seconds each duelist spends under control (stun, root, silence, disarm, and any of them), for the bench
+const CONTROL_FLAGS = ['stun', 'root', 'silence', 'disarm'];
+const newControlTime = () => ({ stun: 0, root: 0, silence: 0, disarm: 0, any: 0 });
+function noteControlTime(arena, dt) {
+    arena.heroes.forEach((h, i) => {
+        const t = arena.stats.ctl[i], on = CONTROL_FLAGS.filter(f => hasFlag(h, f));
+        on.forEach(f => { t[f] += dt; });
+        if (on.length) t.any += dt;
+    });
+}
 // Arma la arena del duelo de la ronda (se pelea al mismo tiempo que las oleadas de los demás, ver startWave).
 // Al empezar: vida y maná llenos, sin mejoras temporales y con los enfriamientos reiniciados.
 function makeDuelArenas(plan) {
@@ -72,7 +82,7 @@ function makeDuelArenas(plan) {
     const list = pairs.map(([a, b]) => {
         const arena = makeArena('duel', [a, b]);
         arena.walls = duelWalls();
-        arena.stats = { lead: null, changes: 0, dmg: 0, avoidable: 0, tape: [] };
+        arena.stats = { lead: null, changes: 0, dmg: 0, avoidable: 0, tape: [], ctl: [newControlTime(), newControlTime()] };
         [a, b].forEach((h, i) => {
             restoreHero(h);
             h.inRest = false;
@@ -95,7 +105,8 @@ function resolveDuel(arena, winner, loser, reason) {
     arena.done = true;
     if (arena.stats) tapeDuelFrame(arena); // el último cuadro: el golpe que lo definió
     if (arena.stats) duelLog.push({ round: waveNumber, secs: Math.round(arena.elapsed * 10) / 10, byTime: reason === 'se acabó el tiempo', changes: arena.stats.changes,
-        dmg: arena.stats.dmg, avoidable: arena.stats.avoidable, winner: winner.name, loser: loser.name });
+        dmg: arena.stats.dmg, avoidable: arena.stats.avoidable, winner: winner.name, loser: loser.name,
+        ctlWinner: arena.stats.ctl && arena.stats.ctl[arena.heroes.indexOf(winner)], ctlLoser: arena.stats.ctl && arena.stats.ctl[arena.heroes.indexOf(loser)] });
     showDuelResult(arena, winner, loser, reason === 'se acabó el tiempo'); // acá, antes de que vayan a descansar y se curen
     const wasMuted = logMuted;
     const involvesPlayer = winner === player || loser === player;
@@ -137,6 +148,7 @@ function updateDuelArena(arena, dt) {
     const s = arena.stats, diff = a.hp / a.maxHp - b.hp / b.maxHp;
     if (s) { const lead = diff > DUEL_LEAD_MARGIN ? a : diff < -DUEL_LEAD_MARGIN ? b : s.lead; if (s.lead && lead !== s.lead) s.changes++; s.lead = lead; }
     if (s && arena.elapsed >= s.tape.length * DUEL_TAPE_STEP) tapeDuelFrame(arena);
+    if (s && s.ctl) noteControlTime(arena, dt);
     if (arena.elapsed < DUEL_TIME) return;
     const pa = a.hp / a.maxHp, pb = b.hp / b.maxHp;
     const aWins = pa === pb ? Math.random() < 0.5 : pa > pb;

@@ -109,6 +109,13 @@ Ordenadas de más a menos valor según lo que dicen los jugadores del original. 
 5. **Ítem contra aturdimientos** (decisión, con el balance): el original no tenía y fue su mayor queja. (a) **un ítem
    compuesto con resistencia a los aturdimientos y control (recomendada)**; (b) que los aturdimientos seguidos sobre el
    mismo héroe duren cada vez menos (como en muchos juegos de pelea); (c) nada por ahora.
+   **Ya estaba y se midió (2026-11-03):** el ítem existe desde el 2026-09-26: **Botas Firmes** (40% menos de aturdimiento,
+   ralentización y atrapado). Además, en el duelo el control dura la mitad y después de un aturdimiento hay 1,5 s sin
+   poder ser aturdido de nuevo. Banco de 132 partidas (2.446 duelos): el que pierde pasa **3% del duelo con algún
+   control** (1,2% aturdido, 1,4% callado, 0,5% atrapado, 0% desarmado) y el que gana, 2,3%. Recibir más control que el
+   rival casi no anticipa quién pierde (590 duelos contra 540). Solo en 3% de los duelos el que perdió pasó un cuarto o
+   más del duelo controlado. **La queja del original acá no aparece: no hace falta nada más.** Lo sigue midiendo el banco
+   (renglón 🔒).
 6. **Modo de a dos** (más adelante): según una reseña, es el modo más divertido del original (tanque con mago,
    invocador con el que potencia). Para nosotros sería vos y un compañero de la IA contra 3 parejas. Es grande: va a C4.
    **Descartado por ahora (decisión del usuario, 2026-11-03):** "el modo de a dos no lo vamos a usar por ahora".
