@@ -111,6 +111,7 @@ Ordenadas de más a menos valor según lo que dicen los jugadores del original. 
    mismo héroe duren cada vez menos (como en muchos juegos de pelea); (c) nada por ahora.
 6. **Modo de a dos** (más adelante): según una reseña, es el modo más divertido del original (tanque con mago,
    invocador con el que potencia). Para nosotros sería vos y un compañero de la IA contra 3 parejas. Es grande: va a C4.
+   **Descartado por ahora (decisión del usuario, 2026-11-03):** "el modo de a dos no lo vamos a usar por ahora".
 
 Lo que **no** conviene copiar: las partidas de 60 rondas (las nuestras de 16-21 minutos están bien para jugar solo), el
 castigo fuerte por perder duelos seguidos (el nuestro es +10% de daño y solo cuando quedan 3) y las fichas que premian
