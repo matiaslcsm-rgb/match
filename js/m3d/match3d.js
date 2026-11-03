@@ -13,7 +13,7 @@
 //   El menú sigue en 2D. Sin WebGL, o en las pruebas, todo se dibuja en 2D (ui.js).
 // Expone window.M3D para el código clásico (ui.js, mouse.js, fxSkills.js).
 import * as THREE from 'three';
-import { buildRobot, animateRobot } from './robot.js';
+import { buildRobot, bakeRobot, animateRobot } from './robot.js';
 import { BOSS_ROBOTS, addExtras } from './bosses3d.js';
 import { HERO_ROBOTS } from './heroes3d.js';
 import { CREEP_ROBOTS } from './creeps3d.js';
@@ -284,6 +284,7 @@ function buildFor(u) {
 }
 // Los competidores, más anchos: el esqueleto es finito y desde la cámara alta la silueta se perdía
 const bulkOf = u => u.isHero ? 1.25 : 1;
+const lookIds = new Map(); // look → number, for the key of the joined pieces (bakeRobot)
 // El robot pintado y con sus piezas propias. En los competidores la altura se mide sin las piezas: un sombrero o una guadaña no achican al robot.
 function makeRobot(u) {
     const robot = buildRobot(buildFor(u)), look = roundBossRobot(u) || (u.isHero && HERO_ROBOTS[u.key]) || creepRobot(u);
@@ -291,13 +292,16 @@ function makeRobot(u) {
     const bodyH = measure();
     if (look) addExtras(robot, look);
     if (look && look.float) ['thighL', 'thighR'].forEach(n => { robot.userData.bones[n].visible = false; }); // M.O.R.T.I.S. flota: sin piernas
-    paintRobot(robot, look ? look.paint : lighten(u.color || (u.type && u.type.color) || '#9aa0a6', 0.15));
-    return { robot, h: u.isHero ? bodyH : measure() };
+    const paint = look ? look.paint : lighten(u.color || (u.type && u.type.color) || '#9aa0a6', 0.15);
+    paintRobot(robot, paint);
+    if (look && !lookIds.has(look)) lookIds.set(look, lookIds.size);
+    return { robot, h: u.isHero ? bodyH : measure(), key: [JSON.stringify(buildFor(u)), look ? lookIds.get(look) : '', paint].join('|') };
 }
 function unitObj(u) {
     let o = units.get(u);
     if (o) return o;
-    const { robot, h } = makeRobot(u);
+    const { robot, h, key } = makeRobot(u);
+    bakeRobot(robot, key); // after measuring: the joined parts are not measured right
     const scale = sizeOf(u) / h;
     robot.scale.set(scale * bulkOf(u), scale, scale * bulkOf(u));
     const g = new THREE.Group(); g.add(robot);
@@ -529,7 +533,7 @@ function frame(arena, dt) {
             o.g.position.y = -Math.max(0, o.dieT - 0.45) * sizeOf(u) * 0.6;
             o.g.visible = true;
         } else o.g.visible = false;
-        if (frameNo - o.seen > 600) { scene.remove(o.g); units.delete(u); }
+        if (frameNo - o.seen > 600) { scene.remove(o.g); o.robot.userData.skeleton.dispose(); units.delete(u); }
     }
     drawAirFx(arena);
     if (!rest) animateCrowd(dt, performance.now() / 1000);
@@ -627,6 +631,8 @@ window.M3D = {
     wants: arena => enabled && arena && ['wave', 'duel', 'boss'].includes(arena.kind),
     // los boxes (el descanso) también: ui.js arma una arena de mentira { kind: 'rest', heroes, creeps: [], projectiles: [], fx: [] }
     enabled: () => enabled,
+    // Draw calls and triangles of the last frame, to measure the cost of the 3D
+    stats: () => ({ calls: renderer.info.render.calls, triangles: renderer.info.render.triangles }),
     frame, hide, project, headHeight, screenToTile, portrait, active: false
 };
 // Este módulo carga después que la interfaz: lo que ya se dibujó con los retratos viejos se vuelve a armar con los robots

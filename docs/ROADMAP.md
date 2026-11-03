@@ -197,7 +197,9 @@ Que se sienta un programa de TV (concepto en `docs/CONCEPTO-FUTURISTA.md`).
 - [x] Tutorial al día con todo lo nuevo (2026-10-30).
 - [ ] Rendimiento: el 3D fluido en una compu común. Medido el 2026-10-28 (con tribunas, columnas y drones): 7,7 ms por
   cuadro en una oleada de 10 creeps y 6,6 ms en un duelo, lógica y dibujo, con una GTX 1650 (~130 cuadros por segundo).
-  Falta probarlo en una compu con video integrado.
+  Falta probarlo en una compu con video integrado. **2026-11-02:** con el contorno del dibujo animado había subido a
+  ~18 ms; ahora cada robot se dibuja de una vez (las piezas unidas, `bakeParts` en toon.js): en una oleada de 11 creeps,
+  2.395 → 205 dibujos por cuadro y 18 → 6 ms. Se ve igual (comparado píxel por píxel en los 38 robots).
 
 ---
 

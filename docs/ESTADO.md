@@ -7,6 +7,13 @@ Documento de traspaso: dónde estamos, qué falta y cómo se trabaja. Las reglas
 - **Carpeta local:** `D:\MattBox\Proyectos\match` (desde 2026-10-31, con Windows recién instalado)
 
 ## Rumbo actual (decidido por el usuario)
+- **El 3D, 3 veces más rápido (2026-11-02, del documento: "lo siguiente es unir las piezas de cada robot en una sola
+  geometría"):** cada robot tenía ~90 piezas y cada una se dibujaba dos veces (color y contorno): ~170 dibujos por robot.
+  Ahora, al aparecer, sus piezas se unen en una por material más una para todo el contorno (`bakeParts` en toon.js,
+  `bakeRobot` en robot.js); el esqueleto sigue moviendo cada pieza como antes. Los robots del mismo tipo y color comparten
+  la pieza unida (la primera vez tarda ~15 ms, las siguientes ~1 ms). Medido en una oleada de 11 creeps: **2.395 → 205
+  dibujos por cuadro y 18 → 6 ms**. Comparados los 38 robots antes y después, píxel por píxel: iguales salvo unos pocos
+  puntos donde dos piezas se pisan. `M3D.stats()` da los dibujos del último cuadro. Los retratos no se unen (se miden).
 - **Caminar corta el golpe (2026-11-02, decisión del usuario: "que la animación de caminar corte la de golpear, para los de
   rango como los de melee"; elegido: que corte el ataque, no solo el dibujo):** `MOVE_ATTACK_RULE = 'cancel'` (game.js).
   Como en Dota, solo la **preparación** del golpe (el último 40% de la carga, cuando el robot se echa atrás) pide estar

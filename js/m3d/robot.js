@@ -5,7 +5,7 @@
 import * as THREE from 'three';
 import { partOf, LIMB_BONES } from './parts.js';
 import { BONES, SHAPES, LEG } from './skeleton.js';
-import { mat, outline } from './toon.js';
+import { mat, outline, bakeParts } from './toon.js';
 
 const SIDES = { L: 1, R: -1 }; // izquierda del robot: x+ (mira hacia z+)
 const GEO = {}; // geometrías compartidas
@@ -31,7 +31,7 @@ export function buildRobot(build) {
         if (s.r) m.rotation.set(s.r[0], s.r[1] * k, s.r[2] * k);
         bones[s.b + side].add(m);
         if (s.wheel) wheels.push(m);
-        if (s.m === 'oruga') tracks.push(m);
+        if (s.m === 'oruga' && !tracks.includes(m.material)) tracks.push(m.material);
         if (s.hand) hands[side].push(m);
     };
     const putAll = (shapes, sides) => shapes.forEach(s => (isLimb(s.b) ? sides : ['']).forEach(side => put(s, side)));
@@ -43,6 +43,13 @@ export function buildRobot(build) {
         if (arm.hideHand) hands[side].forEach(m => { m.visible = false; });
     });
     robot.userData = { bones, wheels, tracks, arms, gait: partOf(build, 'legs').gait, step: 0, t: 0 };
+    return robot;
+}
+
+// Joins the parts of a finished robot (painted, with its extras) to draw it in a few calls (toon.js, bakeParts)
+export function bakeRobot(robot, key) {
+    const stands = bakeParts(robot, key), u = robot.userData;
+    u.wheels = u.wheels.map(w => stands.get(w));
     return robot;
 }
 
@@ -84,5 +91,5 @@ export function animateRobot(robot, dt, speed, air) {
     B.chest.rotation.x = Math.sin(u.t * 2) * 0.015 + (u.gait === 'glide' ? 0.12 * move : 0);                  // respira; patinando, se inclina
     B.neck.rotation.y = Math.sin(u.t * 0.7) * 0.15 * (1 - move);                                             // quieto, mira alrededor
     u.wheels.forEach(w => { w.rotation.x += dt * speed / 0.08; });
-    u.tracks.forEach(t => { t.material.map.offset.y -= dt * speed * 0.1; });
+    u.tracks.forEach(t => { t.map.offset.y -= dt * speed * 0.1; });
 }
