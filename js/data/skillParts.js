@@ -37,6 +37,9 @@ const ZONE_TICK = 0.5;
 // Every show skill is a bit cheaper than the raw budget: in the 528 bench (2026-11-02) they placed 0.3 worse on average
 // than the competitors' own skills
 const SHOW_PRICE = 0.88;
+// The budget underprices burning: in two 528 benches (2026-11-02) five Overheat skills stayed among the strongest even after
+// tuning them one by one. User decision: lower the burn for all of them. Their price stays the same.
+const OVERHEAT_POWER = 0.75;
 const WINDUP_BONUS = 0.4; // 0.25 lost too often to dodges (bench 528, 2026-11-02)
 const SELF_HITS = ['shield', 'heal', 'haste'];
 
@@ -92,7 +95,7 @@ function partValues(def) {
         if (h.type === 'pull') v.pull = h.cells;
         if (h.type === 'overcharge') { v.charges = h.charges; v.chargePower = perLevel(h.power).map(Math.round); }
         if (h.type === 'dent') v.dents = h.stacks;
-        if (h.type === 'overheat') { v.heatDps = perLevel(h.dps).map(Math.round); v.heatDur = h.duration; }
+        if (h.type === 'overheat') { v.heatDps = perLevel(h.dps * OVERHEAT_POWER).map(Math.round); v.heatDur = h.duration; }
         if (h.type === 'discharge') v.dischargeMult = h.mult;
         if (h.type === 'leech') v.leechPct = h.pct;
         if (h.type === 'spread') v.spreadRadius = h.radius;

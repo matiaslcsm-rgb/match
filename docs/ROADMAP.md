@@ -60,6 +60,13 @@ medida con el banco).
   -0,53, Batería Externa -0,44) ni para Fusible Quemado (+0,59) y Corte Final (+0,47). Siguen fuertes 5 de Recalentado
   (se sumó Turbina, -0,46): **apunta a que el problema es el estado, no cada habilidad.** Pendiente (decisión): bajar la
   quemadura de Recalentado para todas, o seguir retocando de a una.
+  **Elegido: bajarla para todas** (`OVERHEAT_POWER` 0,75 en skillParts.js: la quemadura pega 25% menos y el precio
+  sigue igual). **Tercer banco de 528:** de **-0,51 a +0,52**, el más parejo hasta ahora. Las 12 de Recalentado pasan
+  de fuertes a casi neutras (promedio -0,15); Radiador Roto -0,65 → -0,44, Contragolpe -0,53 → -0,31, Lanzallamas
+  -0,30 → -0,17. Las del Show siguen 0,29 puestos detrás de las naturales. Quedan afuera de ±0,3: Escape de Nafta y
+  Pararrayos (-0,5), y **Gran Final** (definitiva de Recalentado, pasó a +0,52), Fusible Quemado, Toma Cenital,
+  Embestida y Grito del Público (+0,3 a +0,5). Con ~280 apariciones el ruido es ±0,14, así que lo que está cerca de
+  ±0,3 puede ser azar: para seguir afinando hace falta medir más, no solo retocar.
 - [x] **Estados visibles** (2026-11-02, recomendado y aprobado: "la profundidad no le llegaba al que juega"):
   `js/statusFx.js`. Debajo de cada barra de vida, un ícono por estado (rayo con sus cargas, que titila cuando falta
   una para explotar; abolladura con su número; llama del recalentado) y una mira rosa que gira sobre la cabeza del
